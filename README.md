@@ -16,5 +16,16 @@ Code fourni pour les TD « IA agentiques avec Spring AI » (M2 MIAGE IPM, Univer
 
 - JDK 21 requis. Ouvrez **le dossier d'un TD** (pas la racine) dans Spring Tools / IntelliJ : `File > Import > Maven > Existing Maven Projects`.
 - Chaque TD s'exécute avec `mvn spring-boot:run` ; les profils de modèle (`lmstudio`, `groq`, `gemini`, `claude`, `simule`) se choisissent avec `-Dspring-boot.run.profiles=…`.
-- Les tests fournis dans un squelette échouent tant que le TD n'est pas fait : c'est normal.
-- Le sujet de chaque TD est distribué en cours ; ce dépôt ne contient aucune solution.
+## Comment lire un dossier de TD
+
+- **Fourni** : classes déjà écrites et testées, à lire mais pas à réécrire (la liste exacte est dans le `README.md` du dossier).
+- **À écrire** : classes ou méthodes à compléter. Cherchez les marqueurs `// TODO TDn` (dans Eclipse : vue *Tasks*, dans IntelliJ : fenêtre *TODO*).
+- **Corrigé du TD précédent** : le reste du code est la solution du TD N-1, pour que chacun reparte d'une base saine.
+- Les tests des squelettes échouent tant que les `TODO` ne sont pas traités : c'est normal. La CI GitHub ne fait que compiler.
+
+## Avant de lancer
+
+- Un modèle de langage : en local (LM Studio, Ollama) ou par API (Groq, Gemini, Claude) via un profil Spring ; sans modèle, le profil `simule` permet de faire tourner les tests. Les clés d'API ne vont jamais dans Git (variables d'environnement ou `application-local.yml`, déjà ignoré).
+- Tenez un `JOURNAL.md` dans votre dépôt : 5 à 10 lignes par TD ; il sert à l'analyse critique du TD6 et à l'évaluation de TD.
+- **TD6** : lancez d'abord le jeu (`mvn spring-boot:run` dans `jeu-bestiaire`, port 8090), puis la clinique avec le profil `jeu`.
+- Le sujet de chaque TD, les supports de CM et la matrice de compétences sont distribués en cours.
