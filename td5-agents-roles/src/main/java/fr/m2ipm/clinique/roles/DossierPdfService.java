@@ -46,19 +46,43 @@ public class DossierPdfService {
 
     /** Génère le PDF du dossier, l'écrit dans dossiers/{runId}.pdf et renvoie ses octets. */
     public byte[] generer(String runId) {
-        // TODO TD5 : à écrire
-        throw new UnsupportedOperationException("À écrire : generer");
+        DossierRun run = duo.run(runId).orElseThrow(() -> new IllegalArgumentException("Dossier inconnu : " + runId));
+        byte[] pdf = rendre(run);
+        try {
+            Files.createDirectories(dossier);
+            Files.write(dossier.resolve(runId + ".pdf"), pdf);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return pdf;
     }
 
     byte[] rendre(DossierRun run) {
-        // TODO TD5 : à écrire
-        throw new UnsupportedOperationException("À écrire : rendre");
+        try (PDDocument doc = new PDDocument(); ByteArrayOutputStream sortie = new ByteArrayOutputStream()) {
+            Page p = new Page(doc);
+            CasBestiaire cas = run.cas();
+            p.titre("Clinique des créatures fantastiques — Dossier de traitement");
+            p.ligne("Date : " + DATE.format(run.date()) + "    Dossier : " + run.runId());
+            p.ligne("Patient : " + cas.creature() + " (" + cas.espece() + "), propriétaire : " + cas.proprietaire() + " (fictif)");
+            p.ligne("Motif : " + cas.symptome());
+            p.espace();
+            // TODO TD5 (étape 6) : un bloc par tour (sousTitre « Tour n », puis lignes : diagnostic, traitements,
+            // justification, verdict du gardien, objections, sources ; utilisez sure(...) pour les listes éventuellement nulles).
+            // TODO TD5 (étape 6) : section « Décision » : issue du duo (run.statut()), état de la validation humaine
+            // (run.validation(), et par qui / quand si run.validePar() n'est pas nul), et la mention qu'aucun traitement
+            // n'est appliqué tant qu'un agent humain n'a pas validé le dossier.
+            p.sousTitre("Annexe technique");
+            p.ligne("Durée : " + run.dureeMs() + " ms ; tokens (estimation des sorties) : " + run.tokensEstimes());
+            p.ligne("Modèle (réglage spring.ai.model.chat) : " + run.modele() + " ; profil de l'acteur : " + run.profil());
+            p.fermer();
+            doc.save(sortie);
+            return sortie.toByteArray();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    private static List<String> sure(List<String> l) {
-        // TODO TD5 : à écrire
-        throw new UnsupportedOperationException("À écrire : sure");
-    }
+    private static List<String> sure(List<String> l) { return l == null ? List.of() : l; }
 
     /** Mise en page minimale : texte à la suite, retour à la ligne, saut de page. */
     private static final class Page {
@@ -74,40 +98,46 @@ public class DossierPdfService {
         }
 
         private void nouvellePage() throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : nouvellePage");
+            if (flux != null) flux.close();
+            PDPage page = new PDPage(PDRectangle.A4);
+            doc.addPage(page);
+            flux = new PDPageContentStream(doc, page);
+            y = PDRectangle.A4.getHeight() - MARGE;
         }
 
-        void titre(String s) throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : titre");
-        }
-        void sousTitre(String s) throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : sousTitre");
-        }
-        void ligne(String s) throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : ligne");
-        }
-        void espace() throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : espace");
-        }
+        void titre(String s) throws IOException { ecrire(s, gras, 14, 22); }
+        void sousTitre(String s) throws IOException { ecrire(s, gras, 12, 18); }
+        void ligne(String s) throws IOException { ecrire(s, normal, 10, 14); }
+        void espace() throws IOException { y -= 8; }
 
-        void fermer() throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : fermer");
-        }
+        void fermer() throws IOException { flux.close(); }
 
         private void ecrire(String texte, PDType1Font police, float taille, float interligne) throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : ecrire");
+            for (String l : decouper(nettoyer(texte), police, taille)) {
+                if (y < MARGE + interligne) nouvellePage();
+                flux.beginText();
+                flux.setFont(police, taille);
+                flux.newLineAtOffset(MARGE, y);
+                flux.showText(l);
+                flux.endText();
+                y -= interligne;
+            }
         }
 
         private static List<String> decouper(String texte, PDType1Font police, float taille) throws IOException {
-            // TODO TD5 : à écrire
-            throw new UnsupportedOperationException("À écrire : decouper");
+            List<String> lignes = new ArrayList<>();
+            StringBuilder courante = new StringBuilder();
+            for (String mot : texte.split(" ")) {
+                String essai = courante.isEmpty() ? mot : courante + " " + mot;
+                if (police.getStringWidth(essai) / 1000 * taille > LARGEUR && !courante.isEmpty()) {
+                    lignes.add(courante.toString());
+                    courante = new StringBuilder(mot);
+                } else {
+                    courante = new StringBuilder(essai);
+                }
+            }
+            lignes.add(courante.toString());
+            return lignes;
         }
 
         /** Les polices standard n'encodent que WinAnsi : on remplace le reste par « ? ». */

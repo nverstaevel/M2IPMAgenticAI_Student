@@ -3,10 +3,10 @@
 Point de départ du TD (sujet distribué en cours). Dossier autonome : importez-le seul dans votre IDE (JDK 21).
 
 ## Fourni
-le corrigé du TD4 (votre agent ReAct), le moteur de scénarios (`scenario` : `Orchestrateur`, `ScenarioLoader`, `Agent`, `Entree`, `Resultat`…), `DuoService`, `SuperviseurAgent`, la page `/agents` en mode « Scénario », `SCENARIOS.md`, `scenarios/_modele.md`, `scenarios/react-clinique.md`, `cas-bestiaire.csv`, les contrats `Diagnostic`, `Critique`, `Verdict`.
+le corrigé du TD4 (votre agent ReAct), le moteur de scénarios (`scenario` : `Orchestrateur`, `ScenarioLoader`, `Agent`, `Entree`, `Resultat`…), `DuoService`, `SuperviseurAgent`, la page `/agents` en mode « Scénario », `SCENARIOS.md`, `scenarios/_modele.md`, `scenarios/react-clinique.md`, `cas-bestiaire.csv`, les contrats `Diagnostic`, `Critique`, `Verdict`, `TraiterConsultationWorkflow` (workflow classique, à lancer et à comparer), et dans `DossierPdfService` tout sauf le contenu du dossier (mise en page, en-tête, annexe technique).
 
 ## À écrire
-`VeterinaireAgent`, `GardienDuBestiaire`, `DossierPdfService`, `TraiterConsultationWorkflow`, les beans `Agent` de vos rôles (dans `scenario/AgentsExemples`), vos fichiers `.md` dans `src/main/resources/scenarios`.
+`VeterinaireAgent`, `GardienDuBestiaire`, le bloc par tour et la décision de `DossierPdfService` (marqués `TODO TD5`), les beans `Agent` de vos rôles (dans `scenario/AgentsExemples`), vos fichiers `.md` dans `src/main/resources/scenarios`.
 
 ## Lancer
 ```bash
