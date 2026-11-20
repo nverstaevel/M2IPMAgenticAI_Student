@@ -35,21 +35,51 @@ public class GoogleAgendaAdapter implements AgendaPort {
     }
 
     private String jeton() {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : jeton");
+        try {
+            identifiants.refreshIfExpired();
+            return identifiants.getAccessToken().getTokenValue();
+        } catch (IOException e) {
+            throw new IllegalStateException("Authentification Google impossible", e);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<LocalTime> creneauxLibres(LocalDate jour) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : creneauxLibres");
+        var corps = Map.of(
+                "timeMin", jour.atTime(9, 0).atZone(PARIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                "timeMax", jour.atTime(18, 0).atZone(PARIS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                "timeZone", PARIS.getId(),
+                "items", List.of(Map.of("id", calendrierId)));
+        Map<String, Object> reponse = client.post().uri("/freeBusy")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jeton())
+                .body(corps).retrieve().body(Map.class);
+        var calendriers = (Map<String, Object>) reponse.get("calendars");
+        var calendrier = (Map<String, Object>) calendriers.get(calendrierId);
+        var occupes = (List<Map<String, String>>) calendrier.getOrDefault("busy", List.of());
+        List<LocalTime> libres = new ArrayList<>();
+        for (LocalTime h = LocalTime.of(9, 0); h.isBefore(LocalTime.of(18, 0)); h = h.plusMinutes(30)) {
+            ZonedDateTime debut = jour.atTime(h).atZone(PARIS);
+            ZonedDateTime fin = debut.plusMinutes(30);
+            boolean pris = occupes.stream().anyMatch(o ->
+                    OffsetDateTime.parse(o.get("start")).toInstant().isBefore(fin.toInstant())
+                            && OffsetDateTime.parse(o.get("end")).toInstant().isAfter(debut.toInstant()));
+            if (!pris) libres.add(h);
+        }
+        return libres;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public String creerEvenement(String titre, LocalDateTime debut, int dureeMinutes) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : creerEvenement");
+        var fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+        var corps = Map.of(
+                "summary", titre,
+                "start", Map.of("dateTime", debut.format(fmt), "timeZone", PARIS.getId()),
+                "end", Map.of("dateTime", debut.plusMinutes(dureeMinutes).format(fmt), "timeZone", PARIS.getId()));
+        Map<String, Object> reponse = client.post().uri("/calendars/{id}/events", calendrierId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jeton())
+                .body(corps).retrieve().body(Map.class);
+        return String.valueOf(reponse.get("id"));
     }
 }

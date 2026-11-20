@@ -35,40 +35,41 @@ public class TarifsExcelReader {
     }
 
     private void lireTarifs(Sheet feuille) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : lireTarifs");
+        for (Row ligne : feuille) {
+            if (ligne.getRowNum() == 0) continue;
+            tarifs.put(cle(texte(ligne, 0), texte(ligne, 1)), ligne.getCell(2).getNumericCellValue());
+        }
     }
 
     private void lirePharmacie(Sheet feuille) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : lirePharmacie");
+        for (Row ligne : feuille) {
+            if (ligne.getRowNum() == 0) continue;
+            String nom = normaliser(texte(ligne, 0));
+            stocks.put(nom, (int) ligne.getCell(1).getNumericCellValue());
+            unites.put(nom, texte(ligne, 2));
+        }
     }
 
     private static String texte(Row ligne, int colonne) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : texte");
+        return ligne.getCell(colonne).getStringCellValue();
     }
 
     /** Prix d'un acte pour une espèce, vide si l'acte ou l'espèce est inconnu. */
     public Optional<Double> tarif(String acte, String espece) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : tarif");
+        return Optional.ofNullable(tarifs.get(cle(acte, espece)));
     }
 
     /** Stock d'un médicament, vide s'il n'est pas dans la pharmacie. */
     public Optional<Integer> stock(String medicament) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : stock");
+        return Optional.ofNullable(stocks.get(normaliser(medicament)));
     }
 
     public String unite(String medicament) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : unite");
+        return unites.getOrDefault(normaliser(medicament), "");
     }
 
     private static String cle(String acte, String espece) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : cle");
+        return normaliser(acte) + "|" + normaliser(espece);
     }
 
     /** Minuscules, sans accents ni espaces superflus : « Élixir » et « elixir » sont le même médicament. */
