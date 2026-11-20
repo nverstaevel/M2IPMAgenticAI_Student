@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Clinique du bestiaire</title>
+<style>body{font:15px system-ui;margin:24px;max-width:960px}table{border-collapse:collapse;margin:8px 0}td,th{border:1px solid #ccc;padding:4px 8px;text-align:left}
+.crit{background:#fde2e2}.elev{background:#fff3d6}pre{background:#f5f5f5;padding:8px;max-height:220px;overflow:auto}</style></head>
+<body><h1>Clinique du bestiaire</h1><p>Tableau de bord de la partie (le jeu se pilote en MCP sur <code>/mcp</code>).</p>
+<div id="etat"></div><h2>Patients</h2><div id="patients"></div><h2>Pharmacie</h2><div id="pharma"></div><h2>Journal</h2><pre id="journal"></pre>
+<button onclick="fetch('/api/nouvelle-partie',{method:'POST'}).then(maj)">Nouvelle partie</button>
+<script>
+function t(rows,cols){return '<table><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr>'+rows.map(r=>'<tr class="'+(r.urgence==='CRITIQUE'?'crit':r.urgence==='ELEVEE'?'elev':'')+'">'+cols.map(c=>'<td>'+(Array.isArray(r[c])?r[c].join(', '):(r[c]??''))+'</td>').join('')+'</tr>').join('')+'</table>'}
+function maj(){fetch('/api/partie').then(r=>r.json()).then(p=>{const e=p.etat;
+document.getElementById('etat').innerHTML='<b>Jour '+e.jour+'/'+e.joursTotal+'</b> · points d’action '+e.pointsAction+' · trésorerie '+e.tresorerie+' · réputation '+e.reputation+' · guéris '+e.gueris+' · morts '+e.morts+' · <b>score '+e.score+'</b>'+(e.terminee?' · TERMINÉE':'');
+document.getElementById('patients').innerHTML=t(p.patients,['id','nom','espece','pv','urgence','symptomes','signeDistinctif','noteDuProprietaire']);
+document.getElementById('pharma').innerHTML=t(p.pharmacie,['medicament','prix','stock','enCommande']);
+document.getElementById('journal').textContent=p.journal.join('\n')})}
+maj();setInterval(maj,1500);
+</script></body></html>

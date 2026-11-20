@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Dossiers à valider</title></head>
+<body>
+<h1>Dossiers de traitement</h1>
+<p>Aucun traitement n'est appliqué tant qu'un dossier n'est pas validé par un agent humain.</p>
+<table border="1" cellpadding="4">
+  <tr><th>Créature</th><th>Issue du duo</th><th>État</th><th>PDF</th><th>Décision</th></tr>
+  <tr th:each="d : ${dossiers}">
+    <td th:text="${d.cas().creature()} + ' (' + ${d.cas().espece()} + ')'">Flammèche</td>
+    <td th:text="${d.statut()}">APPROUVEE</td>
+    <td th:text="${d.validation()} + (${d.validePar()} != null ? ' par ' + ${d.validePar()} : '')">EN_ATTENTE_DE_VALIDATION</td>
+    <td><a th:href="@{/api/dossiers/{id}.pdf(id=${d.runId()})}">PDF</a></td>
+    <td>
+      <form th:if="${d.validation().name() == 'EN_ATTENTE_DE_VALIDATION'}" method="post"
+            th:action="@{/dossiers/{id}/decision(id=${d.runId()})}">
+        <button type="submit" name="valide" value="true">Valider</button>
+        <button type="submit" name="valide" value="false">Refuser</button>
+      </form>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

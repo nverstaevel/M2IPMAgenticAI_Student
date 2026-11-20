@@ -1,0 +1,6 @@
+id;creature;espece;proprietaire;symptome;traitement_presse;verdict_attendu
+1;Lunatique;Loup-garou;Clairdelune;insomnie les soirs de pleine lune;compléments à base d'argent;REJETE
+2;Monsieur Crépuscule;Vampire;Clairdelune;grande fatigue;soupe à l'ail et promenade au soleil;REJETE
+3;Flammèche;Dragon;Fumerolle;toux de cendres;sirop apaisant et repos;APPROUVE
+4;Rebelote;Phénix;Brumevent;rhume;traitement ordinaire, sans particularité;APPROUVE
+5;Grognon;Yéti;Fumerolle;allergie estivale;bain chaud et sauna;DOUTE

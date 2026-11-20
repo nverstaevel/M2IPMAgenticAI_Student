@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: entete('Nouvelle consultation')}"></head>
+<body>
+<nav th:replace="~{fragments :: menu}"></nav>
+<h1 th:text="'Nouvelle consultation pour ' + ${creature.nom}">Nouvelle consultation</h1>
+<p class="erreur" th:if="${erreur}" th:text="${erreur}">Erreur</p>
+<form th:action="@{/consultations}" method="post">
+  <input type="hidden" name="creatureId" th:value="${creature.id}">
+  <p><label>Soigneur
+    <select name="soigneurId" required>
+      <option th:each="s : ${soigneurs}" th:value="${s.id}" th:text="${s.nom}">Soigneur</option>
+    </select></label></p>
+  <p><label>Date et heure <input type="datetime-local" name="dateHeure" required></label></p>
+  <p><label>Motif <input name="motif" required></label></p>
+  <button type="submit">Planifier</button>
+</form>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: entete('Propriétaires')}"></head>
+<body>
+<h1>Clinique des créatures fantastiques</h1>
+<form th:action="@{/proprietaires}" method="get">
+  <label>Nom du propriétaire <input name="nom" th:value="${nom}"></label>
+  <button type="submit">Rechercher</button>
+</form>
+<table>
+  <thead><tr><th>Nom</th><th>Prénom</th><th>Ville</th><th>Téléphone</th></tr></thead>
+  <tbody>
+    <tr th:each="p : ${proprietaires}">
+      <td><a th:href="@{/proprietaires/{id}(id=${p.id})}" th:text="${p.nom}">Nom</a></td>
+      <td th:text="${p.prenom}">Prénom</td>
+      <td th:text="${p.ville}">Ville</td>
+      <td th:text="${p.telephone}">Tél</td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(proprietaires)}"><td colspan="4">Aucun propriétaire trouvé.</td></tr>
+  </tbody>
+</table>
+</body>
+</html>

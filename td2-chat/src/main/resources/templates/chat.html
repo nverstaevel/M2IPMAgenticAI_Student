@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: entete('Dr Gribouille')}"></head>
+<body>
+<nav th:replace="~{fragments :: menu}"></nav>
+<h1>Consultation avec le Dr Gribouille</h1>
+<div id="fil" style="min-height: 12rem; border: 1px solid #ccc; padding: .5rem; margin-bottom: 1rem;"></div>
+<div id="propositions"></div>
+<form id="formulaire">
+  <input id="message" style="width: 70%" placeholder="Posez votre question…" autocomplete="off" required>
+  <button type="submit">Envoyer</button>
+  <label><input type="checkbox" id="flux"> flux</label>
+  <button type="button" id="effacer" title="Oublier la conversation en cours">Effacer le contexte</button>
+</form>
+<script>
+  let cid = sessionStorage.getItem('cid');
+  if (!cid) { cid = crypto.randomUUID(); sessionStorage.setItem('cid', cid); }
+  const fil = document.getElementById('fil');
+
+  function ajouter(qui, texte) {
+    const p = document.createElement('p');
+    p.textContent = qui + ' : ' + texte;
+    fil.appendChild(p);
+    return p;
+  }
+
+  function afficherPropositions(liste) {
+    const zone = document.getElementById('propositions');
+    zone.innerHTML = '';
+    liste.forEach(p => {
+      const d = document.createElement('div');
+      d.className = 'erreur';
+      d.textContent = p.creatureNom + ' avec ' + p.soigneurNom + ' le ' + p.dateHeure + ' (' + p.motif + ') ';
+      const ok = document.createElement('button');
+      ok.textContent = 'Confirmer';
+      ok.onclick = async () => {
+        const r = await fetch('/api/propositions/' + p.id + '/confirmer', { method: 'POST' });
+        ajouter('Clinique', r.ok ? 'Consultation créée.' : 'Refusé : ' + ((await r.json()).detail || r.status));
+        const l = await fetch('/api/propositions?conversationId=' + cid);
+        afficherPropositions(await l.json());
+      };
+      d.appendChild(ok);
+      zone.appendChild(d);
+    });
+  }
+
+  document.getElementById('effacer').addEventListener('click', async () => {
+    const r = await fetch('/api/chat/' + cid, { method: 'DELETE' });
+    if (!r.ok) { ajouter('Erreur', 'Impossible d\'effacer le contexte (' + r.status + ')'); return; }
+    fil.innerHTML = '';
+    document.getElementById('propositions').innerHTML = '';
+    ajouter('Clinique', 'Contexte effacé : le Dr Gribouille repart de zéro.');
+  });
+
+  document.getElementById('formulaire').addEventListener('submit', async e => {
+    e.preventDefault();
+    const champ = document.getElementById('message');
+    const message = champ.value; champ.value = '';
+    ajouter('Vous', message);
+    if (document.getElementById('flux').checked) {
+      const p = ajouter('Dr Gribouille', '');
+      const es = new EventSource('/api/chat/stream?conversationId=' + cid + '&message=' + encodeURIComponent(message));
+      es.onmessage = ev => { p.textContent += ev.data; };
+      es.onerror = () => { es.close(); if (!p.textContent) { p.textContent = 'Dr Gribouille : (aucune réponse du modèle, voir la console du serveur)'; } };
+    } else {
+      const attente = ajouter('Dr Gribouille', '… réfléchit');
+      try {
+        const r = await fetch('/api/chat', { method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ conversationId: cid, message }) });
+        if (!r.ok) {
+          let detail = r.status;
+          try { detail = (await r.json()).detail || r.status; } catch (_) {}
+          attente.textContent = 'Erreur : ' + detail;
+          return;
+        }
+        const corps = await r.json();
+        attente.textContent = 'Dr Gribouille : ' + corps.reponse;
+        afficherPropositions(corps.propositions);
+      } catch (err) {
+        attente.textContent = 'Erreur : ' + err;
+      }
+    }
+  });
+</script>
+</body>
+</html>

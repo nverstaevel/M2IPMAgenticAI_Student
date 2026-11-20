@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: entete('Erreur')}"></head>
+<body>
+<nav th:replace="~{fragments :: menu}"></nav>
+<h1>Oups</h1>
+<p class="erreur" th:text="${message}">Message</p>
+</body>
+</html>

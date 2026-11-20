@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: entete('Agents en direct')}"></head>
+<body>
+<nav th:replace="~{fragments :: menu}"></nav>
+<style>
+  body { max-width: none; margin: 0 1rem 1rem; }
+  #mise { display: grid; grid-template-columns: minmax(15rem, 17rem) 1fr minmax(16rem, 21rem); gap: .8rem; align-items: start; }
+  .panneau { border: 1px solid #ccc; border-radius: 6px; padding: .6rem; background: #fff; }
+  .panneau h2 { font-size: 1rem; margin: 0 0 .4rem; }
+  label { display: block; margin: .4rem 0 .15rem; font-size: .85rem; color: #444; }
+  textarea, select, input[type=number] { width: 100%; box-sizing: border-box; font: inherit; }
+  textarea { min-height: 5.5rem; }
+  button { font: inherit; cursor: pointer; }
+  #graphe { height: 70vh; min-height: 28rem; border: 1px solid #ccc; border-radius: 6px; background: #fafafa; position: relative; overflow: hidden; }
+  #graphe svg { width: 100%; height: 100%; cursor: grab; display: block; }
+  #graphe svg.glisse { cursor: grabbing; }
+  #monde { transition: transform .55s ease; transform-origin: 0 0; }
+  #monde.sans-transition { transition: none; }
+  .barre { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .4rem; font-size: .9rem; }
+  .pastille { padding: .1rem .5rem; border-radius: 1rem; background: #eee; }
+  .pastille.encours { background: #fff3cd; } .pastille.ok { background: #d4edda; } .pastille.erreur { background: #f8d7da; }
+  .legende { display: flex; flex-wrap: wrap; gap: .6rem; font-size: .78rem; color: #444; margin-top: .4rem; }
+  .legende i { display: inline-block; width: .8rem; height: .8rem; border-radius: 3px; margin-right: .2rem; vertical-align: -1px; }
+  /* nœuds */
+  .noeud { transition: transform .55s ease, opacity .4s ease; cursor: pointer; }
+  .noeud rect.corps { fill: #fff; stroke-width: 2; rx: 8; }
+  .noeud text { font-size: 13px; pointer-events: none; }
+  .noeud text.sous { font-size: 11px; fill: #555; }
+  .noeud.nouveau { opacity: 0; }
+  .noeud.select rect.corps { stroke-width: 4; }
+  .noeud.EN_COURS rect.corps { animation: pouls 1.1s ease-in-out infinite; }
+  .noeud.ERREUR rect.corps { fill: #fdecea; stroke: #c0392b !important; }
+  @keyframes pouls { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .25; } }
+  .G-UTILISATEUR rect.corps { stroke: #5d6d7e; } .G-MODELE rect.corps { stroke: #7d3c98; } .G-OUTIL rect.corps { stroke: #d68910; }
+  .G-AGENT rect.corps { stroke: #2471a3; } .G-CRITIQUE rect.corps { stroke: #c0392b; } .G-TRAVAILLEUR rect.corps { stroke: #229954; }
+  .G-HUMAIN rect.corps { stroke: #b7950b; } .G-CODE rect.corps { stroke: #566573; }
+  .noeud.ATTENTE rect.corps { stroke-dasharray: 6 4; fill: #fffbea; } .G-FIN rect.corps { stroke: #1e8449; }
+  .G-FIN.OK rect.corps { fill: #eafaf1; }
+  .bandeau { height: 6px; rx: 3; }
+  .lien { fill: none; stroke: #8a8f98; stroke-width: 2; marker-end: url(#fleche); transition: opacity .4s; }
+  .lien.nouveau { opacity: 0; }
+  .lien.retour { stroke: #b9770e; stroke-dasharray: 7 5; }
+  .etiquette-retour { font-size: 11px; fill: #b9770e; text-anchor: middle; font-style: italic; }
+  .cadre { fill: rgba(120, 130, 150, .07); stroke: #aab; stroke-dasharray: 3 4; rx: 10; }
+  .cadre-titre { font-size: 11px; fill: #667; font-weight: 600; }
+  #detail pre { white-space: pre-wrap; word-break: break-word; background: #f4f4f4; padding: .4rem; border-radius: 4px; max-height: 14rem; overflow: auto; font-size: .82rem; margin: .15rem 0 .5rem; }
+  #detail dt { font-weight: 600; font-size: .82rem; color: #444; } #detail dd { margin: 0 0 .4rem; }
+  #journal { font-size: .8rem; max-height: 9rem; overflow: auto; color: #333; margin: .3rem 0 0; padding-left: 1.8rem; }
+  .erreur-form { color: #a00; font-size: .85rem; min-height: 1.1rem; }
+</style>
+
+<h1>Agents en direct</h1>
+<div id="mise">
+  <section class="panneau">
+    <h2>Lancer</h2>
+    <label for="mode">Type d'agent</label>
+    <select id="mode"></select>
+    <label for="exemple">Exemple</label>
+    <select id="exemple"></select>
+    <label for="demande">Demande</label>
+    <textarea id="demande" placeholder="Que doit faire l'agent ?"></textarea>
+    <div id="parametres"></div>
+    <p><button id="lancer" type="button">Lancer et suivre</button></p>
+    <div class="erreur-form" id="erreur-form"></div>
+    <h2>Exécutions</h2>
+    <select id="runs" size="6"></select>
+    <p>
+      <button id="ouvrir" type="button">Ouvrir</button>
+      <button id="rejouer" type="button" title="Rejoue l'exécution sélectionnée pas à pas">Rejouer</button>
+      <button id="actualiser" type="button">Actualiser</button>
+    </p>
+  </section>
+
+  <section>
+    <div class="barre">
+      <span class="pastille" id="statut">Aucune exécution</span>
+      <span id="titre"></span>
+      <span class="pastille" id="stats"></span>
+      <label style="display:inline;margin:0"><input type="checkbox" id="suivre" checked> suivre le dernier nœud</label>
+      <button id="ensemble" type="button">Vue d'ensemble</button>
+    </div>
+    <div id="graphe">
+      <svg id="svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="fleche" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8f98"/>
+          </marker>
+        </defs>
+        <g id="monde"><g id="cadres"></g><g id="liens"></g><g id="noeuds"></g></g>
+      </svg>
+    </div>
+    <div class="legende" id="legende"></div>
+  </section>
+
+  <section class="panneau" id="detail">
+    <h2>Détail du nœud</h2>
+    <p id="aucun-detail">Cliquez sur un nœud du graphe.</p>
+    <dl id="champs" hidden></dl>
+    <h2>Journal</h2>
+    <ol id="journal"></ol>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var LARG = 176, HAUT = 62, ECART_X = 78, ECART_Y = 26;
+  var GENRES = {
+    UTILISATEUR: ['Demande', '#5d6d7e'], MODELE: ['Appel du modèle', '#7d3c98'], OUTIL: ['Outil', '#d68910'],
+    AGENT: ['Agent', '#2471a3'], CRITIQUE: ['Critique', '#c0392b'], TRAVAILLEUR: ['Travailleur', '#229954'],
+    HUMAIN: ['Validation humaine', '#b7950b'], CODE: ['Code Java (sans modèle)', '#566573'], FIN: ['Résultat', '#1e8449']
+  };
+  var NS = 'http://www.w3.org/2000/svg';
+
+  // ---- Types d'agents proposés (une entrée par agent du cours ; les TD suivants en ajoutent) ----
+  var MODES = [
+    {
+      id: 'react', libelle: 'Agent ReAct',
+      exemples: [
+        { l: '1 outil · tarif', t: 'Quel est le tarif d\'une consultation pour un dragon ?' },
+        { l: '2 outils · stock + fiche', t: 'Reste-t-il du baume ignifuge en pharmacie, et quelles sont ses contre-indications pour un dragon ?' },
+        { l: 'Enchaînement · propriétaire → créatures → tarifs', t: 'Quelles sont les créatures de Gaspard Fumerolle, et combien coûte une consultation pour chacune ?' },
+        { l: 'Enchaînement · historique', t: 'Quel est le dernier diagnostic de Lunatique et quel soigneur l\'a reçu ?' },
+        { l: 'Adaptation · rupture de stock', t: 'Reste-t-il de la poudre de lune ? Si non, propose un autre médicament adapté à un loup-garou et vérifie son stock.' },
+        { l: 'Contre-indication à repérer', t: 'Monsieur Crépuscule est un vampire fatigué : peut-on lui donner de la poudre de lune ?' },
+        { l: 'Agenda · créneaux (jour piégé : voir l\'événement)', t: 'Quels créneaux sont libres le 3 décembre 2026 ?' },
+        { l: 'Agenda · proposition (jamais créée sans le personnel)', t: 'Propose une consultation pour Paillette le 4 décembre 2026 à 10h pour un sabot fendu.' },
+        { l: 'Source externe · Wikipédia + tarif', t: 'Que dit Wikipédia sur le phénix, et combien coûte une consultation pour un phénix ?' },
+        { l: 'Cas limite · espèce inconnue', t: 'Quel est le tarif d\'une consultation pour un canard ?' },
+        { l: 'Cas limite · demande impossible', t: 'Réserve-moi un vol pour Mars.' },
+        { l: 'Boucle détectée · même appel répété', t: 'Consulte le tarif d\'une consultation pour un dragon, puis refais exactement le même appel pour vérifier qu\'il ne change pas, et recommence encore une fois.' },
+        { l: 'Plafond d\'étapes (réglé à 3)', t: 'Pour chaque espèce de la clinique, donne le tarif de consultation et le soigneur compétent.', p: { maxEtapes: 3 } }
+      ],
+      parametres: [{ id: 'maxEtapes', libelle: 'Étapes maximum', type: 'number', min: 1, max: 20, valeur: 8 }],
+      requete: function (demande, p) { return { url: '/api/agent/lancer', corps: { demande: demande, maxEtapes: Number(p.maxEtapes) || 8 } }; }
+    }
+  ];
+  window.AGENTS_MODES = MODES;
+
+  var etat = { runId: null, titre: '', statut: null, noeuds: new Map(), source: null, rejeu: 0, selection: null, premier: 0, dernier: 0 };
+  var els = {};
+  ['mode', 'exemple', 'demande', 'parametres', 'lancer', 'erreur-form', 'runs', 'ouvrir', 'rejouer', 'actualiser', 'statut', 'titre',
+    'stats', 'suivre', 'ensemble', 'graphe', 'svg', 'monde', 'cadres', 'liens', 'noeuds', 'legende', 'aucun-detail', 'champs', 'journal']
+    .forEach(function (id) { els[id] = document.getElementById(id); });
+  var domNoeuds = new Map(), domLiens = new Map(), domCadres = new Map(), domEtiquettes = new Map();
+  var cam = { x: 40, y: 0, k: 1 };
+
+  // ---------- formulaire ----------
+  function mode() { return MODES.filter(function (m) { return m.id === els.mode.value; })[0] || MODES[0]; }
+  MODES.forEach(function (m) { var o = document.createElement('option'); o.value = m.id; o.textContent = m.libelle; els.mode.appendChild(o); });
+  function remplirMode() {
+    var m = mode();
+    els.exemple.innerHTML = '';
+    var vide = document.createElement('option'); vide.value = ''; vide.textContent = '(choisir un exemple)'; els.exemple.appendChild(vide);
+    (m.exemples || []).forEach(function (e, i) { var o = document.createElement('option'); o.value = String(i); o.textContent = e.l; els.exemple.appendChild(o); });
+    els.parametres.innerHTML = '';
+    (m.parametres || []).forEach(function (p) {
+      var l = document.createElement('label'); l.textContent = p.libelle; l.setAttribute('for', 'p-' + p.id);
+      var champ;
+      if (p.type === 'select') {
+        champ = document.createElement('select');
+        p.options.forEach(function (v) { var o = document.createElement('option'); o.value = v[0]; o.textContent = v[1]; champ.appendChild(o); });
+      } else {
+        champ = document.createElement('input'); champ.type = p.type || 'text';
+        if (p.min != null) champ.min = p.min; if (p.max != null) champ.max = p.max;
+      }
+      champ.id = 'p-' + p.id; if (p.valeur != null) champ.value = p.valeur;
+      els.parametres.appendChild(l); els.parametres.appendChild(champ);
+    });
+    els.demande.disabled = m.sansDemande === true;
+    els.demande.placeholder = m.sansDemande ? '(non utilisée par ce mode)' : 'Que doit faire l\'agent ?';
+  }
+  els.mode.addEventListener('change', remplirMode);
+  els.exemple.addEventListener('change', function () {
+    var m = mode(); if (els.exemple.value === '') { return; }
+    var e = m.exemples[Number(els.exemple.value)];
+    if (e.t) { els.demande.value = e.t; }
+    Object.keys(e.p || {}).forEach(function (k) { var c = document.getElementById('p-' + k); if (c) { c.value = e.p[k]; } });
+  });
+  remplirMode();
+
+  function valeursParametres() {
+    var p = {};
+    (mode().parametres || []).forEach(function (d) { p[d.id] = document.getElementById('p-' + d.id).value; });
+    return p;
+  }
+
+  els.lancer.addEventListener('click', function () {
+    els['erreur-form'].textContent = '';
+    var m = mode(), demande = els.demande.value.trim();
+    if (!m.sansDemande && !demande) { els['erreur-form'].textContent = 'Saisissez une demande.'; return; }
+    var r = m.requete(demande, valeursParametres());
+    els.lancer.disabled = true;
+    fetch(r.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(r.corps) })
+      .then(function (rep) {
+        if (!rep.ok) {
+          return rep.json().catch(function () { return {}; }).then(function (j) { throw new Error(j.detail || ('HTTP ' + rep.status)); });
+        }
+        return rep.json();
+      })
+      .then(function (j) { ouvrir(j.runId); actualiserListe(j.runId); })
+      .catch(function (e) { els['erreur-form'].textContent = 'Échec du lancement : ' + e.message; })
+      .then(function () { els.lancer.disabled = false; });
+  });
+
+  // ---------- liste des exécutions ----------
+  function actualiserListe(selection) {
+    fetch('/api/agent/suivi').then(function (r) { return r.json(); }).then(function (liste) {
+      els.runs.innerHTML = '';
+      liste.forEach(function (r) {
+        var o = document.createElement('option'); o.value = r.runId;
+        o.textContent = new Date(r.debut).toLocaleTimeString() + ' · ' + r.statut + ' · ' + r.titre;
+        els.runs.appendChild(o);
+      });
+      if (selection) { els.runs.value = selection; }
+    }).catch(function () {});
+  }
+  els.actualiser.addEventListener('click', function () { actualiserListe(etat.runId); });
+  els.ouvrir.addEventListener('click', function () { if (els.runs.value) { ouvrir(els.runs.value); } });
+  els.runs.addEventListener('dblclick', function () { if (els.runs.value) { ouvrir(els.runs.value); } });
+
+  // ---------- état du graphe ----------
+  function reinitialiser(runId) {
+    if (etat.source) { etat.source.close(); etat.source = null; }
+    etat.rejeu++;
+    etat.runId = runId; etat.titre = ''; etat.statut = null; etat.noeuds = new Map(); etat.selection = null; etat.premier = 0; etat.dernier = 0;
+    domNoeuds.forEach(function (g) { g.remove(); }); domNoeuds.clear();
+    domLiens.forEach(function (p) { p.remove(); }); domLiens.clear();
+    domCadres.forEach(function (c) { c.rect.remove(); c.txt.remove(); }); domCadres.clear();
+    domEtiquettes.forEach(function (t) { t.remove(); }); domEtiquettes.clear();
+    els.journal.innerHTML = '';
+    afficherDetail();
+    dessiner();
+  }
+
+  function appliquer(e) {
+    if (!etat.premier) { etat.premier = e.horodatage; }
+    etat.dernier = e.horodatage;
+    if (e.type === 'demarrage') { etat.titre = e.libelle || ''; etat.statut = 'EN_COURS'; return; }
+    if (e.type === 'fin') { etat.statut = e.statut; journaliser(e, 'Terminé : ' + e.statut); return; }
+    var n = etat.noeuds.get(e.id);
+    var neuf = !n;
+    if (neuf) { n = { id: e.id, parents: [], genre: 'MODELE', libelle: e.id, statut: 'EN_COURS', ordre: etat.noeuds.size, t0: e.horodatage }; etat.noeuds.set(e.id, n); }
+    ['genre', 'libelle', 'statut', 'detail', 'resultat', 'dureeMs', 'tokens', 'tokensEntree', 'tokensSortie', 'appelsModele', 'tokensEstimes'].forEach(function (c) { if (e[c] != null) { n[c] = e[c]; } });
+    if (e.parents != null) { n.parents = e.parents; }
+    n.t1 = e.horodatage;
+    if (neuf) { journaliser(e, 'Nouveau nœud : ' + n.libelle); }
+    else if (e.statut === 'OK' || e.statut === 'ERREUR') { journaliser(e, n.libelle + ' : ' + e.statut + (e.dureeMs != null ? ' (' + e.dureeMs + ' ms)' : '')); }
+  }
+
+  function journaliser(e, texte) {
+    var li = document.createElement('li');
+    li.textContent = ((e.horodatage - etat.premier) / 1000).toFixed(1) + ' s · ' + texte;
+    els.journal.appendChild(li); els.journal.scrollTop = els.journal.scrollHeight;
+  }
+
+  // ---------- mise en page ----------
+  function niveau(n, memo, pile) {
+    if (memo.has(n.id)) { return memo.get(n.id); }
+    if (pile.has(n.id)) { return 0; }
+    pile.add(n.id);
+    var l = 0;
+    n.parents.forEach(function (pid) { var p = etat.noeuds.get(pid); if (p) { l = Math.max(l, niveau(p, memo, pile) + 1); } });
+    pile.delete(n.id); memo.set(n.id, l);
+    return l;
+  }
+
+  function disposer() {
+    var memo = new Map(), niveaux = [];
+    etat.noeuds.forEach(function (n) {
+      n.niveau = niveau(n, memo, new Set());
+      (niveaux[n.niveau] = niveaux[n.niveau] || []).push(n);
+    });
+    niveaux.forEach(function (liste, i) {
+      if (!liste) { return; }
+      liste.sort(function (a, b) { return a.ordre - b.ordre; });
+      liste.forEach(function (n, j) {
+        n.x = i * (LARG + ECART_X);
+        n.y = (j - (liste.length - 1) / 2) * (HAUT + ECART_Y);
+      });
+    });
+  }
+
+  // Une boucle est dépliée dans le temps : on regroupe les nœuds d'un même tour (duo) ou d'une même itération (ReAct)
+  // dans un cadre, et on marque d'une flèche « retour » le lien qui relance un nouveau tour.
+  function groupe(n) {
+    var m = /^[vgr](\d+)$/.exec(n.id);
+    if (m) { return { cle: 'T' + m[1], type: 'Tour', num: Number(m[1]), retour: 'objections' }; }
+    m = /^e(\d+)(-outil)?$/.exec(n.id);
+    if (m) { return { cle: 'I' + m[1], type: 'Itération', num: Number(m[1]), retour: 'résultat' }; }
+    return null;
+  }
+
+  function dessinerCadres() {
+    var boites = new Map();
+    etat.noeuds.forEach(function (n) {
+      var g = groupe(n); if (!g) { return; }
+      var b = boites.get(g.cle) || { g: g, x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+      b.x0 = Math.min(b.x0, n.x); b.y0 = Math.min(b.y0, n.y); b.x1 = Math.max(b.x1, n.x + LARG); b.y1 = Math.max(b.y1, n.y + HAUT);
+      boites.set(g.cle, b);
+    });
+    boites.forEach(function (b, cle) {
+      var c = domCadres.get(cle);
+      if (!c) { c = { rect: elt('rect', { class: 'cadre' }, els.cadres), txt: elt('text', { class: 'cadre-titre' }, els.cadres) }; domCadres.set(cle, c); }
+      var pad = 12;
+      c.rect.setAttribute('x', b.x0 - pad); c.rect.setAttribute('y', b.y0 - pad - 16);
+      c.rect.setAttribute('width', b.x1 - b.x0 + 2 * pad); c.rect.setAttribute('height', b.y1 - b.y0 + 2 * pad + 16);
+      c.txt.setAttribute('x', b.x0 - pad + 8); c.txt.setAttribute('y', b.y0 - pad - 2);
+      c.txt.textContent = b.g.type + ' ' + b.g.num;
+    });
+    domCadres.forEach(function (c, cle) { if (!boites.has(cle)) { c.rect.remove(); c.txt.remove(); domCadres.delete(cle); } });
+  }
+
+  function coupe(s, max) { s = s == null ? '' : String(s); return s.length > max ? s.slice(0, max - 1) + '…' : s; }
+  function elt(nom, attrs, parent) {
+    var e = document.createElementNS(NS, nom);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (parent) { parent.appendChild(e); }
+    return e;
+  }
+
+  function sousTitre(n) {
+    if (n.statut === 'EN_COURS') { return 'en cours…'; }
+    var p = [];
+    if (n.dureeMs != null) { p.push(n.dureeMs + ' ms'); }
+    if (n.tokens != null) { p.push((n.tokensEstimes ? '≈' : '') + n.tokens + ' tok'); }
+    return p.length ? p.join(' · ') : (n.statut === 'ERREUR' ? 'erreur' : '');
+  }
+
+  function dessiner() {
+    disposer();
+    etat.noeuds.forEach(function (n) {
+      var g = domNoeuds.get(n.id);
+      if (!g) {
+        g = elt('g', { 'data-id': n.id }, els.noeuds);
+        g.classList.add('noeud', 'nouveau');
+        elt('rect', { class: 'corps', width: LARG, height: HAUT }, g);
+        elt('rect', { class: 'bandeau', width: LARG, height: 6, fill: (GENRES[n.genre] || GENRES.MODELE)[1] }, g);
+        elt('text', { class: 'titre', x: 10, y: 28 }, g);
+        elt('text', { class: 'sous', x: 10, y: 48 }, g);
+        elt('title', {}, g);
+        g.addEventListener('click', function () { etat.selection = n.id; afficherDetail(); dessiner(); });
+        domNoeuds.set(n.id, g);
+        requestAnimationFrame(function () { requestAnimationFrame(function () { g.classList.remove('nouveau'); }); });
+      }
+      g.style.transform = 'translate(' + n.x + 'px,' + n.y + 'px)';
+      g.setAttribute('class', 'noeud G-' + n.genre + ' ' + n.statut + (etat.selection === n.id ? ' select' : '') + (g.classList.contains('nouveau') ? ' nouveau' : ''));
+      g.querySelector('.bandeau').setAttribute('fill', (GENRES[n.genre] || GENRES.MODELE)[1]);
+      g.querySelector('.titre').textContent = coupe(n.libelle, 23);
+      g.querySelector('.sous').textContent = sousTitre(n);
+      g.querySelector('title').textContent = n.libelle;
+    });
+    dessinerCadres();
+    // liens
+    var vus = new Set();
+    var vuesEtiq = new Set();
+    etat.noeuds.forEach(function (n) {
+      n.parents.forEach(function (pid) {
+        var p = etat.noeuds.get(pid); if (!p) { return; }
+        var cle = pid + '>' + n.id; vus.add(cle);
+        var l = domLiens.get(cle);
+        if (!l) {
+          l = elt('path', { class: 'lien nouveau' }, els.liens); domLiens.set(cle, l);
+          requestAnimationFrame(function () { requestAnimationFrame(function () { l.classList.remove('nouveau'); }); });
+        }
+        var x1 = p.x + LARG, y1 = p.y + HAUT / 2, x2 = n.x, y2 = n.y + HAUT / 2, dx = Math.max(30, (x2 - x1) / 2);
+        l.setAttribute('d', 'M' + x1 + ',' + y1 + ' C' + (x1 + dx) + ',' + y1 + ' ' + (x2 - dx) + ',' + y2 + ' ' + x2 + ',' + y2);
+        var gp = groupe(p), gn = groupe(n), retour = !!(gp && gn && gp.type === gn.type && gn.num > gp.num);
+        l.setAttribute('class', 'lien' + (retour ? ' retour' : '') + (l.classList.contains('nouveau') ? ' nouveau' : ''));
+        if (retour) {
+          var t = domEtiquettes.get(cle);
+          if (!t) { t = elt('text', { class: 'etiquette-retour' }, els.liens); domEtiquettes.set(cle, t); }
+          t.setAttribute('x', (x1 + x2) / 2); t.setAttribute('y', Math.min(y1, y2) - 8);
+          t.textContent = '↻ ' + gn.retour; vuesEtiq.add(cle);
+        }
+      });
+    });
+    domLiens.forEach(function (p, cle) { if (!vus.has(cle)) { p.remove(); domLiens.delete(cle); } });
+    domEtiquettes.forEach(function (t, cle) { if (!vuesEtiq.has(cle)) { t.remove(); domEtiquettes.delete(cle); } });
+    barreEtat();
+    if (els.suivre.checked) { suivreDernier(); } else { appliquerCamera(); }
+  }
+
+  function barreEtat() {
+    var s = etat.statut;
+    els.statut.textContent = s == null ? 'Aucune exécution' : (s === 'EN_COURS' ? 'En cours…' : 'Terminé : ' + s);
+    els.statut.className = 'pastille ' + (s == null ? '' : s === 'EN_COURS' ? 'encours' : (s === 'REPONSE_FINALE' || s === 'APPROUVEE' || s === 'TERMINE' ? 'ok' : 'erreur'));
+    els.titre.textContent = etat.titre;
+    var tok = 0, tIn = 0, tOut = 0, appels = 0, estime = false;
+    etat.noeuds.forEach(function (n) { if (n.genre === 'MODELE' || n.genre === 'AGENT' || n.genre === 'CRITIQUE' || n.genre === 'TRAVAILLEUR') { tok += n.tokens || 0; tIn += n.tokensEntree || 0; tOut += n.tokensSortie || 0; appels += n.appelsModele || 0; if (n.tokensEstimes) { estime = true; } } });
+    var duree = etat.premier ? ((etat.dernier - etat.premier) / 1000).toFixed(1) + ' s' : '';
+    els.stats.textContent = etat.noeuds.size + ' nœuds · ' + (estime ? '≈' : '') + tok + ' tokens (entrée ' + tIn + ' · sortie ' + tOut + ') · ' + appels + ' appel(s) au modèle · ' + duree;
+  }
+
+  // ---------- caméra ----------
+  function appliquerCamera() { els.monde.style.transform = 'translate(' + cam.x + 'px,' + cam.y + 'px) scale(' + cam.k + ')'; }
+  function taille() { var r = els.graphe.getBoundingClientRect(); return { l: r.width, h: r.height }; }
+
+  function suivreDernier() {
+    var cible = null;
+    etat.noeuds.forEach(function (n) { if (n.statut === 'EN_COURS' && (!cible || n.ordre > cible.ordre)) { cible = n; } });
+    if (!cible) { etat.noeuds.forEach(function (n) { if (!cible || n.ordre > cible.ordre) { cible = n; } }); }
+    if (!cible) { cam = { x: 40, y: taille().h / 2, k: 1 }; appliquerCamera(); return; }
+    var t = taille(); cam.k = Math.min(cam.k, 1) || 1; if (cam.k < 0.6) { cam.k = 1; }
+    cam.x = t.l * 0.62 - (cible.x + LARG / 2) * cam.k;
+    cam.y = t.h / 2 - (cible.y + HAUT / 2) * cam.k;
+    appliquerCamera();
+  }
+
+  function ensemble() {
+    if (!etat.noeuds.size) { return; }
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    etat.noeuds.forEach(function (n) { x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y); x1 = Math.max(x1, n.x + LARG); y1 = Math.max(y1, n.y + HAUT); });
+    var t = taille(), m = 30;
+    cam.k = Math.min(1.2, (t.l - 2 * m) / (x1 - x0), (t.h - 2 * m) / (y1 - y0));
+    cam.x = (t.l - (x1 - x0) * cam.k) / 2 - x0 * cam.k;
+    cam.y = (t.h - (y1 - y0) * cam.k) / 2 - y0 * cam.k;
+    appliquerCamera();
+  }
+  els.ensemble.addEventListener('click', function () { els.suivre.checked = false; ensemble(); });
+  els.suivre.addEventListener('change', function () { if (els.suivre.checked) { suivreDernier(); } });
+
+  var glisse = null;
+  els.svg.addEventListener('mousedown', function (ev) {
+    if (ev.target.closest && ev.target.closest('.noeud')) { return; }
+    glisse = { x: ev.clientX - cam.x, y: ev.clientY - cam.y };
+    els.svg.classList.add('glisse'); els.monde.classList.add('sans-transition'); els.suivre.checked = false;
+  });
+  window.addEventListener('mousemove', function (ev) { if (glisse) { cam.x = ev.clientX - glisse.x; cam.y = ev.clientY - glisse.y; appliquerCamera(); } });
+  window.addEventListener('mouseup', function () { glisse = null; els.svg.classList.remove('glisse'); els.monde.classList.remove('sans-transition'); });
+  els.svg.addEventListener('wheel', function (ev) {
+    ev.preventDefault(); els.suivre.checked = false;
+    var r = els.graphe.getBoundingClientRect(), px = ev.clientX - r.left, py = ev.clientY - r.top;
+    var f = ev.deltaY < 0 ? 1.12 : 1 / 1.12, k = Math.max(0.15, Math.min(2.5, cam.k * f));
+    cam.x = px - (px - cam.x) * (k / cam.k); cam.y = py - (py - cam.y) * (k / cam.k); cam.k = k;
+    els.monde.classList.add('sans-transition'); appliquerCamera();
+    setTimeout(function () { els.monde.classList.remove('sans-transition'); }, 60);
+  }, { passive: false });
+
+  // ---------- détail ----------
+  function joli(texte) {
+    if (texte == null) { return ''; }
+    try { return JSON.stringify(JSON.parse(texte), null, 2); } catch (e) { return String(texte); }
+  }
+  function afficherDetail() {
+    var n = etat.selection ? etat.noeuds.get(etat.selection) : null;
+    els.champs.innerHTML = '';
+    els['aucun-detail'].hidden = !!n; els.champs.hidden = !n;
+    if (!n) { return; }
+    function ligne(titre, valeur, pre) {
+      if (valeur == null || valeur === '') { return; }
+      var dt = document.createElement('dt'); dt.textContent = titre;
+      var dd = document.createElement('dd');
+      if (pre) { var p = document.createElement('pre'); p.textContent = valeur; dd.appendChild(p); } else { dd.textContent = valeur; }
+      els.champs.appendChild(dt); els.champs.appendChild(dd);
+    }
+    ligne('Nœud', n.libelle); ligne('Type', (GENRES[n.genre] || [n.genre])[0]); ligne('Statut', n.statut);
+    ligne('Durée', n.dureeMs != null ? n.dureeMs + ' ms' : null); ligne('Tokens', n.tokens != null ? (n.tokensEstimes ? '≈ ' : '') + n.tokens + (n.tokensEntree != null ? ' (entrée ' + n.tokensEntree + ' · sortie ' + n.tokensSortie + ')' : '') + (n.appelsModele ? ' · ' + n.appelsModele + ' appel(s) au modèle' : '') + (n.tokensEstimes ? ' — estimé, le fournisseur n\'a pas annoncé sa consommation' : '') : null);
+    ligne(n.genre === 'OUTIL' ? 'Arguments' : n.genre === 'MODELE' ? 'Texte produit par le modèle' : 'Contenu', joli(n.detail), true);
+    ligne('Résultat', joli(n.resultat), true);
+  }
+
+  // ---------- flux en direct et rejeu ----------
+  function ouvrir(runId) {
+    reinitialiser(runId);
+    var es = new EventSource('/api/agent/suivi/' + encodeURIComponent(runId) + '/flux');
+    etat.source = es;
+    es.addEventListener('evt', function (ev) {
+      var e = JSON.parse(ev.data); appliquer(e); dessiner();
+      if (e.type === 'fin') { es.close(); etat.source = null; actualiserListe(runId); }
+    });
+    es.onerror = function () { es.close(); if (etat.source === es) { etat.source = null; } };
+  }
+
+  els.rejouer.addEventListener('click', function () {
+    var runId = els.runs.value || etat.runId; if (!runId) { return; }
+    fetch('/api/agent/suivi/' + encodeURIComponent(runId)).then(function (r) { return r.json(); }).then(function (evts) {
+      reinitialiser(runId);
+      var jeton = etat.rejeu, i = 0;
+      (function pas() {
+        if (jeton !== etat.rejeu || i >= evts.length) { return; }
+        appliquer(evts[i++]); dessiner();
+        setTimeout(pas, 450);
+      })();
+    });
+  });
+
+  // ---------- légende ----------
+  Object.keys(GENRES).forEach(function (g) {
+    var s = document.createElement('span'); var i = document.createElement('i'); i.style.background = GENRES[g][1];
+    s.appendChild(i); s.appendChild(document.createTextNode(GENRES[g][0])); els.legende.appendChild(s);
+  });
+
+  window.addEventListener('resize', function () { if (els.suivre.checked) { suivreDernier(); } });
+  actualiserListe();
+  var param = new URLSearchParams(location.search).get('run');
+  if (param) { ouvrir(param); }
+})();
+</script>
+</body>
+</html>
