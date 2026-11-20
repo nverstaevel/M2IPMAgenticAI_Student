@@ -32,18 +32,33 @@ public class TraceStore {
     }
 
     public void ajouter(String runId, Etape etape) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : ajouter");
+        try {
+            Files.createDirectories(dossier);
+            Files.writeString(fichier(runId), json.writeValueAsString(etape) + "\n", StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /** Étapes d'une exécution, vide si le runId est inconnu. */
     public List<Etape> lire(String runId) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : lire");
+        Path f = fichier(runId);
+        if (!Files.exists(f)) {
+            return List.of();
+        }
+        try {
+            return Files.readAllLines(f, StandardCharsets.UTF_8).stream()
+                    .filter(l -> !l.isBlank()).map(l -> json.readValue(l, Etape.class)).toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private Path fichier(String runId) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : fichier");
+        if (!RUN_ID.matcher(runId).matches()) {
+            throw new IllegalArgumentException("runId invalide");
+        }
+        return dossier.resolve(runId + ".jsonl");
     }
 }

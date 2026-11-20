@@ -3,10 +3,10 @@
 Point de départ du TD (sujet distribué en cours). Dossier autonome : importez-le seul dans votre IDE (JDK 21).
 
 ## Fourni
-le corrigé du TD3, l'outillage de suivi (`Evenement`, `SuiviExecution`, `SuiviController`, `SuiviOutils`, `Jetons`, `ComptageJetons`), la page `/agents`, les contrats `Etape`, `ResultatAgent`, `MotifArret`.
+le corrigé du TD3, l'outillage de suivi (`Evenement`, `SuiviExecution`, `SuiviController`, `SuiviOutils`, `Jetons`, `ComptageJetons`), la page `/agents`, les contrats `Etape`, `ResultatAgent`, `MotifArret`, le stockage des traces (`TraceStore`), les endpoints (`AgentController`), et dans `AgentReactService` tout sauf le cœur de la boucle : le suivi du graphe, l'arrêt sur budget de tokens et l'arrêt sur erreur sont déjà écrits.
 
 ## À écrire
-`AgentReactService` (la boucle), `TraceStore`, `AgentController`.
+uniquement le cœur de `AgentReactService.executer`, aux endroits marqués `TODO TD4` : l'appel du modèle, la réponse finale, l'exécution des outils et l'historique (étape 1), puis les arrêts sur plafond d'étapes et sur boucle détectée (étape 2).
 
 ## Lancer
 ```bash

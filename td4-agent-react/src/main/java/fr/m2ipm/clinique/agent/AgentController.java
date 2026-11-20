@@ -37,14 +37,14 @@ public class AgentController {
     /** Comparaison (TD4 §5) : mêmes outils, boucle du framework, aucune trace d'étape ni plafond personnalisé. */
     @PostMapping("/framework")
     public FrameworkReponse framework(@Valid @RequestBody AgentRequest requete) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : framework");
+        return new FrameworkReponse(framework.prompt().user(requete.demande())
+                .toolContext(java.util.Map.of("conversationId", "framework")).call().content());
     }
 
     @PostMapping
     public AgentReponse executer(@Valid @RequestBody AgentRequest requete) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : executer");
+        var e = agent.executer(requete.demande(), requete.maxEtapes() == null ? 8 : requete.maxEtapes());
+        return new AgentReponse(e.runId(), e.resultat());
     }
 
     public record Lancement(String runId) {}
@@ -52,19 +52,21 @@ public class AgentController {
     /** Lance l'agent en arrière-plan et rend aussitôt le runId : la page /agents suit l'exécution en direct. */
     @PostMapping("/lancer")
     public Lancement lancer(@Valid @RequestBody AgentRequest requete) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : lancer");
+        String runId = java.util.UUID.randomUUID().toString();
+        int max = requete.maxEtapes() == null ? 8 : requete.maxEtapes();
+        suivi.demarrer(runId, "ReAct : " + (requete.demande().length() > 60 ? requete.demande().substring(0, 60) + "…" : requete.demande()));
+        executeur.submit(() -> agent.executer(runId, requete.demande(), max));
+        return new Lancement(runId);
     }
 
     @jakarta.annotation.PreDestroy
     void arreter() {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : arreter");
+        executeur.shutdownNow();
     }
 
     @GetMapping("/{runId}/trace")
     public ResponseEntity<List<Etape>> trace(@PathVariable String runId) {
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : trace");
+        List<Etape> etapes = traces.lire(runId);
+        return etapes.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(etapes);
     }
 }
