@@ -82,10 +82,7 @@ public class AgentReactService {
     }
 
     /** Options de l'appel : on part de celles du modèle (OpenAiChatOptions, AnthropicChatOptions…) pour ne pas casser le client du fournisseur. */
-    @SuppressWarnings({
-        // TODO TD4 : à écrire
-        throw new UnsupportedOperationException("À écrire : ");
-    })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private ToolCallingChatOptions optionsAppel(Map<String, Object> contexte, Double temperature) {
         // TODO TD4 : à écrire
         throw new UnsupportedOperationException("À écrire : optionsAppel");
