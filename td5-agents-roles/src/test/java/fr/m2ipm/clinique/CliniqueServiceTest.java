@@ -33,7 +33,7 @@ class CliniqueServiceTest {
     void rechercheEstPartielleEtInsensibleALaCasse() {
         assertThat(service.rechercherProprietaires("BRUME")).extracting(ProprietaireDto::nom)
                 .containsExactly("Brumevent");
-        assertThat(service.rechercherProprietaires("")).hasSize(3);
+        assertThat(service.rechercherProprietaires("")).hasSize(10);
     }
 
     @Test
