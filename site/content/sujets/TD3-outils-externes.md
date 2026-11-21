@@ -21,7 +21,7 @@ Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'
 ## Avant la séance
 
 - [ ] Partez du dossier de départ `td3-outils-externes` (il contient votre TD2 corrigé plus le code fourni) ou, pour garder votre propre TD2, copiez `td2-chat` en `td3-outils-externes` et ajoutez-y le code fourni. Travaillez dans la copie.
-- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), et, pour l'extension Google Agenda seulement, l'adresse du compte de service (dans le `README` du dossier `td3-outils-externes`) et son fichier de clés, distribué en séance : il ne va jamais dans Git.
+- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), et, pour l'extension Google Agenda seulement, un compte Google personnel (vous créerez votre propre compte de service, voir le `README` du dossier `td3-outils-externes`) : sa clé JSON ne va jamais dans Git.
 - [ ] Contrôlez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`.
 - [ ] Relisez dans le support de CM2 : *Ports et adaptateurs*, *Sources externes*, *Interroger plutôt que charger*.
 
@@ -127,7 +127,7 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 | Symptôme | Cause fréquente | Que faire |
 | --- | --- | --- |
 | Wikipedia répond 403 | pas de `User-Agent` | ajouter un en-tête qui nomme votre application et un contact |
-| Erreur d'authentification Google | agenda non partagé avec le compte de service | vérifier l'identifiant de l'agenda et le partage ; sinon, revenir à `agenda.mode=simule` |
+| Erreur d'authentification Google | agenda non partagé avec votre compte de service | vérifier l'identifiant de l'agenda et le partage ; sinon, revenir à `agenda.mode=simule` |
 | Tokens à 0 dans les métadonnées | le fournisseur ne les annonce pas | estimer (1 token pour 4 caractères) et le noter dans le journal |
 | « context length exceeded » en stratégie A | corpus plus grand que la fenêtre du modèle | c'est un résultat : notez la taille qui fait échouer |
 | Le modèle n'appelle pas l'outil | description d'outil trop vague | reformuler la description et les `@ToolParam` |
@@ -149,7 +149,7 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 
 Si le socle est terminé avant la fin de la séance :
 
-- essayez `GoogleAgendaAdapter` : dans Google Agenda, créez un agenda vide dédié au TD, partagez-le avec l'adresse du compte de service (dans le `README` du dossier) avec le droit « Apporter des modifications aux événements », puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de votre agenda) et `agenda.google.credentials-file` (chemin du fichier du compte de service) dans `application-local.yml` ;
+- essayez `GoogleAgendaAdapter` : dans Google Agenda, créez un agenda vide dédié au TD, créez d'abord votre propre compte de service dans votre projet Google Cloud (marche à suivre dans le `README` du dossier), puis partagez l'agenda avec son adresse avec le droit « Apporter des modifications aux événements », puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de votre agenda) et `agenda.google.credentials-file` (chemin de la clé JSON de votre compte de service) dans `application-local.yml` ;
 - faites varier la position du passage utile (début, milieu, fin) et la quantité de texte parasite (aucune, moitié, double) avec la stratégie A, et notez les résultats dans le journal ;
 - implémentez la stratégie C (similarité) et comparez-la à B ;
 - écrivez vous-même `TarifsExcelReader` avec Apache POI avant de lire celui qui est fourni.

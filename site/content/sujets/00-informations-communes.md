@@ -55,7 +55,7 @@ Le journal sert à l'analyse critique du TD6 et à garder une trace de votre pro
 
 ## Règles de sécurité
 
-- **Secrets.** Clés d'API et fichier du compte de service Google ne vont jamais dans Git. Utilisez des variables d'environnement ou un fichier `application-local.yml`, déjà ignoré par le `.gitignore` fourni.
+- **Secrets.** Clés d'API et clé JSON de votre compte de service Google ne vont jamais dans Git. Utilisez des variables d'environnement ou un fichier `application-local.yml`, déjà ignoré par le `.gitignore` fourni.
 - **Données.** Uniquement des données fictives. N'écrivez jamais de donnée personnelle réelle dans un prompt, surtout vers un modèle hébergé.
 - **Agenda.** Le TD3 travaille avec un agenda simulé en mémoire. Si vous essayez l'agenda Google réel (extension), créez votre propre agenda de test, vide, et n'utilisez que lui. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
 - **Budget.** Un modèle hébergé a un plafond de dépense. Surveillez les tokens consommés dès le TD2.
