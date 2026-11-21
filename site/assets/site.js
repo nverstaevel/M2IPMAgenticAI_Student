@@ -52,5 +52,5 @@ q.addEventListener('input',async()=>{await ensure();const terms=norm(q.value).sp
     etat(prev);
     try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'avis/'+prev+'/'+page,title:(prev==='up'?'👍 ':'👎 ')+document.title,event:true}); }catch(x){}
   });
-  main.appendChild(box);
+  main.insertBefore(box,main.firstChild);
 })();
