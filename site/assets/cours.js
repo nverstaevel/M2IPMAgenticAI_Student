@@ -9,7 +9,8 @@
       var k=st.clientWidth/K, d=st.querySelector('.deck'); d.style.transform='scale('+k+')'; st.style.height=(H*k)+'px';
     });
   }
-  window.addEventListener('resize',fit); window.addEventListener('load',fit); fit();
+  window.addEventListener('resize',fit); window.addEventListener('load',fit); window.addEventListener('orientationchange',fit); fit();
+  if(window.ResizeObserver){ var ro=new ResizeObserver(fit); document.querySelectorAll('.slide .stage').forEach(function(s){ro.observe(s);}); }
   // plein écran : une slide à la fois
   var figs=[].slice.call(document.querySelectorAll('figure.slide')), cur=-1;
   var v=document.createElement('div'); v.id='viewer'; v.innerHTML='<div class="vs"><div class="deck"></div></div><div class="vbar"><button data-a="p">←</button><span id="vn"></span><button data-a="n">→</button><button data-a="x">Fermer</button></div>';
