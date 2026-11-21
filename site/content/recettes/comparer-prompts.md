@@ -2,6 +2,8 @@
 title: Comparer deux prompts ou deux températures
 resume: Même grille, plusieurs rejeux, un tableau : on décide avec des chiffres, pas à l'intuition.
 td: td2
+famille: modele
+ordre: 7
 notions: temperature, evaluer-agent, chatclient-prompt, tokens-contexte
 ---
 ## Objectif

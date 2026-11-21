@@ -2,6 +2,8 @@
 title: Borner une boucle d'agent (plafond, budget, boucle)
 resume: Les cinq motifs d'arrêt : où les tester dans la boucle et comment les prouver avec le modèle simulé.
 td: td4
+famille: agents
+ordre: 2
 notions: arrets-agent, boucle-react, tester-sans-modele, traces-graphe
 ---
 ## Objectif

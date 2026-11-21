@@ -2,6 +2,8 @@
 title: Interroger une base sans jamais laisser le modèle écrire du SQL
 resume: Requêtes paramétrées dans votre code, deuxième source de données avec son `@Qualifier`.
 td: td3
+famille: outils
+ordre: 5
 notions: appel-outils, texte-tiers-injection, couches-spring
 ---
 ## Principe

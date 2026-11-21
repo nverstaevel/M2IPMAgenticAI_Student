@@ -2,6 +2,8 @@
 title: Répondre en flux (SSE)
 resume: Afficher la réponse au fil de l'eau avec `.stream().content()`.
 td: td2
+famille: modele
+ordre: 5
 notions: chatclient-prompt, api-rest-validation, memoire-conversation
 ---
 ## Côté serveur

@@ -2,6 +2,8 @@
 title: Tester sans vrai modèle (profil simule)
 resume: Piloter le modèle simulé pour tester outils, boucle et arrêts.
 td: td2, td3, td4, td5
+famille: methode
+ordre: 2
 notions: tester-sans-modele, arrets-agent, appel-outils
 ---
 ## Quand l'utiliser

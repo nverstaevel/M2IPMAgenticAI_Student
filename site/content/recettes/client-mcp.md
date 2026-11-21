@@ -2,6 +2,8 @@
 title: Connecter la clinique au jeu (client MCP)
 resume: Le starter, deux fichiers de propriétés, `JeuMcp`, un point de contrôle.
 td: td6
+famille: agents
+ordre: 8
 notions: mcp, profils-secrets, appel-outils, texte-tiers-injection
 ---
 {{fig:mcp}}

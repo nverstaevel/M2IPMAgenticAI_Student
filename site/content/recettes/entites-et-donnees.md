@@ -2,6 +2,8 @@
 title: Déclarer une entité et son jeu de données
 resume: Entités JPA, relations, et data.sql qui retrouve les identifiants par le nom.
 td: td1
+famille: spring
+ordre: 1
 notions: jpa-entites, spring-data-services, couches-spring
 ---
 ## Objectif

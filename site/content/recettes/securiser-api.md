@@ -2,6 +2,8 @@
 title: Protéger l'API : rôles et CSRF
 resume: Deux rôles, CSRF ignoré pour /api/**, et un endpoint réservé au personnel.
 td: td1, td2
+famille: spring
+ordre: 4
 notions: securite-basique, api-rest-validation, confirmation-ecritures
 ---
 ## Objectif

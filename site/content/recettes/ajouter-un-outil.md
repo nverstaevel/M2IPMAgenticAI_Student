@@ -2,6 +2,8 @@
 title: Ajouter un outil au modèle
 resume: Une méthode annotée, une bonne description, un branchement sur le client.
 td: td2, td3, td5
+famille: outils
+ordre: 1
 notions: appel-outils, couches-spring, tester-sans-modele, chatclient-prompt
 ---
 ## Quand l'utiliser

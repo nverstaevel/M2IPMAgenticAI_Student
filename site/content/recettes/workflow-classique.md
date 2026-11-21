@@ -2,6 +2,8 @@
 title: Écrire le workflow de référence (sans modèle décideur)
 resume: Le même traitement enchaîné par du code Java : la référence à laquelle comparer un agent.
 td: td5
+famille: agents
+ordre: 7
 notions: workflow-ou-agent, evaluer-agent, boucle-react, agents-roles
 ---
 ## Objectif

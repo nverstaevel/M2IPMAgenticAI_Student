@@ -2,6 +2,8 @@
 title: Obtenir un objet Java plutôt qu'un texte
 resume: Un `record`, un client séparé, `.entity(...)`.
 td: td2, td5
+famille: modele
+ordre: 6
 notions: sortie-structuree, chatclient-prompt
 ---
 {{fig:sortie_structuree}}

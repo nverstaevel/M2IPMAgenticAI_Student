@@ -2,6 +2,8 @@
 title: Isoler une dépendance externe (port + deux adaptateurs)
 resume: Une interface, une version réelle, une version simulée, choisies par une propriété de configuration.
 td: td3
+famille: outils
+ordre: 6
 notions: port-adaptateur, tester-sans-modele, profils-secrets
 ---
 ## Le schéma

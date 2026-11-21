@@ -2,6 +2,8 @@
 title: Brancher et vérifier un fournisseur de modèle
 resume: Choisir Ollama, LM Studio ou une API, puis prouver en une commande que ça répond.
 td: td2
+famille: modele
+ordre: 1
 notions: profils-secrets, tester-sans-modele, chatclient-prompt
 ---
 ## Quand l'utiliser

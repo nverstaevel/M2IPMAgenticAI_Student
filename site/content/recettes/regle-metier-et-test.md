@@ -2,6 +2,8 @@
 title: Ajouter une règle métier au service et la tester
 resume: Écrire la règle dans le service, la signaler par une exception claire, la vérifier par un test.
 td: td1
+famille: spring
+ordre: 2
 notions: couches-spring, spring-data-services, api-rest-validation
 ---
 ## Objectif

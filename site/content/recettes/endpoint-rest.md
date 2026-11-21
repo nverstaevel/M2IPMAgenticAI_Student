@@ -2,6 +2,8 @@
 title: Exposer une ressource REST (validation et erreurs lisibles)
 resume: Un record d'entrée validé, un DTO de sortie, une traduction centralisée des erreurs.
 td: td1
+famille: spring
+ordre: 3
 notions: api-rest-validation, couches-spring, securite-basique
 ---
 ## Objectif

@@ -2,6 +2,8 @@
 title: Écrire un scénario d'agents en .md
 resume: Entrées, Agents, Graphe : le fichier minimal et les erreurs courantes.
 td: td5, td6
+famille: agents
+ordre: 4
 notions: scenarios-md, agents-roles, moindre-privilege
 ---
 ## Partir du modèle

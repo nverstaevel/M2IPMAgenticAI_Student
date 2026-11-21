@@ -2,6 +2,8 @@
 title: Donner une mémoire à un ChatClient
 resume: Fenêtre glissante, conseiller de mémoire, identifiant de conversation, dépôt JDBC.
 td: td2
+famille: modele
+ordre: 4
 notions: memoire-conversation, chatclient-prompt, tokens-contexte
 ---
 {{fig:memoire}}

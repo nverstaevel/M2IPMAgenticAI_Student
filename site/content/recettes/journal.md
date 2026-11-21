@@ -2,6 +2,8 @@
 title: Tenir son JOURNAL.md
 resume: Cinq à dix lignes par TD : ce qu'il faut noter pour préparer l'évaluation.
 td: td1, td2, td3, td4, td5, td6
+famille: methode
+ordre: 1
 notions: evaluer-agent, traces-graphe, temperature
 ---
 Le journal sert à deux moments : l'**analyse critique du TD6** et la **préparation de l'évaluation de TD**.

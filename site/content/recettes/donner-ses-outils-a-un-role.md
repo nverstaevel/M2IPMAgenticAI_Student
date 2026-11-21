@@ -2,6 +2,8 @@
 title: Donner à chaque rôle seulement ses outils
 resume: Dresser le tableau rôle × outil, puis le faire respecter par la configuration.
 td: td5, td6
+famille: agents
+ordre: 6
 notions: moindre-privilege, texte-tiers-injection, appel-outils, agents-roles
 ---
 ## Objectif

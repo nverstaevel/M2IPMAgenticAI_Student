@@ -2,6 +2,8 @@
 title: Lancer un TD avec plusieurs profils
 resume: Combiner un profil de modèle, `jeu` ou `persistant`, depuis Maven ou l'IDE.
 td: td2, td6
+famille: modele
+ordre: 2
 notions: profils-secrets, tester-sans-modele
 ---
 ## Quand l'utiliser

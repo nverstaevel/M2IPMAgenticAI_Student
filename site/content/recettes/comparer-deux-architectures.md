@@ -2,6 +2,8 @@
 title: Comparer deux architectures d'agents
 resume: Mêmes conditions, plusieurs parties, mesures puis traces : une conclusion honnête.
 td: td5, td6
+famille: agents
+ordre: 9
 notions: evaluer-agent, traces-graphe, workflow-ou-agent, moindre-privilege
 ---
 ## Objectif

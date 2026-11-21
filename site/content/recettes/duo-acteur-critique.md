@@ -2,6 +2,8 @@
 title: Construire un duo acteur / critique
 resume: Deux agents, un verdict structuré, une boucle bornée avec objections.
 td: td5
+famille: agents
+ordre: 5
 notions: agents-roles, sortie-structuree, confirmation-ecritures, moindre-privilege
 ---
 ## Objectif

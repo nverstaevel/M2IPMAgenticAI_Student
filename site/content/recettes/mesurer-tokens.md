@@ -2,6 +2,8 @@
 title: Mesurer tokens, latence, coût et exactitude
 resume: Lire `Usage`, chronométrer, appliquer un barème, remplir `mesures.csv`.
 td: td2, td3, td4, td5
+famille: outils
+ordre: 8
 notions: tokens-contexte, evaluer-agent, interroger-plutot-que-charger
 ---
 ## Squelette

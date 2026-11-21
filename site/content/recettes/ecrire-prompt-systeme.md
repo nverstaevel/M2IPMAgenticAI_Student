@@ -2,6 +2,8 @@
 title: Écrire et tester un prompt système
 resume: Rôle, langue, règle d'usage des outils, limites : puis une grille de questions pour le vérifier.
 td: td2
+famille: modele
+ordre: 3
 notions: chatclient-prompt, temperature, texte-tiers-injection, appel-outils
 ---
 ## Objectif

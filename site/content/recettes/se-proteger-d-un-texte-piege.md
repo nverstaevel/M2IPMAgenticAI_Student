@@ -2,6 +2,8 @@
 title: Se protéger d'un texte piégé
 resume: Quatre couches de défense, de la consigne de prompt à la confirmation humaine.
 td: td3, td6
+famille: outils
+ordre: 7
 notions: texte-tiers-injection, moindre-privilege, confirmation-ecritures, traces-graphe
 ---
 ## Objectif

@@ -2,6 +2,8 @@
 title: Diagnostiquer une panne en cinq minutes
 resume: Dans quel ordre vérifier : modèle, profil, logs, outil, test.
 td: td2, td3, td4, td5, td6
+famille: methode
+ordre: 3
 notions: tester-sans-modele, traces-graphe, profils-secrets, appel-outils
 ---
 Avant de demander de l'aide, faites ce parcours et **notez le résultat** de chaque étape.

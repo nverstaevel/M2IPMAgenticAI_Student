@@ -98,3 +98,8 @@ a.card.pick{text-decoration:none;color:inherit;display:block}a.card.pick:hover{b
 .avis button{font-size:17px;line-height:1;padding:4px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;cursor:pointer}
 .avis button:hover,.avis button.on{border-color:var(--acc);background:var(--accbg)}.avis .m{font-size:13px;color:var(--mut);flex-basis:100%}
 @media print{.avis{display:none}}
+
+.filtres{margin:12px 0 18px;display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center}.filtres span{font-size:13px;color:var(--mut);margin-right:4px}
+.filtres button.chip{cursor:pointer;font:inherit;font-size:13px}.filtres button.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.famrec h2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:1.6em}.famrec h2 small{font-size:13px;font-weight:400;color:var(--mut)}
+.famrec .intro{margin:.2em 0 .4em;color:var(--mut)}.num{display:inline-block;min-width:1.9em;text-align:center;background:var(--accbg);color:var(--acc);border-radius:8px;font-size:.8em;padding:0 6px;font-weight:700}

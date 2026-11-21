@@ -287,7 +287,21 @@ def build_notions():
          '<h1>Notions du cours</h1><p class="lead">Chaque fiche explique une notion avec un schéma, un exemple de la clinique, les erreurs fréquentes et un auto-test, puis vous envoie vers les <strong>recettes</strong> qui la mettent en pratique.</p>'
          '<p class="note">Parcours conseillé : <strong>notion</strong> (comprendre) → <strong>recette</strong> (faire) → <strong>architecture</strong> (savoir quand l\'utiliser).</p>' + "".join(sect))
 
+FAM_REC = [("methode", "Méthode : à garder sous la main", "Les trois gestes qui servent à tous les TD : tenir son journal, tester sans vrai modèle, diagnostiquer une panne.", "dès le TD1"),
+           ("spring", "Spring Boot, le socle", "Une application en couches : données, règles métier, API, sécurité. Rien d'IA ici, mais les TD suivants s'appuieront dessus.", "TD1"),
+           ("modele", "Parler à un modèle", "Brancher un fournisseur, écrire un prompt, garder une mémoire, obtenir un objet Java.", "TD2"),
+           ("outils", "Outils, sources et contexte", "Donner au modèle de quoi lire ou agir, sans lui laisser la main sur les écritures, et mesurer ce que cela coûte.", "TD2 à TD3"),
+           ("agents", "Agents", "De la boucle d'agent à plusieurs agents qui se répartissent les rôles, puis au jeu MCP.", "TD4 à TD6")]
+FAM_IDX = {f[0]: i for i, f in enumerate(FAM_REC, 1)}
+
+def num_rec(r): return f'{FAM_IDX.get(r.get("famille"), 0)}.{r.get("ordre", "0")}'
+
+def parcours_rec():
+    """Recettes dans l'ordre du parcours : [(rid, recette)]"""
+    return sorted(RECETTES.items(), key=lambda kv: (FAM_IDX.get(kv[1].get("famille"), 9), int(kv[1].get("ordre", "99") or 99)))
+
 def build_recettes():
+    PARC = parcours_rec(); POS = {rid: i for i, (rid, _) in enumerate(PARC)}
     for rid, r in RECETTES.items():
         h, _ = md_render(r["body"])
         notions = [n for n in lst(r.get("notions", "")) if n in NOTIONS]
@@ -296,19 +310,36 @@ def build_recettes():
             f'<li><a href="../notions/{n}.html"><strong>{esc(NOTIONS[n]["title"])}</strong></a> — {esc(NOTIONS[n].get("resume", ""))}</li>' for n in notions) + "</ul></section>") if notions else ""
         pats = PAT_PAR_RECETTE.get(rid, [])
         patblock = f'<section class="card"><h2 class="nodot">Architectures où cette recette sert</h2>{liens_patterns(pats, "../")}</section>' if pats else ""
-        corps = (f'<p class="kicker"><a href="index.html">Recettes</a> · {" ".join(TDS[t][0] for t in lst(r.get("td","")) if t in TDS)}</p>'
+        fam = next((f for f in FAM_REC if f[0] == r.get("famille")), None)
+        i = POS[rid]; pv = PARC[i - 1] if i > 0 else None; nx = PARC[i + 1] if i + 1 < len(PARC) else None
+        nav_pn = ('<nav class="pager">' + (f'<a href="{pv[0]}.html">← {num_rec(pv[1])} {esc(pv[1]["title"])}</a>' if pv else "<span></span>")
+                  + (f'<a href="{nx[0]}.html">{num_rec(nx[1])} {esc(nx[1]["title"])} →</a>' if nx else "<span></span>") + "</nav>")
+        corps = (f'<p class="kicker"><a href="index.html">Recettes</a> · {f"famille {FAM_IDX[fam[0]]} · {esc(fam[1])} · " if fam else ""}<strong>{num_rec(r)}</strong> · {" ".join(TDS[t][0] for t in lst(r.get("td","")) if t in TDS)}</p>'
                  f'<h1>{esc(r["title"])}</h1><p class="lead">{esc(r.get("resume",""))}</p>{mob}'
                  f'<article class="prose">{h}</article>{patblock}'
-                 + (f'<section class="card"><h2 class="nodot">Utilisée dans</h2>{usage_html(USAGE_R[rid], "../")}</section>' if USAGE_R[rid] else ""))
+                 + (f'<section class="card"><h2 class="nodot">Utilisée dans</h2>{usage_html(USAGE_R[rid], "../")}</section>' if USAGE_R[rid] else "") + nav_pn)
         page(f"recettes/{rid}.html", r["title"], corps)
         add_search(r["title"], f"recettes/{rid}.html", r["body"] + " " + r.get("resume", ""), "Recette")
-    ordre = sorted(RECETTES.items(), key=lambda kv: (min([int(t[2:]) for t in lst(kv[1].get("td", "td9")) if t.startswith("td")] or [9]), kv[1]["title"]))
-    cards = "".join(f'<a class="card link" href="{rid}.html"><h3>{esc(r["title"])}</h3><p>{esc(r.get("resume",""))}</p>'
-                    f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in lst(r.get("td","")) if t in TDS)}'
-                    f'<span class="rec">🧠 {len([n for n in lst(r.get("notions","")) if n in NOTIONS])} notions</span></p></a>' for rid, r in ordre)
+    def carte(rid, r):
+        tds = lst(r.get("td", ""))
+        return (f'<a class="card link rec" href="{rid}.html" data-fam="{r.get("famille")}" data-td="{" ".join(tds)}"><h3><span class="num">{num_rec(r)}</span> {esc(r["title"])}</h3><p>{esc(r.get("resume",""))}</p>'
+                f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in tds if t in TDS)}'
+                f'<span class="rec">🧠 {len([n for n in lst(r.get("notions","")) if n in NOTIONS])} notions</span></p></a>')
+    sect = ""
+    for k, (fid, titre, intro, quand) in enumerate(FAM_REC, 1):
+        cs = "".join(carte(rid, r) for rid, r in PARC if r.get("famille") == fid)
+        sect += f'<section class="famrec" id="{fid}" data-fam="{fid}"><h2><span class="num">{k}</span> {esc(titre)} <small>{quand}</small></h2><p class="intro">{esc(intro)}</p><div class="cards">{cs}</div></section>'
+    filtre = ('<div class="filtres" id="filtres"><span>Famille :</span><button class="chip on" data-f="fam" data-v="">Toutes</button>'
+              + "".join(f'<button class="chip" data-f="fam" data-v="{f[0]}">{FAM_IDX[f[0]]} · {esc(f[1].split(":")[0])}</button>' for f in FAM_REC)
+              + '<br><span>TD :</span><button class="chip on" data-f="td" data-v="">Tous</button>'
+              + "".join(f'<button class="chip" data-f="td" data-v="{t}">{TDS[t][0]}</button>' for t in TDS) + '</div>')
+    js = ("<script>(function(){var s={fam:'',td:''},bs=document.querySelectorAll('#filtres button');"
+          "function ap(){document.querySelectorAll('.rec').forEach(function(c){var ok=(!s.fam||c.dataset.fam===s.fam)&&(!s.td||c.dataset.td.split(' ').indexOf(s.td)>=0);c.style.display=ok?'':'none';});"
+          "document.querySelectorAll('.famrec').forEach(function(f){var v=[].some.call(f.querySelectorAll('.rec'),function(c){return c.style.display!=='none';});f.style.display=v?'':'none';});}"
+          "bs.forEach(function(b){b.addEventListener('click',function(){s[b.dataset.f]=b.dataset.v;bs.forEach(function(x){if(x.dataset.f===b.dataset.f)x.classList.toggle('on',x===b);});ap();});});})();</script>")
     page("recettes/index.html", "Recettes",
-         '<h1>Recettes</h1><p class="lead">Des marches à suivre courtes : objectif, ingrédients, squelette de code, vérification, pièges. Chaque recette dit <strong>quelles notions elle mobilise</strong>. Les exemples sont <strong>hors clinique</strong> quand ils touchent à ce que vous devez écrire : ils montrent le geste, pas la solution.</p>'
-         f'<div class="cards">{cards}</div>')
+         '<h1>Recettes</h1><p class="lead">Des marches à suivre courtes : objectif, ingrédients, squelette de code, vérification, pièges. Elles sont rangées <strong>dans l\'ordre du parcours</strong> : commencez par la famille 1 (méthode), puis suivez les familles 2 à 5 au rythme des TD. Chaque recette dit <strong>quelles notions elle mobilise</strong>.</p>'
+         + filtre + sect + js)
 
 FAMILLES = [("Outils et sources", "Donner au modèle de quoi lire ou agir"), ("Humain dans la boucle", "Garder la main sur les écritures"),
             ("Enchaînements et boucles", "Du workflow fixe à l'agent qui décide"), ("Plusieurs agents", "Répartir les rôles"), ("Interopérabilité", "Brancher des outils venus d'ailleurs")]

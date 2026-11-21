@@ -2,6 +2,8 @@
 title: Proposer, puis confirmer (jamais écrire directement)
 resume: L'outil prépare une proposition expirante ; un endpoint réservé au personnel l'applique.
 td: td2, td3, td4, td5
+famille: outils
+ordre: 2
 notions: confirmation-ecritures, securite-basique, appel-outils, couches-spring
 ---
 ## Le schéma

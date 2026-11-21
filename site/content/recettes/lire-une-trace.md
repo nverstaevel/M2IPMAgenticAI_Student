@@ -2,6 +2,8 @@
 title: Lire une trace d'agent
 resume: Une méthode en cinq questions et un catalogue des échecs.
 td: td4, td5, td6
+famille: agents
+ordre: 3
 notions: traces-graphe, arrets-agent, evaluer-agent, texte-tiers-injection
 ---
 ## Ouvrir la trace
