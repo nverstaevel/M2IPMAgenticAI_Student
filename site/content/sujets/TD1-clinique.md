@@ -21,7 +21,7 @@ Construire en 3 h l'application de base, sans IA : API REST, pages Thymeleaf, s�
 
 ## Avant la séance
 
-- [ ] Java 21, Maven, Git et un IDE installés ; dépôt `clinique-fantastique` créé. `java -version` et `mvn -version` répondent.
+- [ ] Java 21, Maven et un IDE installés (Git est recommandé, pas obligatoire). `java -version` et `mvn -version` répondent.
 - [ ] Le squelette (inspiré de Spring Petclinic) compile : `mvn -q verify` passe avant que vous écriviez quoi que ce soit.
 - [ ] À relire : entités JPA et `@OneToMany`, Spring Data, `@RestController`, Thymeleaf, Spring Security. Le support de CM1 contient un rappel Spring Boot avec cette même clinique (*Rappel Spring Boot*).
 

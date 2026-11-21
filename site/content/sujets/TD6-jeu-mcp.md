@@ -15,7 +15,7 @@ La clinique ne vit plus seule : une seconde application, le jeu **Clinique du be
 
 ## Avant la séance
 
-- Le TD5 est terminé. Prenez le dossier td6-mcp-jeu du dépôt M2IPMAgenticAI\_Student (le dossier jeu-bestiaire, le jeu, est fourni à côté), ou, pour garder votre code, copiez votre dossier `td5-agents-roles` en `td6-mcp-jeu`.
+- Le TD5 est terminé. Prenez le dossier td6-mcp-jeu du dépôt M2IPMAgenticAI\_Student (cloné ou téléchargé en ZIP) (le dossier jeu-bestiaire, le jeu, est fourni à côté), ou, pour garder votre code, copiez votre dossier `td5-agents-roles` en `td6-mcp-jeu`.
 - Un modèle est disponible (Ollama, LM Studio ou API) : le jeu fait beaucoup d'appels, préférez un modèle local rapide ou un fournisseur gratuit.
 - Java 21, Maven, et le port 8090 libre (le jeu) en plus du 8080 (la clinique).
 - Lisez `SCENARIOS.md` (5 minutes) et les diapositives du CM3.

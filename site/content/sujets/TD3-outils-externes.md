@@ -21,7 +21,7 @@ Sortir de la clinique. Le Dr Gribouille gagne quatre outils qui vont chercher de
 ## Avant la séance
 
 - [ ] Copiez `td2-chat` en `td3-outils-externes` (ou prenez le dossier de reprise) et travaillez dans la copie.
-- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), le fichier du compte de service Google et l'identifiant de l'agenda de test de votre binôme.
+- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), le fichier du compte de service Google et l'identifiant de l'agenda de test fourni.
 - [ ] Contrôlez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`.
 - [ ] Relisez dans le support de CM2 : *Ports et adaptateurs*, *Sources externes*, *Interroger plutôt que charger*.
 
@@ -149,7 +149,7 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 
 Si le socle est terminé avant la fin de la séance :
 
-- essayez `GoogleAgendaAdapter` avec le compte de service et l'agenda de test de votre binôme (sans profil `simule`) ;
+- essayez `GoogleAgendaAdapter` avec le compte de service et l'agenda de test fourni (sans profil `simule`) ;
 - faites varier la position du passage utile (début, milieu, fin) et la quantité de texte parasite (aucune, moitié, double) avec la stratégie A, et notez les résultats dans le journal ;
 - implémentez la stratégie C (similarité) et comparez-la à B ;
 - écrivez vous-même `TarifsExcelReader` avec Apache POI avant de lire celui qui est fourni.

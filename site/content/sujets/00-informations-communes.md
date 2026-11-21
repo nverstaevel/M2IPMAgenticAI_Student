@@ -3,7 +3,7 @@
 
 ## Organisation
 
-Six TD de 3 h, faits en binôme, construisent une même application sur tout le semestre : la clinique des créatures fantastiques et son assistant, le Dr Gribouille. Chaque TD part du résultat du précédent. Un binôme en retard récupère un dossier de reprise (le dossier `tdN-…` du TD précédent, fourni par l'enseignant) au début de la séance suivante.
+Six TD de 3 h, faits seul ou à deux (comme vous préférez), construisent une même application sur tout le semestre : la clinique des créatures fantastiques et son assistant, le Dr Gribouille. Chaque TD part du résultat du précédent. Si vous êtes en retard, vous récupérez un dossier de reprise (le dossier `tdN-…` du TD précédent, fourni par l'enseignant) au début de la séance suivante.
 
 Ordre des séances : CM1, TD1, TD2, CM2, TD3, TD4, TD5, CM3, TD6, CM4. Le CM2 couvre les sources externes, la gestion du contexte et la boucle d'agent (ReAct) : il prépare TD3, TD4 et TD5. Le CM3 présente le protocole MCP et le jeu de la clinique (architecture, confiance, évaluation) et prépare le TD6.
 
@@ -41,9 +41,10 @@ Un **point de contrôle** est une vérification que vous pouvez faire seul (une 
 - **Scénarios en Markdown** (TD5, TD6). Une architecture d'agents se décrit dans un fichier `.md` du dossier `scenarios/` : trois sections : Entrées, Agents (beans Java et outils autorisés) et Graphe, dessiné avec des flèches (a -> b, boucles avec max). `SCENARIOS.md` explique le format et `scenarios/_modele.md` est un point de départ à copier.
 - **Suivi de l'exécution.** Les classes `SuiviExecution` et `SuiviOutils` du dossier fourni enregistrent les étapes, les tokens et les erreurs. Un outil appelé plus de 15 fois dans une même exécution est coupé : c'est un garde-fou, pas un bug.
 
-## Dépôt Git, conventions et journal de bord
+## Organisation du code, Git, conventions et journal de bord
 
-- Un dépôt par binôme, nommé `clinique-fantastique`, avec un dossier par TD (`td1-clinique`, `td2-chat`, `td3-outils-externes`, `td4-agent-react`, `td5-agents-roles`, `td6-mcp-jeu`). Au début de chaque TD, copiez le dossier de départ fourni par le dépôt M2IPMAgenticAI\_Student (corrigé du TD précédent, code fourni, squelettes « À écrire »), ou votre dossier précédent en y ajoutant le code fourni, et travaillez dans la copie ; le dossier jeu-bestiaire (le jeu du TD6) est fourni tel quel et ne se modifie pas ; en fin de séance, poussez-la.
+- Un dossier de travail par TD (`td1-clinique`, `td2-chat`, `td3-outils-externes`, `td4-agent-react`, `td5-agents-roles`, `td6-mcp-jeu`), où vous voulez sur votre machine. Au début de chaque TD, prenez le dossier de départ fourni par le dépôt M2IPMAgenticAI\_Student (corrigé du TD précédent, code fourni, squelettes « À écrire »), ou votre dossier précédent en y ajoutant le code fourni, et travaillez dans la copie ; le dossier jeu-bestiaire (le jeu du TD6) est fourni tel quel et ne se modifie pas.
+- **Git est recommandé, pas obligatoire.** Il vous donne un historique et une sauvegarde (un dépôt personnel ou à deux, si vous voulez), mais vous pouvez très bien télécharger le dépôt fourni en ZIP et travailler sans. Dans tous les cas, gardez une copie de votre travail à la fin de chaque séance.
 - Les versions de Java, Spring Boot et Spring AI sont fixées dans le `pom.xml` du squelette. Ne les modifiez pas.
 - Packages : `domain`, `repository`, `service`, `controller`, `dto`, `ai` (chat, outils, agents), `externe` (Wikipédia, Excel, catalogue, agenda), `agent` (boucle, traces), `experience`, `roles` et `scenario`, `jeu` (client MCP).
 - Chaque service public a au moins un test. Aucun test n'appelle un vrai modèle : utilisez le modèle simulé fourni.
@@ -55,7 +56,7 @@ Le journal sert à deux moments : l'analyse critique du TD6 et la préparation d
 
 - **Secrets.** Clés d'API et fichier du compte de service Google ne vont jamais dans Git. Utilisez des variables d'environnement ou un fichier `application-local.yml`, déjà ignoré par le `.gitignore` fourni.
 - **Données.** Uniquement des données fictives. N'écrivez jamais de donnée personnelle réelle dans un prompt, surtout vers un modèle hébergé.
-- **Agenda.** Utilisez seulement l'agenda de test de votre binôme. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
+- **Agenda.** Utilisez seulement l'agenda de test qui vous est fourni. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
 - **Budget.** Un modèle hébergé a un plafond de dépense. Surveillez les tokens consommés dès le TD2.
 - **Actions d'écriture.** Le modèle ne décide jamais seul d'écrire en base ou dans l'agenda : une confirmation passe par un endpoint distinct, que le modèle ne peut pas appeler (introduit au TD2).
 - **Assistants IA.** Libres en TD, pour apprendre. Notez dans le journal ce que vous avez demandé et ce que vous avez vérifié. Interdits pendant les évaluations.

@@ -200,7 +200,7 @@ def build_td(td):
     suiv = list(TDS)[list(TDS).index(td) + 1] if td != "td6" else None
     pager = '<nav class="pager">' + (f'<a href="{prec}.html">← {TDS[prec][0]} · {esc(TDS[prec][1])}</a>' if prec else "<span></span>") \
             + (f'<a href="{suiv}.html">{TDS[suiv][0]} · {esc(TDS[suiv][1])} →</a>' if suiv else "<span></span>") + "</nav>"
-    head = (f'<header class="td-head"><p class="kicker">{num} · séance de 3 h · en binôme</p><h1>{esc(theme)}</h1>'
+    head = (f'<header class="td-head"><p class="kicker">{num} · séance de 3 h · seul ou à deux</p><h1>{esc(theme)}</h1>'
             f'<p class="livrable"><strong>Vous livrez :</strong> {esc(livrable)}</p>'
             f'<div class="progress" data-prefix="{td}-" data-total="{total}"><div class="bar"><i></i></div><span class="pct">0 %</span></div></header>')
     corps = head + fiche + f'<article class="sujet">{h}</article>' + pager
@@ -309,9 +309,9 @@ def build_code():
                       f'<div class="grid2"><div><h3>Vous écrivez</h3><p>{ecrit}</p></div><div><h3>Fourni (ne pas modifier)</h3><p>{fourni}</p></div></div></section>')
     page("code.html", "Carte du code",
          '<h1>Carte du code</h1><p class="lead">Ce que contient chaque dossier de départ : ce que vous écrivez, ce qui est fourni. Chaque dossier est le corrigé du TD précédent, le code fourni du TD et des squelettes à compléter.</p>'
-         '<div class="card"><h2 class="nodot">Mettre en place son dossier</h2><ol><li>Clonez (ou forkez) le dépôt étudiant et ouvrez <strong>un dossier de TD</strong> dans l\'IDE (pas la racine).</li>'
+         '<div class="card"><h2 class="nodot">Mettre en place son dossier</h2><ol><li>Récupérez le dépôt étudiant (clone Git recommandé, ou téléchargement en ZIP : Git n\'est pas obligatoire) et ouvrez <strong>un dossier de TD</strong> dans l\'IDE (pas la racine).</li>'
          '<li>Lancez : <code>mvn spring-boot:run -Dspring-boot.run.profiles=…</code></li><li>Cherchez les marqueurs <code>// TODO TDn</code> (Eclipse : vue <em>Tasks</em> ; IntelliJ : fenêtre <em>TODO</em>).</li>'
-         '<li>Un binôme en retard repart du dossier du TD suivant : rien n\'est perdu.</li></ol></div>' + "".join(lignes))
+         '<li>En retard ? Repartez du dossier du TD suivant : rien n\'est perdu.</li></ol></div>' + "".join(lignes))
     add_search("Carte du code : dossiers de départ, TODO", "code.html", "dossier de départ todo squelette fourni à écrire", "Code")
 
 def build_index(totaux):
