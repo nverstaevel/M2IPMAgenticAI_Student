@@ -5,3 +5,5 @@ target/
 .env
 application-local.properties
 application-local.yml
+compte-de-service*.json
+*service-account*.json

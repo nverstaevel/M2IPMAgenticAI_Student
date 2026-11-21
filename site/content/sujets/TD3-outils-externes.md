@@ -21,7 +21,7 @@ Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'
 ## Avant la séance
 
 - [ ] Partez du dossier de départ `td3-outils-externes` (il contient votre TD2 corrigé plus le code fourni) ou, pour garder votre propre TD2, copiez `td2-chat` en `td3-outils-externes` et ajoutez-y le code fourni. Travaillez dans la copie.
-- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), et, pour l'extension Google Agenda seulement, le fichier du compte de service Google.
+- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), et, pour l'extension Google Agenda seulement, l'adresse du compte de service (dans le `README` du dossier `td3-outils-externes`) et son fichier de clés, distribué en séance : il ne va jamais dans Git.
 - [ ] Contrôlez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`.
 - [ ] Relisez dans le support de CM2 : *Ports et adaptateurs*, *Sources externes*, *Interroger plutôt que charger*.
 
@@ -149,7 +149,7 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 
 Si le socle est terminé avant la fin de la séance :
 
-- essayez `GoogleAgendaAdapter` : dans Google Agenda, créez un agenda vide dédié au TD, partagez-le avec l'adresse du compte de service (fournie en séance) avec le droit « Apporter des modifications aux événements », puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de votre agenda) et `agenda.google.credentials-file` (chemin du fichier du compte de service) dans `application-local.yml` ;
+- essayez `GoogleAgendaAdapter` : dans Google Agenda, créez un agenda vide dédié au TD, partagez-le avec l'adresse du compte de service (dans le `README` du dossier) avec le droit « Apporter des modifications aux événements », puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de votre agenda) et `agenda.google.credentials-file` (chemin du fichier du compte de service) dans `application-local.yml` ;
 - faites varier la position du passage utile (début, milieu, fin) et la quantité de texte parasite (aucune, moitié, double) avec la stratégie A, et notez les résultats dans le journal ;
 - implémentez la stratégie C (similarité) et comparez-la à B ;
 - écrivez vous-même `TarifsExcelReader` avec Apache POI avant de lire celui qui est fourni.

@@ -15,7 +15,7 @@ mvn test
 ```
 
 ## Agenda réel (extension)
-Par défaut `agenda.mode=simule` : l'agenda est `AgendaSimule`, en mémoire. Pour essayer Google Agenda, créez un agenda de test vide, partagez-le avec l'adresse du compte de service, puis renseignez dans `application-local.yml` : `agenda.mode: google`, `agenda.google.calendar-id`, `agenda.google.credentials-file`. Le fichier du compte de service ne va jamais dans Git.
+Par défaut `agenda.mode=simule` : l'agenda est `AgendaSimule`, en mémoire. Pour essayer Google Agenda, créez un agenda de test vide, partagez-le avec l'adresse du compte de service ci-dessous (droit « Apporter des modifications aux événements »), puis renseignez dans `application-local.yml` : `agenda.mode: google`, `agenda.google.calendar-id`, `agenda.google.credentials-file`. Adresse du compte de service : **À COMPLÉTER PAR L'ENSEIGNANT** (`…@….iam.gserviceaccount.com`). Le fichier de clés JSON est distribué en séance et ne va jamais dans Git.
 
 ## Remarques
 Les tests `OutilsExternesTest`, `WikipediaClientTest`, `ExperienceContexteTest` décrivent le comportement attendu.
