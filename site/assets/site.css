@@ -103,3 +103,7 @@ a.card.pick{text-decoration:none;color:inherit;display:block}a.card.pick:hover{b
 .filtres button.chip{cursor:pointer;font:inherit;font-size:13px}.filtres button.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .famrec h2{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-top:1.6em}.famrec h2 small{font-size:13px;font-weight:400;color:var(--mut)}
 .famrec .intro{margin:.2em 0 .4em;color:var(--mut)}.num{display:inline-block;min-width:1.9em;text-align:center;background:var(--accbg);color:var(--acc);border-radius:8px;font-size:.8em;padding:0 6px;font-weight:700}
+
+.prose img,.sujet img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block;margin:.6em auto}
+.prose td img,.sujet td img{margin:0}
+.prose table:has(img),.sujet table:has(img){table-layout:fixed;width:100%}.prose table:has(img) img,.sujet table:has(img) img{width:100%;max-width:100%;height:auto}

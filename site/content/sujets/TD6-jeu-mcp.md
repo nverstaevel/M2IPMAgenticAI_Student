@@ -36,6 +36,81 @@ La clinique ne vit plus seule : une seconde application, le jeu **Clinique du be
 | [Spring AI, client MCP](https://docs.spring.io/spring-ai/reference/2.0/api/mcp/mcp-client-boot-starter-docs.html) | propriétés du starter client |
 | [Spring AI, serveur MCP Streamable HTTP](https://docs.spring.io/spring-ai/reference/2.0/api/mcp/mcp-streamable-http-server-boot-starter-docs.html) | ce que fait le jeu côté serveur |
 
+## Bienvenue à la Clinique du bestiaire
+
+Un dragonnet qui tousse de la fumée jaune sur la moquette, un loup-garou qui se gratte en jurant que ce ne sont pas des puces, une licorne qui boude, un vampire qui voulait un rendez-vous *avant* le coucher du soleil : la salle d'attente est pleine, et le seul praticien disponible est un chatbot en blouse. Vous avez **5 jours**, **5 points d'action par jour**, une pharmacie de onze flacons et un score qui ne pardonne pas les décès.
+
+Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La page ci-dessous, c'est ce que *vous* voyez ; ce que l'agent verra, ce sont huit outils MCP. Les deux décrivent la même clinique.
+
+### Le tableau de bord, case par case
+
+![La page du jeu, avec ses neuf zones numérotées](img/jeu/jeu-vue-ensemble.png)
+
+*Jour 1, avant la première consultation : trois patients attendent, aucun point d'action n'est encore dépensé.*
+
+| N° | Où | Ce que vous y lisez |
+| --- | --- | --- |
+| 1 | En-tête | **Jour 1/5** et cinq pastilles jaunes : les points d'action du jour. Examiner et soigner en consomment un chacun ; observer, lire et commander sont gratuits. Plus de pastille ? Il ne reste qu'à terminer la journée. |
+| 2 | En-tête | 🪙 la trésorerie (500 au départ), ❤️ la réputation (jauge sur 100, 50 au départ), ✅ les guéris, 💀 les morts. |
+| 3 | En-tête, à droite | Le **score** : 100 × guérisons + trésorerie + 2 × réputation − 150 × morts. C'est le chiffre que vous comparerez à l'étape 6. |
+| 4 | En-tête | 🌙 **Fin de journée** (sans retour en arrière : le monde avance) et 🔄 **Nouvelle partie** (même graine, mêmes patients). |
+| 5 | La salle d'attente | Les créatures arrivent à pied par l'entrée et s'installent. Le **rond** à côté de chacune est un compte à rebours en jours restants ; son anneau, qui passe du vert à l'orange puis au rouge, suit les points de vie (jauge sous le nom). Une 🔎 à côté du nom : déjà examinée. Un clic ouvre son dossier. |
+| 6 | Derrière le bureau | **Dr Gribouille**, dont la bulle commente chaque action. Il ne soigne pas tout seul : c'est vous, ou votre agent, qui tenez la seringue. |
+| 7 | À droite, en haut | Le **dossier du patient** (voir plus bas). |
+| 8 | À droite, au milieu | La **pharmacie** : un clic sur un flacon en commande un exemplaire. Le badge indique le stock (rouge s'il en reste un ou aucun), « +1 🚚 » une commande en route ; le survol affiche le prix et la description. |
+| 9 | À droite, en bas | Le **journal** : toutes les actions de la partie, la plus récente en premier. |
+
+La page se rafraîchit toute seule chaque seconde : gardez-la ouverte pendant les étapes 3 à 6, vous regarderez votre agent soigner en direct, avec le même suspense qu'un match de football.
+
+### Le dossier du patient
+
+| Avant l'examen | Après l'examen |
+| --- | --- |
+| ![Dossier d'un vampire avant examen](img/jeu/jeu-dossier-avant.png) | ![Le même dossier après examen : le signe distinctif apparaît](img/jeu/jeu-dossier-apres.png) |
+
+Un clic sur une créature ouvre son dossier : espèce, points de vie, jours restants, **symptômes visibles** et **note du propriétaire**. Les symptômes sont communs aux deux maladies de l'espèce : impossible de trancher à l'œil nu. 🔎 **Examiner** (5 🪙 et 1 point) révèle le **signe distinctif**, qui désigne la bonne maladie. Il reste à choisir un flacon dans la liste, puis 💉 **Soigner** (1 point).
+
+Un conseil de confrère : la note du propriétaire (« Il a avalé quelque chose dans le jardin ») est écrite par un tiers. Elle renseigne, elle ne commande pas. Vous y reviendrez dans les questions de réflexion.
+
+### Une journée type, en images
+
+**Le bon remède.** La créature saute de joie (✨), puis repart à pied. Le journal note les honoraires (80 🪙) et la réputation gagne 5 points.
+
+![Opaline vient d'être guérie : étincelles, bulle de Gribouille](img/jeu/jeu-gueri.png)
+
+**Le mauvais remède.** Un flacon qui ne convient pas n'a aucun effet (et coûte 5 PV au patient) : le flacon est dépensé, le point d'action aussi, et Gribouille hausse les épaules (🤷). Un flacon *toxique* pour l'espèce peut même être fatal : le jeu ne vous avertit pas.
+
+![Un médicament sans effet : message en bas de page, PV en baisse](img/jeu/jeu-erreur.png)
+
+**La pharmacie.** Une commande est payée tout de suite et livrée à la fin de la journée. Ici, le badge rouge de `sang-de-synthese` signale qu'il n'en reste qu'un ; `poudre-d-aube` affiche une livraison en route.
+
+![La pharmacie : stock bas en rouge, camion de livraison](img/jeu/jeu-pharmacie.png)
+
+**La fin de journée.** L'écran s'assombrit : chaque malade non soigné perd 15 PV, les commandes arrivent, trois nouveaux patients entrent et les points d'action reviennent à 5. Le lendemain, la salle d'attente est plus pleine, et les comptes à rebours plus courts.
+
+![La nuit tombe sur la clinique : un loup-garou entre par la porte](img/jeu/jeu-nuit.png)
+
+**La fin de partie**, après cinq jours. Ici, une partie ratée : un seul patient guéri, deux morts, un score de 395. Gribouille n'a plus qu'à cliquer sur « Rejouer » (le jeu félicite d'un « Bravo ! » uniquement si personne n'est mort).
+
+![L'écran de fin de partie : Partie terminée, score 395, 1 guéri, 2 morts](img/jeu/jeu-fin.png)
+
+### Ce que l'agent voit à votre place
+
+Votre agent n'a pas d'yeux, seulement des outils. Chaque zone de la page a son équivalent MCP :
+
+| Vous, sur la page | L'agent, par MCP |
+| --- | --- |
+| L'en-tête : jour, points d'action, trésorerie, score | `etat_clinique` |
+| La salle d'attente et le dossier (symptômes, note) | `lister_patients` |
+| Le bouton 🔎 Examiner | `examiner_patient` |
+| Le bouton 💉 Soigner | `soigner` |
+| La pharmacie : stock et prix | `consulter_pharmacie` |
+| Un clic sur un flacon | `commander` |
+| Le bouton 🌙 Fin de journée | `fin_de_journee` |
+| *(aucun bouton)* | `fiche_espece` : le manuel du bestiaire, avec les maladies de l'espèce, leurs signes, leurs remèdes et les médicaments toxiques |
+
+Un seul outil n'a pas de bouton : `fiche_espece`. Sur la page, vous devez tâtonner ; l'agent, lui, peut lire le manuel (encore faut-il qu'il le lise). Pour le consulter vous aussi, utilisez MCP Inspector à l'étape 1. Ce que Gribouille ne verra jamais : les animations, les étincelles, et le vampire qui soupire.
+
 ## Parcours guidé
 
 | Étape | Durée | Vous produisez | Point de contrôle |
@@ -51,7 +126,7 @@ Si le temps manque, les étapes 1 à 4 sont indispensables. Terminez 5 et 6 chez
 
 ### Étape 1 — Lancer et explorer
 
-Dans un terminal : `mvn -f jeu-bestiaire/pom.xml spring-boot:run`. Ouvrez <http://localhost:8090> : la salle d'attente s'anime, les créatures arrivent à pied et un compte à rebours en jours restants s'affiche sur chacune. Jouez une première journée à la main : clic sur une créature (examiner, soigner), clic sur un flacon (commander), puis « Fin de journée ». Le jeu se pilote par MCP sur `http://localhost:8090/mcp`.
+Dans un terminal : `mvn -f jeu-bestiaire/pom.xml spring-boot:run`. Ouvrez <http://localhost:8090> (la visite guidée est juste au-dessus) : la salle d'attente s'anime, les créatures arrivent à pied et un compte à rebours en jours restants s'affiche sur chacune. Jouez une première journée à la main : clic sur une créature (examiner, soigner), clic sur un flacon (commander), puis « Fin de journée ». Le jeu se pilote par MCP sur `http://localhost:8090/mcp`.
 
 Dans un second terminal : `npx @modelcontextprotocol/inspector`, choisissez le transport **Streamable HTTP**, URL `http://localhost:8090/mcp`, puis **List Tools**. Refaites une journée avec les outils MCP, comme le fera l'agent : `etat_clinique`, `lister_patients`, `fiche_espece` (par exemple `vampire`), `examiner_patient` (`P01`), `soigner`, puis `fin_de_journee`.
 

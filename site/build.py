@@ -538,6 +538,7 @@ def main():
     if OUT.exists(): shutil.rmtree(OUT)
     OUT.mkdir(parents=True)
     shutil.copytree(SITE / "assets", OUT / "assets")
+    if (CONTENT / "sujets" / "img").exists(): shutil.copytree(CONTENT / "sujets" / "img", OUT / "td" / "img")   # images des sujets (chemin relatif identique à celui du dépôt)
     (OUT / "assets" / "pygments.css").write_text(
         HtmlFormatter(style="default").get_style_defs(".codehilite") + "\n" +
         HtmlFormatter(style="monokai").get_style_defs('[data-theme="dark"] .codehilite'), encoding="utf-8")
