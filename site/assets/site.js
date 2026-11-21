@@ -33,3 +33,24 @@ q.addEventListener('input',async()=>{await ensure();const terms=norm(q.value).sp
  const sc=idx.map(d=>{let s=0;for(const t of terms){if(d.n.includes(t))s+=10;else if(d.b.includes(t))s+=1;else return null}return[d,s]}).filter(Boolean).sort((a,b)=>b[1]-a[1]).slice(0,9);
  sel=0;res.innerHTML=sc.length?sc.map(([d],i)=>`<li><a class="${i?'':'sel'}" href="${root+d.u}"><b>${d.g}</b>${d.t}</a></li>`).join(''):'<li><small>Aucun résultat</small></li>'});
 })();
+
+/* Avis « utile ? » : un pouce par page, compté comme événement GoatCounter (anonyme) */
+(function(){
+  var home=/(^|\/)(index\.html)?$/.test(location.pathname) && !/\/(td|notions|recettes|patterns|cours)\//.test(location.pathname);
+  var main=document.getElementById('contenu'); if(!main||home) return;
+  var page=location.pathname.replace(/^.*M2IPMAgenticAI_Student\//i,'').replace(/^\//,'')||'index.html';
+  var key='m2ipm:avis:'+page, prev=null; try{prev=localStorage.getItem(key);}catch(e){}
+  var box=document.createElement('div'); box.className='avis';
+  box.innerHTML='<span class="q">Cette page vous a-t-elle été utile ?</span> <button data-v="up" aria-label="Oui, utile">👍</button> <button data-v="down" aria-label="Non, à améliorer">👎</button> <span class="m" role="status"></span>';
+  var m=box.querySelector('.m');
+  function etat(v){ box.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.v===v);});
+    m.textContent=v?'Merci, votre avis aide à améliorer le cours. Dites-le aussi à votre enseignant si quelque chose bloque.':''; }
+  etat(prev);
+  box.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b||b.dataset.v===prev) return; prev=b.dataset.v;
+    try{localStorage.setItem(key,prev);}catch(x){}
+    etat(prev);
+    try{ if(window.goatcounter&&window.goatcounter.count) window.goatcounter.count({path:'avis/'+prev+'/'+page,title:(prev==='up'?'👍 ':'👎 ')+document.title,event:true}); }catch(x){}
+  });
+  main.appendChild(box);
+})();
