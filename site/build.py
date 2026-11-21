@@ -392,7 +392,7 @@ def build_ressources():
 
 def build_cours():
     (OUT / "cours").mkdir(parents=True, exist_ok=True)
-    (OUT / "assets" / "cours.css").write_text(CM.css_scope(), encoding="utf-8")
+    (OUT / "assets" / "deck.css").write_text(CM.css_shadow(), encoding="utf-8")
     cartes = []
     for cm, (nom, a, b_, resume) in CM.CMS.items():
         sl = CM.slides(cm)
@@ -404,7 +404,7 @@ def build_cours():
             if s["debut"]:
                 index.append(f'<li><a href="#{s["id"]}">{esc(s["debut"])}</a></li>')
                 corps.append(f'<h2 class="sect">{esc(s["debut"])}</h2>')
-            corps.append(f'<figure class="slide" id="{s["id"]}" data-n="{s["i"] + 1}"><div class="stage"><div class="deck" style="--pg:&quot;{s['i'] + 1}&quot;">{s["html"]}</div></div>'
+            corps.append(f'<figure class="slide" id="{s["id"]}" data-n="{s["i"] + 1}"><div class="stage"><div class="deck" style="--pg:&quot;{s['i'] + 1}&quot;"><template shadowrootmode="open"><link rel="stylesheet" href="../assets/deck.css">{s["html"]}</template></div></div>'
                          f'<figcaption><a href="#{s["id"]}">#{s["i"] + 1}</a> · {esc(s["titre"] or s["id"])}</figcaption></figure>')
             add_search(f"{nom} · {s['titre'] or s['id']}", f"cours/{cm}.html#{s['id']}", s["eyebrow"] + " " + re.sub(r"<[^>]+>", " ", s["html"]), "Cours")
         side = f'<p class="sidetitle">{nom}</p><ul>{"".join(index)}</ul>'
@@ -412,7 +412,7 @@ def build_cours():
                   f'<p class="lead">{len(sl)} diapositives. Cliquez sur une diapositive pour la lire en plein écran (flèches ← → pour naviguer, Échap pour fermer).</p>'
                   f'<p>{btn_pdf}<a class="btn ghost" href="{GITHUB}/tree/main/cours">Sources sur GitHub</a></p>')
         page(f"cours/{cm}.html", nom, entete + "".join(corps), side=side,
-             extra_head='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="../assets/cours.css">'
+             extra_head='<link rel="preconnect" href="https://fonts.googleapis.com">'
                         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">'
                         '<script src="../assets/cours.js" defer></script>')
         cartes.append(f'<a class="card pick" href="{cm}.html"><h3>{nom}</h3><p>{esc(resume)}</p><p class="note">{len(sl)} diapositives</p></a>')

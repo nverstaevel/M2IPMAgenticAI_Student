@@ -1,5 +1,9 @@
 (function(){
   var K=1920,H=1080;
+  // navigateurs sans Shadow DOM déclaratif : on attache les racines à la main
+  document.querySelectorAll('template[shadowrootmode]').forEach(function(t){
+    var h=t.parentNode; if(h.shadowRoot) return; var r=h.attachShadow({mode:'open'}); r.appendChild(t.content); t.remove();
+  });
   function fit(){
     document.querySelectorAll('.slide .stage').forEach(function(st){
       var k=st.clientWidth/K, d=st.querySelector('.deck'); d.style.transform='scale('+k+')'; st.style.height=(H*k)+'px';
@@ -13,7 +17,7 @@
   function size(){ var vs=v.querySelector('.vs'),d=v.querySelector('.deck'); var k=Math.min((innerWidth-40)/K,(innerHeight-90)/H); d.style.transform='scale('+k+')'; vs.style.width=(K*k)+'px'; vs.style.height=(H*k)+'px'; }
   function show(i){
     if(i<0||i>=figs.length) return; cur=i;
-    var src=figs[i].querySelector('.deck'); var vd=v.querySelector('.deck'); vd.innerHTML=src.innerHTML; vd.style.setProperty('--pg',"'"+figs[i].dataset.n+"'");
+    var src=figs[i].querySelector('.deck'); var vd=v.querySelector('.deck'); if(!vd.shadowRoot) vd.attachShadow({mode:'open'}); vd.shadowRoot.innerHTML=src.shadowRoot.innerHTML; vd.style.setProperty('--pg',"'"+figs[i].dataset.n+"'");
     v.querySelector('#vn').textContent=figs[i].dataset.n+' / 142'; v.classList.add('on'); size();
     history.replaceState(null,'','#'+figs[i].id);
   }

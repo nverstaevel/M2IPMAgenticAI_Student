@@ -77,6 +77,22 @@ def css_scope():
             ".deck{font-size:16px;line-height:normal;color:#16222E}.deck section::after{content:var(--pg,'')}")
     return "\n".join(out) + "\n" + base
 
+def css_shadow():
+    """deck.css pour un Shadow DOM : isolé du CSS du site (rien n'entre, rien ne sort)."""
+    css = (COURS / "deck.css").read_text(encoding="utf-8")
+    out = []
+    for bloc in css.split("}"):
+        if "{" not in bloc: continue
+        sel, corps = bloc.split("{", 1)
+        sels = [(":host" if s.strip() == ":root" else s.strip()) for s in sel.split(",") if s.strip()]
+        out.append(",".join(sels) + "{" + corps + "}")
+    base = (":host{all:initial;display:block;width:1920px;height:1080px;overflow:hidden;font-family:'Inter',Arial,sans-serif;color:#16222E;font-size:16px;line-height:normal}"
+            "*{box-sizing:border-box}"
+            "section{width:1920px;height:1080px;box-sizing:border-box;position:relative;overflow:hidden;margin:0}"
+            ".xs{flex:none}.conns{position:absolute;left:0;top:0;pointer-events:none}"
+            "section::after{content:var(--pg,'')}")
+    return "\n".join(out) + "\n" + base + "\n"
+
 def slides(cm):
     nom, a, b, _ = CMS[cm]
     order, sections = deck()
