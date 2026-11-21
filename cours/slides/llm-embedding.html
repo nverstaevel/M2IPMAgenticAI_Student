@@ -1,0 +1,5 @@
+<section id="llm-embedding" class="">
+<p class="eyebrow a">CM1 · FONDEMENTS · EMBEDDINGS</p>
+<h2>Chaque token devient un vecteur</h2><div class="cols"><div class="col"><p class="code">« dragon »  → [ 0.12, -0.80, 0.33, … ]<br>« griffon » → [ 0.10, -0.75, 0.41, … ]<br>« facture » → [-0.62,  0.05, 0.90, … ]<br><br>4 096 valeurs par vecteur, par exemple.</p></div><div class="col"><ul class="s"><li>Une table : une ligne de quelques milliers de nombres par token du vocabulaire</li><li>Les valeurs sont <b>apprises</b> : des sens proches donnent des vecteurs proches</li><li>On ajoute la <b>position</b> du token dans la phrase</li><li>Même idée pour des textes entiers : modèles d’embeddings, base vectorielle, RAG (CM2)</li></ul></div></div>
+<p class="foot">Valeurs illustratives. Distance(dragon, griffon) est plus petite que distance(dragon, facture).</p>
+</section>

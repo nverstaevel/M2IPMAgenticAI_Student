@@ -1,0 +1,5 @@
+<section id="out-api" class="">
+<p class="eyebrow a">CM1 · OUTILLAGE · API</p>
+<h2>Une API de chat presque universelle</h2><div class="cols"><div class="col"><p class="code">POST /v1/chat/completions<br>{<br>&#160;&#160;"model": "qwen2.5-7b-instruct",<br>&#160;&#160;"temperature": 0.3,<br>&#160;&#160;"messages": [<br>&#160;&#160;&#160;&#160;{"role": "system", "content": "…"},<br>&#160;&#160;&#160;&#160;{"role": "user", "content": "…"}<br>&#160;&#160;]<br>}</p></div><div class="col"><ul class="s"><li>Format popularisé par OpenAI, repris par LM Studio, Ollama (/v1), vLLM et de nombreux services</li><li>La réponse contient le message, la raison d’arrêt (<b>finish_reason</b>) et l’usage en tokens</li><li>Les outils s’ajoutent par un champ <b>tools</b> (schéma JSON)</li><li>Spring AI masque ces détails : lisez le journal DEBUG pour voir ce qui part</li></ul></div></div>
+<p class="foot">Anthropic, Google et l’API native d’Ollama ont leurs propres formats : un starter Spring AI par fournisseur.</p>
+</section>

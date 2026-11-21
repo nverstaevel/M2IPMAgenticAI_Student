@@ -1,0 +1,5 @@
+<section id="llm-generation" class="">
+<p class="eyebrow a">CM1 · FONDEMENTS · GÉNÉRATION</p>
+<h2>Un token à la fois, en boucle</h2><div class="cols"><div class="col"><table class="t"><tr><th style="width:64%">Après « Le chat dort sur le »</th><th style="width:36%">Probabilité</th></tr><tr><td>canapé</td><td>0,41</td></tr><tr><td>lit</td><td>0,22</td></tr><tr><td>toit</td><td>0,09</td></tr><tr><td>clavier</td><td>0,05</td></tr><tr><td>autres (tout le vocabulaire)</td><td>0,23</td></tr></table></div><div class="col"><ul class="s"><li>À chaque pas, une probabilité pour <b>tout</b> le vocabulaire</li><li>Un token est tiré, ajouté au texte, et on recommence</li><li><b>Préremplissage</b> : le prompt est lu en parallèle (délai avant le premier token)</li><li><b>Décodage</b> : un token par pas (vitesse en tokens par seconde)</li><li>Le <b>cache KV</b> garde clés et valeurs déjà calculées</li></ul></div></div>
+<p class="foot">Probabilités illustratives.</p>
+</section>

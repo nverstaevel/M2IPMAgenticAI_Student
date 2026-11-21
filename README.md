@@ -13,6 +13,7 @@ Code fourni pour les TD « IA agentiques avec Spring AI » (M2 MIAGE IPM, Univer
 | `td5-agents-roles` | TD5 | Agents à rôles, scénarios `.md`, dossier PDF |
 | `td6-mcp-jeu` | TD6 | Client MCP : Gribouille joue au jeu `jeu-bestiaire` |
 | `jeu-bestiaire` | TD6 | Le jeu (serveur MCP), fourni, à ne pas modifier |
+| `cours` | CM1 à CM3 | Les diapositives des cours (PDF et sources), aussi lisibles sur le site |
 
 **Chaque dossier `tdN-…` est le point de départ du TD N** : il contient le corrigé du TD précédent, le code fourni du TD, et des squelettes (`À écrire`) pour ce que vous devez coder. Travaillez dans votre propre copie (clone, fork ou simple ZIP téléchargé : **Git est recommandé, pas obligatoire**), seul ou à deux, un dossier à la fois.
 

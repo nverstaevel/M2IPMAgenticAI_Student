@@ -1,0 +1,5 @@
+<section id="sb-rest" class="">
+<p class="eyebrow a">RAPPEL · API</p>
+<h2>Un contrôleur REST traduit HTTP en appels de service</h2><p class="code">@RestController<br>@RequestMapping("/api")<br>public class ApiController {<br><br>&#160;&#160;&#160;&#160;@GetMapping("/proprietaires/{id}")<br>&#160;&#160;&#160;&#160;public ProprietaireDto proprietaire(@PathVariable Long id) {<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;return service.trouverProprietaire(id);<br>&#160;&#160;&#160;&#160;}<br><br>&#160;&#160;&#160;&#160;@PostMapping("/consultations")<br>&#160;&#160;&#160;&#160;public ResponseEntity&lt;ConsultationDto&gt; planifier(<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;@Valid @RequestBody PlanificationRequest requete) { … }<br>}</p>
+<p class="foot">@PathVariable : segment d’URL · @RequestParam : paramètre · @RequestBody : corps JSON · @Valid : validation avant l’appel.</p>
+</section>

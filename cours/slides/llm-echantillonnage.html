@@ -1,0 +1,5 @@
+<section id="llm-echantillonnage" class="">
+<p class="eyebrow a">CM1 · FONDEMENTS · ÉCHANTILLONNAGE</p>
+<h2>Comment choisir le prochain token</h2><table class="t"><tr><th style="width:18%">Méthode</th><th style="width:44%">Principe</th><th style="width:38%">Effet</th></tr><tr><td>Glouton</td><td>Prendre le plus probable</td><td>Répétitif, presque déterministe</td></tr><tr><td>Température</td><td>Diviser les scores avant le softmax</td><td>Sous 1 : prudent. Au-dessus de 1 : varié</td></tr><tr><td>Top-k</td><td>Tirer parmi les k plus probables</td><td>Coupe la queue improbable</td></tr><tr><td>Top-p</td><td>Tirer parmi les plus probables jusqu’à cumuler p</td><td>S’adapte à chaque pas</td></tr></table>
+<p class="foot">Température 0 : presque déterministe, mais pas toujours reproductible (calcul parallèle, changement de version). Les TD fixent 0,3.</p>
+</section>

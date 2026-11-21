@@ -1,0 +1,36 @@
+<section id="seq-confirm" class="">
+<p class="eyebrow a">CM1 · SÉQUENCE</p>
+<h2>Proposer, puis confirmer</h2>
+<p class="n ext" style="left:149px;top:280px;width:236px;height:72px"><span>Utilisateur</span></p>
+<p class="n" style="left:426px;top:280px;width:236px;height:72px"><span>ChatClient</span></p>
+<p class="n" style="left:703px;top:280px;width:236px;height:72px"><span>OutilsClinique</span></p>
+<p class="n" style="left:981px;top:280px;width:236px;height:72px"><span>Proposition<br>Service</span></p>
+<p class="n" style="left:1258px;top:280px;width:236px;height:72px"><span>ChatController<br>/confirmer</span></p>
+<p class="n old" style="left:1535px;top:280px;width:236px;height:72px"><span>Clinique<br>Service</span></p>
+<x-connector x1="267" y1="352" x2="267" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="544" y1="352" x2="544" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="821" y1="352" x2="821" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1099" y1="352" x2="1099" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1376" y1="352" x2="1376" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1653" y1="352" x2="1653" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="267" y1="404" x2="544" y2="404" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="544" y1="452" x2="821" y2="452" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="821" y1="500" x2="1099" y2="500" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1099" y1="548" x2="821" y2="548" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="544" y1="596" x2="267" y2="596" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="128" y1="664" x2="1788" y2="664" head="none" style="color:#A8481F;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="267" y1="724" x2="1376" y2="724" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1376" y1="772" x2="1099" y2="772" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1099" y1="820" x2="1653" y2="820" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1376" y1="868" x2="267" y2="868" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<p class="lb" style="left:128px;top:364px;width:708px">1 · « Réserve Brume demain à 10 h »  (POST /api/chat)</p>
+<p class="lb" style="left:303px;top:412px;width:760px">2 · proposerConsultation(créature, soigneur, date, motif)</p>
+<p class="lb" style="left:644px;top:460px;width:632px">3 · proposer(…) : vérifie, n’écrit rien en base</p>
+<p class="lb r" style="left:599px;top:508px;width:721px">4 · proposition en attente (identifiant, durée 10 min)</p>
+<p class="lb r" style="left:128px;top:556px;width:644px">5 · réponse + liste des propositions à confirmer</p>
+<p class="lb" style="left:497px;top:648px;width:926px;color:#A8481F;font-weight:600">Frontière : à partir d’ici, une personne authentifiée (rôle PERSONNEL)</p>
+<p class="lb" style="left:544px;top:684px;width:555px">6 · POST /api/propositions/{id}/confirmer</p>
+<p class="lb" style="left:1114px;top:732px;width:248px">7 · confirmer(id)</p>
+<p class="lb" style="left:1022px;top:780px;width:708px">8 · planifierConsultation(…) : seule écriture en base</p>
+<p class="lb r" style="left:685px;top:828px;width:273px">9 · ConsultationDto</p>
+</section>

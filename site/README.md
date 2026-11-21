@@ -21,3 +21,6 @@ Les indices orientent sans donner la solution ; les exemples des recettes sont h
 
 Liens : notion ⇄ recette (via `notions:` des recettes), recette/notion ⇄ pattern (via `notions:` et `recettes:` des patterns), TD ⇄ pattern (via `td:`). Le build signale toute notion sans recette.
 Format d'auto-test dans un Markdown : deux lignes `Q: …` puis `R: …`.
+
+## Cours (diapositives)
+`cours/` à la racine du dépôt contient les diapositives : `python3 site/import_cours.py <chemin du dossier supports/cm enseignant>` les copie **sans les notes de l'enseignant** (balises `<aside>`), puis `python3 site/pdf_cours.py` régénère `CM1.pdf` à `CM3.pdf` (Playwright + Chrome). Le build les convertit en pages `cours/cm1.html`… (formes et connecteurs de l'éditeur de slides convertis en HTML/SVG, CSS limité à `.deck`) et relie les notions aux diapositives par le titre (champ `cm:` des notions).

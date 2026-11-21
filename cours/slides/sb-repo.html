@@ -1,0 +1,4 @@
+<section id="sb-repo" class="">
+<p class="eyebrow a">RAPPEL · PERSISTANCE</p>
+<h2>Un dépôt Spring Data : une interface suffit</h2><div class="cols"><div class="col"><p class="code">public interface CreatureRepository<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;extends JpaRepository&lt;Creature, Long&gt; {<br><br>&#160;&#160;&#160;&#160;List&lt;Creature&gt;<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;findByProprietaireIdOrderByNom(Long id);<br>}</p></div><div class="col"><ul class="s"><li><b>JpaRepository</b> fournit save, findById, findAll, delete…</li><li>Le nom de la méthode est la requête : <b>findBy</b> + propriété + <b>OrderBy</b></li><li>Requête libre : <b>@Query</b> en JPQL</li><li>Spring génère l’implémentation au démarrage</li></ul></div></div>
+</section>

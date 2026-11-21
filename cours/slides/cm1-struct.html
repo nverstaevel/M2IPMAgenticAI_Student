@@ -1,0 +1,4 @@
+<section id="cm1-struct" class="">
+<p class="eyebrow a">CM1 · SORTIE STRUCTURÉE</p>
+<h2>Du texte à un objet Java</h2><div class="cols"><div class="col"><ul><li>Le contrat est un type Java : un enregistrement avec une énumération</li><li>Le framework demande du JSON conforme, puis le convertit</li><li>Valider quand même : valeur hors énumération, champ vide</li></ul></div><div class="col"><p class="code">record Triage(Urgence urgence, String motif) {}<br><br>Triage t = client.prompt()<br>&#160;&#160;&#160;&#160;.user(symptomes)<br>&#160;&#160;&#160;&#160;.call()<br>&#160;&#160;&#160;&#160;.entity(Triage.class);</p></div></div>
+</section>

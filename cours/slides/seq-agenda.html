@@ -1,0 +1,36 @@
+<section id="seq-agenda" class="">
+<p class="eyebrow a">CM2 · SÉQUENCE</p>
+<h2>Écrire dans l’agenda : proposer, puis confirmer</h2>
+<p class="n ext" style="left:149px;top:280px;width:236px;height:72px"><span>Modèle<br>(ChatClient)</span></p>
+<p class="n" style="left:426px;top:280px;width:236px;height:72px"><span>OutilsExternes</span></p>
+<p class="n" style="left:703px;top:280px;width:236px;height:72px"><span>Proposition<br>AgendaService</span></p>
+<p class="n" style="left:981px;top:280px;width:236px;height:72px"><span>AgendaPort</span></p>
+<p class="n ext" style="left:1258px;top:280px;width:236px;height:72px"><span>Personnel</span></p>
+<p class="n" style="left:1535px;top:280px;width:236px;height:72px"><span>ChatController</span></p>
+<x-connector x1="267" y1="352" x2="267" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="544" y1="352" x2="544" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="821" y1="352" x2="821" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1099" y1="352" x2="1099" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1376" y1="352" x2="1376" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1653" y1="352" x2="1653" y2="902" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="267" y1="404" x2="544" y2="404" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="544" y1="452" x2="821" y2="452" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="821" y1="500" x2="1099" y2="500" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1099" y1="548" x2="821" y2="548" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="821" y1="596" x2="544" y2="596" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="544" y1="644" x2="267" y2="644" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="128" y1="712" x2="1788" y2="712" head="none" style="color:#A8481F;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1376" y1="772" x2="1653" y2="772" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1653" y1="820" x2="821" y2="820" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="821" y1="868" x2="1099" y2="868" style="color:#5F6B76;border-width:3px"></x-connector>
+<p class="lb" style="left:128px;top:364px;width:670px">1 · proposerEvenementAgenda(créature, date, motif)</p>
+<p class="lb" style="left:572px;top:412px;width:222px">2 · proposer(…)</p>
+<p class="lb" style="left:759px;top:460px;width:401px">3 · le créneau est-il libre ?</p>
+<p class="lb r" style="left:772px;top:508px;width:376px">4 · créneaux libres du jour</p>
+<p class="lb r" style="left:328px;top:556px;width:708px">5 · proposition d’agenda enregistrée (attente 10 min)</p>
+<p class="lb r" style="left:147px;top:604px;width:516px">6 · « proposition créée, à confirmer »</p>
+<p class="lb" style="left:631px;top:696px;width:657px;color:#A8481F;font-weight:600">Frontière : seul le personnel écrit dans l’agenda</p>
+<p class="lb" style="left:1148px;top:732px;width:644px">7 · POST /api/propositions-agenda/{id}/confirmer</p>
+<p class="lb" style="left:1114px;top:780px;width:248px">8 · confirmer(id)</p>
+<p class="lb" style="left:689px;top:828px;width:542px">9 · creerEvenement(titre, début, 30 min)</p>
+</section>

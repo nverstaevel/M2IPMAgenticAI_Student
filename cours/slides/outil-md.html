@@ -1,0 +1,5 @@
+<section id="outil-md" class="">
+<p class="eyebrow">OUTIL · SCÉNARIOS EN MARKDOWN</p>
+<h2>Un graphe d’agents, un fichier .md</h2><div class="cols"><div class="col"><ul class="s"><li>Un graphe dessiné avec des flèches : a -> b -> c</li><li>Les outils autorisés de chaque agent, nœud par nœud</li><li>Des boucles bornées : critique -> acteur : REJETE (max 2)</li><li>En Java : les agents (prompts), seule chose à écrire</li><li>Aperçu avant exécution, puis exécution dessinée</li></ul></div><div class="col" style="flex:1.2"><table class="t"><tr><th style="width:42%">Écriture</th><th style="width:58%">Sens</th></tr><tr><td>a -> b, c</td><td>fan-out ; a, b -> c : jonction</td></tr><tr><td>a -> b : REJETE</td><td>arc étiqueté (décision du critique)</td></tr><tr><td>b -> a : REJETE (max 2)</td><td>boucle, au plus 2 reprises</td></tr><tr><td>p => x, y</td><td>délégation d’un plan à des travailleurs</td></tr><tr><td>agent : outils dossier</td><td>seuls ces outils sont permis</td></tr></table></div></div>
+<p class="foot">Départ : scenarios/_modele.md. Format complet : SCENARIOS.md. Exemples : duo-veterinaire-gardien, superviseur-clinique, react-clinique.</p>
+</section>

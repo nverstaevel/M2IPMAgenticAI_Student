@@ -1,0 +1,4 @@
+<section id="out-local" class="">
+<p class="eyebrow a">CM1 · OUTILLAGE · LOCAL</p>
+<h2>Ollama : un modèle local en quelques commandes</h2><p class="code">ollama pull qwen2.5:7b    # télécharger le modèle<br>ollama run qwen2.5:7b     # discuter dans le terminal<br>ollama list               # modèles installés<br>ollama ps                 # modèles chargés en mémoire<br><br>curl localhost:11434/api/chat -d '{<br>&#160;&#160;"model": "qwen2.5:7b", "stream": false,<br>&#160;&#160;"messages": [{"role": "user", "content": "Bonjour"}]}'</p><div style="height:16px"></div><ul class="s"><li>Le serveur écoute sur le port 11434 ; Spring AI s’y connecte par <b>spring.ai.ollama.base-url</b></li><li><b>LM Studio</b> : application graphique, serveur local sur le port 1234, compatible OpenAI</li><li>Derrière les deux : <b>llama.cpp</b>, moteur d’inférence pour les modèles au format GGUF</li></ul>
+</section>

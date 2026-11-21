@@ -1,0 +1,5 @@
+<section id="sb-test" class="">
+<p class="eyebrow a">RAPPEL · TESTS</p>
+<h2>Tester l’API sans navigateur</h2><p class="code">@SpringBootTest<br>class ApiTest {<br>&#160;&#160;&#160;&#160;// MockMvc construit avec Spring Security (@BeforeEach)<br>&#160;&#160;&#160;&#160;@Test<br>&#160;&#160;&#160;&#160;@WithMockUser(roles = "LECTURE")<br>&#160;&#160;&#160;&#160;void rechercheParNom() throws Exception {<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;mvc.perform(get("/api/proprietaires").param("nom", "brume"))<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;.andExpect(status().isOk())<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;.andExpect(jsonPath("$[0].nom").value("Brumevent"));<br>&#160;&#160;&#160;&#160;}<br>}</p>
+<p class="foot">Même principe aux TD suivants, avec un modèle de chat simulé : un test ne dépend jamais d’un vrai LLM.</p>
+</section>

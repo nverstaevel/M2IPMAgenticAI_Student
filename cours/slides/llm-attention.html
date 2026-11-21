@@ -1,0 +1,4 @@
+<section id="llm-attention" class="">
+<p class="eyebrow a">CM1 · FONDEMENTS · ATTENTION</p>
+<h2>Chaque token pondère ceux qui le précèdent</h2><div class="cols"><div class="col"><ul class="s"><li>Chaque token produit une <b>requête</b> (Q), une <b>clé</b> (K) et une <b>valeur</b> (V)</li><li>Score : similarité entre sa requête et les clés des autres tokens</li><li>Les valeurs sont mélangées selon ces scores (softmax)</li><li><b>Masque causal</b> : jamais de lecture du futur</li><li>Plusieurs <b>têtes</b> en parallèle, chacune cherche un type de lien</li></ul></div><div class="col"><p class="code">Attention(Q, K, V) =<br>&#160;&#160;&#160;&#160;softmax( Q · K^T / √d ) · V</p><div style="height:24px"></div><div class="card b"><h3>Coût</h3><p>Le nombre de paires de tokens croît comme le carré de la longueur du contexte.</p></div></div></div>
+</section>

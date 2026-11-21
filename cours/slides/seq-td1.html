@@ -1,0 +1,32 @@
+<section id="seq-td1" class="">
+<p class="eyebrow a">SÉQUENCE · TD1</p>
+<h2>Planifier une consultation, sans IA</h2>
+<p class="n ext" style="left:176px;top:280px;width:236px;height:72px"><span>Client</span></p>
+<p class="n" style="left:509px;top:280px;width:236px;height:72px"><span>ApiController</span></p>
+<p class="n" style="left:842px;top:280px;width:236px;height:72px"><span>CliniqueService</span></p>
+<p class="n" style="left:1175px;top:280px;width:236px;height:72px"><span>Dépôts</span></p>
+<p class="n ext" style="left:1508px;top:280px;width:236px;height:72px"><span>Base H2</span></p>
+<x-connector x1="294" y1="352" x2="294" y2="880" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="627" y1="352" x2="627" y2="880" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="960" y1="352" x2="960" y2="880" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1293" y1="352" x2="1293" y2="880" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1626" y1="352" x2="1626" y2="880" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<p class="nt" style="left:283px;top:428px;width:689px;height:32px"><span>2 · @Valid contrôle le corps : 400 s’il est invalide</span></p>
+<p class="nt" style="left:128px;top:822px;width:999px;height:32px"><span>En cas de conflit : exception métier, traduite en 409 par ApiExceptionHandler</span></p>
+<x-connector x1="294" y1="404" x2="627" y2="404" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="627" y1="510" x2="960" y2="510" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="960" y1="558" x2="1293" y2="558" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1293" y1="606" x2="1626" y2="606" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="960" y1="654" x2="1293" y2="654" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="960" y1="702" x2="1293" y2="702" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="960" y1="750" x2="627" y2="750" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="627" y1="798" x2="294" y2="798" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<p class="lb" style="left:183px;top:364px;width:555px">1 · POST /api/consultations  (corps JSON)</p>
+<p class="lb" style="left:407px;top:470px;width:772px">3 · planifierConsultation(créature, soigneur, date, motif)</p>
+<p class="lb" style="left:868px;top:518px;width:516px">4 · charger le soigneur avec un verrou</p>
+<p class="lb" style="left:1007px;top:566px;width:785px">5 · requête avec verrou (une seule planification à la fois)</p>
+<p class="lb" style="left:785px;top:614px;width:683px">6 · y a-t-il déjà une consultation sur ce créneau ?</p>
+<p class="lb" style="left:913px;top:662px;width:427px">7 · enregistrer la consultation</p>
+<p class="lb r" style="left:657px;top:710px;width:273px">8 · ConsultationDto</p>
+<p class="lb r" style="left:260px;top:758px;width:401px">9 · 201 Created et corps JSON</p>
+</section>

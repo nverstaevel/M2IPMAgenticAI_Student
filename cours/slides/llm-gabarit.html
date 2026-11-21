@@ -1,0 +1,5 @@
+<section id="llm-gabarit" class="">
+<p class="eyebrow a">CM1 · FONDEMENTS · DU MESSAGE AU TEXTE</p>
+<h2>Un chat n’est qu’un long texte balisé</h2><p class="code">&lt;système&gt;     Tu es le Dr Gribouille, assistant de la clinique.<br>&lt;outils&gt;      creneauxLibres(soigneurId, date) : liste les créneaux libres<br>&lt;utilisateur&gt; Qui peut soigner un griffon demain ?<br>&lt;assistant&gt;   appel : creneauxLibres(soigneurId = 3, date = 2026-11-20)</p><div style="height:20px"></div><ul class="s"><li>Le serveur applique un <b>gabarit</b> (chat template) propre à chaque modèle : balises, rôles, outils</li><li>Les outils sont décrits <b>dans le texte</b> : nom, description, schéma JSON. La qualité des descriptions compte</li><li>Le modèle écrit l’appel sous forme de texte structuré ; le serveur le décode, Spring AI exécute la méthode</li><li>Un modèle non entraîné à cela ignore les outils ou invente le format</li></ul>
+<p class="foot">Schéma : les balises réelles varient selon le modèle.</p>
+</section>

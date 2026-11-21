@@ -1,0 +1,5 @@
+<section id="sb-erreurs" class="">
+<p class="eyebrow a">RAPPEL · QUALITÉ</p>
+<h2>Valider les entrées, traduire les erreurs</h2><div class="cols"><div class="col"><p class="code">public record PlanificationRequest(<br>&#160;&#160;&#160;&#160;@NotNull Long creatureId,<br>&#160;&#160;&#160;&#160;@NotNull Long soigneurId,<br>&#160;&#160;&#160;&#160;@NotNull LocalDateTime dateHeure,<br>&#160;&#160;&#160;&#160;@NotBlank String motif) {}</p></div><div class="col"><ul class="s"><li>Un <b>record</b> Java est un DTO immuable</li><li><b>@NotNull, @NotBlank, @Size…</b> décrivent les contraintes</li><li><b>@RestControllerAdvice</b> : une classe traduit les exceptions en 404, 409, 400</li></ul></div></div>
+<p class="foot">Ces messages d’erreur seront lus par le modèle d’IA : écrivez-les pour être compris, pas seulement pour être journalisés.</p>
+</section>

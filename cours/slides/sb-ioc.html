@@ -1,0 +1,5 @@
+<section id="sb-ioc" class="">
+<p class="eyebrow a">RAPPEL · CONTENEUR</p>
+<h2>Spring crée les objets et les relie</h2><div class="cols"><div class="col"><ul class="s"><li>Un <b>bean</b> est un objet géré par le conteneur</li><li><b>@Component, @Service, @RestController</b> : détectés au démarrage</li><li><b>@Configuration</b> et <b>@Bean</b> : vous construisez l’objet vous-même</li><li><b>Injection par constructeur</b> : dépendances explicites, immuables, faciles à tester</li></ul></div><div class="col"><p class="code">@RestController<br>@RequestMapping("/api")<br>public class ApiController {<br>&#160;&#160;&#160;&#160;private final CliniqueService service;<br><br>&#160;&#160;&#160;&#160;ApiController(CliniqueService service) {<br>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;this.service = service;<br>&#160;&#160;&#160;&#160;}<br>}</p></div></div>
+<p class="foot">Au TD2, les clients de chat et la mémoire de conversation seront des beans déclarés dans une classe @Configuration.</p>
+</section>

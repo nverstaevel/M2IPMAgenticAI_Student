@@ -1,0 +1,4 @@
+<section id="cm1-descr" class="">
+<p class="eyebrow a">CM1 · CONCEVOIR UN OUTIL</p>
+<h2>La description d’un outil est un prompt</h2><div class="cards"><div class="card b"><h3>À éviter</h3><p>« Cherche des trucs dans la base ». Un paramètre <b>String x</b>. Une exception brute en cas d’erreur.</p></div><div class="card a"><h3>À écrire</h3><p>Ce que fait l’outil et quand l’utiliser. Chaque argument décrit, avec son format (date AAAA-MM-JJ). Ce qui est renvoyé. Un message d’erreur lisible.</p></div></div><p class="code">@Tool(description = "Liste les créneaux libres d’un soigneur à une date")<br>public List&lt;Creneau&gt; creneauxLibres(<br>&#160;&#160;&#160;&#160;@ToolParam(description = "Identifiant du soigneur") long soigneurId,<br>&#160;&#160;&#160;&#160;@ToolParam(description = "Date, format AAAA-MM-JJ") LocalDate date)</p>
+</section>

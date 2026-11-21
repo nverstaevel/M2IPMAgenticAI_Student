@@ -13,6 +13,8 @@ from markdown.extensions.toc import slugify_unicode
 from pygments.formatters import HtmlFormatter
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import cours as CM
 SITE = ROOT / "site"
 CONTENT = SITE / "content"
 OUT = SITE / "_build"
@@ -104,8 +106,8 @@ def scan_todos():
 TODOS = scan_todos()
 
 # ----------------------------------------------------------------------------- gabarit
-NAV = [("index.html", "Accueil"), ("notions/index.html", "Notions"), ("recettes/index.html", "Recettes"), ("architectures/index.html", "Architectures"), ("code.html", "Code"),
-       ("depannage.html", "Dépannage"), ("ressources.html", "Ressources"), ("commun.html", "Infos communes")]
+NAV = [("index.html", "Accueil"), ("notions/index.html", "Notions"), ("recettes/index.html", "Recettes"), ("architectures/index.html", "Architectures"), ("cours/index.html", "Cours"), ("code.html", "Code"),
+       ("depannage.html", "Dépannage"), ("ressources.html", "Ressources"), ("commun.html", "Infos")]
 
 def page(rel, titre, corps, side="", extra_head="", td_ctx=None):
     depth = rel.count("/")
@@ -240,6 +242,17 @@ def liens_patterns(ids, root):
     return '<div class="liens">' + "".join(
         f'<a href="{root}architectures/{p}.html"><b>🧩 {esc(PATTERNS[p]["title"])}</b><span>{esc(PATTERNS[p].get("resume", ""))}</span></a>' for p in ids if p in PATTERNS) + "</div>"
 
+_IDX = None
+def lien_slide(texte, root="../"):
+    """Un titre de notion « CM1 — Titre » devient un lien vers la diapositive du même titre, s'il existe."""
+    global _IDX
+    if _IDX is None: _IDX = CM.titre_index()
+    hit = CM.trouver(_IDX, texte)
+    if hit: return f'<a href="{root}cours/{hit[0]}.html#{hit[1]}">{esc(texte)}</a>'
+    m = re.match(r"CM(\d)", texte)
+    if m: return f'<a href="{root}cours/cm{m.group(1)}.html">{esc(texte)}</a>'
+    return esc(texte)
+
 def build_notions():
     cards = []
     for nid, n in NOTIONS.items():
@@ -247,14 +260,14 @@ def build_notions():
         tds = sorted({td for td, _ in USAGE_N[nid]} | set(lst(n.get("td", ""))))
         rec = RECETTES_PAR_NOTION.get(nid, [])
         if not rec: print("ATTENTION : notion sans recette :", nid)
-        cm = "".join(f"<li>{esc(x.strip())}</li>" for x in re.split(r"\s*;\s*", n.get("cm", "")) if x.strip())
+        cm = "".join(f"<li>{lien_slide(x.strip())}</li>" for x in re.split(r"\s*;\s*", n.get("cm", "")) if x.strip())
         haut = (f'<p class="aller">👉 <strong>Passer à la pratique :</strong> {chips(rec, "r", "../")}</p>' if rec else "")
         pratique = (f'<section class="pratique"><h2>Passer à la pratique</h2><p>Vous avez compris la notion ? Mettez-la en œuvre avec :</p>{liens_recettes(rec, "../")}</section>' if rec else "")
         pats = PAT_PAR_NOTION.get(nid, [])
         patblock = (f'<section class="card"><h2 class="nodot">Architectures qui s\'appuient sur cette notion</h2>{liens_patterns(pats, "../")}</section>' if pats else "")
         corps = (f'<p class="kicker"><a href="index.html">Notions</a></p><h1>{esc(n["title"])}</h1><p class="lead">{esc(n.get("resume",""))}</p>{haut}'
                  f'<div class="grid2"><section class="card"><h2 class="nodot">Dans le cours</h2><ul>{cm}</ul>'
-                 f'<p class="note">Support de CM distribué en séance : repérez ces titres de diapositives.</p></section>'
+                 f'<p class="note">Les titres cliquables ouvrent la diapositive correspondante dans la page <a href="../cours/index.html">Cours</a>.</p></section>'
                  f'<section class="card"><h2 class="nodot">Où le retrouver en TD</h2>{usage_html(USAGE_N[nid], "../") or ""}</section></div>'
                  f'<article class="prose">{h}</article>{pratique}{patblock}')
         page(f"notions/{nid}.html", n["title"], corps)
@@ -377,6 +390,37 @@ def build_ressources():
         add_search(f"Ressources {num}", f"ressources.html#{td}", txt, "Ressource")
     page("ressources.html", "Ressources", "".join(parts))
 
+def build_cours():
+    (OUT / "cours").mkdir(parents=True, exist_ok=True)
+    (OUT / "assets" / "cours.css").write_text(CM.css_scope(), encoding="utf-8")
+    cartes = []
+    for cm, (nom, a, b_, resume) in CM.CMS.items():
+        sl = CM.slides(cm)
+        pdf = ROOT / "cours" / f"{nom}.pdf"
+        if pdf.exists(): shutil.copy(pdf, OUT / "cours" / pdf.name)
+        btn_pdf = f'<a class="btn" href="{nom}.pdf">Télécharger le PDF ({pdf.stat().st_size // 1024} Ko)</a> ' if pdf.exists() else ""
+        index, corps = [], []
+        for s in sl:
+            if s["debut"]:
+                index.append(f'<li><a href="#{s["id"]}">{esc(s["debut"])}</a></li>')
+                corps.append(f'<h2 class="sect">{esc(s["debut"])}</h2>')
+            corps.append(f'<figure class="slide" id="{s["id"]}" data-n="{s["i"] + 1}"><div class="stage"><div class="deck" style="--pg:&quot;{s['i'] + 1}&quot;">{s["html"]}</div></div>'
+                         f'<figcaption><a href="#{s["id"]}">#{s["i"] + 1}</a> · {esc(s["titre"] or s["id"])}</figcaption></figure>')
+            add_search(f"{nom} · {s['titre'] or s['id']}", f"cours/{cm}.html#{s['id']}", s["eyebrow"] + " " + re.sub(r"<[^>]+>", " ", s["html"]), "Cours")
+        side = f'<p class="sidetitle">{nom}</p><ul>{"".join(index)}</ul>'
+        entete = (f'<p class="kicker"><a href="index.html">Cours</a></p><h1>{nom} · {esc(resume)}</h1>'
+                  f'<p class="lead">{len(sl)} diapositives. Cliquez sur une diapositive pour la lire en plein écran (flèches ← → pour naviguer, Échap pour fermer).</p>'
+                  f'<p>{btn_pdf}<a class="btn ghost" href="{GITHUB}/tree/main/cours">Sources sur GitHub</a></p>')
+        page(f"cours/{cm}.html", nom, entete + "".join(corps), side=side,
+             extra_head='<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="../assets/cours.css">'
+                        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400..700&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">'
+                        '<script src="../assets/cours.js" defer></script>')
+        cartes.append(f'<a class="card pick" href="{cm}.html"><h3>{nom}</h3><p>{esc(resume)}</p><p class="note">{len(sl)} diapositives</p></a>')
+    page("cours/index.html", "Cours",
+         '<h1>Cours</h1><p class="lead">Les diapositives des trois cours magistraux, à relire avant un TD ou pour retrouver une notion. Les notions du site renvoient directement aux diapositives concernées.</p>'
+         f'<div class="grid3">{"".join(cartes)}</div>'
+         '<p class="note">Les PDF sont aussi dans le dossier <code>cours/</code> du dépôt étudiant, avec les sources des diapositives.</p>')
+
 def build_commun():
     t = (CONTENT / "sujets" / "00-informations-communes.md").read_text(encoding="utf-8")
     h, tokens = md_render(re.sub(r"^# .*\n", "", t, count=1))
@@ -410,7 +454,7 @@ def build_index(totaux):
                          f'<span class="s-l">{esc(livrable)}</span><span class="bar"><i></i></span><span class="pct">0 %</span></a>')
         else:
             cm = nom.lower()
-            lien = f'notions/index.html' if nom != "CM4" else "commun.html"
+            lien = f'cours/{cm}.html' if nom != "CM4" else "commun.html"
             cards.append(f'<a class="seance cm" href="{lien}"><span class="s-n">{nom}</span><strong>Cours magistral</strong><span class="s-l">{esc(resume)}</span></a>')
     corps = f"""<section class="hero"><p class="kicker">M2 MIAGE IPM · Université Toulouse Capitole</p>
 <h1>Réussir les TD <em>IA agentiques</em> avec Spring AI</h1>
@@ -422,7 +466,7 @@ def build_index(totaux):
 <div class="cards four">
 <div class="card"><h3>1 · Lisez le sujet</h3><p>Le sujet complet de chaque TD est ici, avec un sommaire et des cases à cocher pour l'avant-séance.</p></div>
 <div class="card"><h3>2 · Bloqué ? Un indice</h3><p>Chaque étape a un bloc <em>Besoin d'aide ?</em> : des indices <strong>progressifs</strong>, à déplier un par un. Ils orientent, ils ne donnent pas la solution.</p></div>
-<div class="card"><h3>3 · Comprendre la notion</h3><p>Les <a href="notions/index.html">fiches Notions</a> rappellent l'essentiel et disent où la retrouver dans les supports de CM.</p></div>
+<div class="card"><h3>3 · Comprendre la notion</h3><p>Les <a href="notions/index.html">fiches Notions</a> rappellent l'essentiel et renvoient à la diapositive du <a href="cours/index.html">cours</a> qui en parle.</p></div>
 <div class="card"><h3>4 · Copier le geste</h3><p>Les <a href="recettes/index.html">recettes</a> donnent le squelette, la vérification et les pièges. Vous adaptez, vous ne recopiez pas.</p></div></div>
 <h2>Trois réflexes</h2>
 <div class="cards three"><div class="card"><h3>Vérifier le modèle</h3><pre><code>curl -u gribouille:gribouille \\
@@ -443,7 +487,7 @@ def main():
         HtmlFormatter(style="default").get_style_defs(".codehilite") + "\n" +
         HtmlFormatter(style="monokai").get_style_defs('[data-theme="dark"] .codehilite'), encoding="utf-8")
     totaux = {td: build_td(td) for td in TDS}
-    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_commun(); build_code(); build_index(totaux)
+    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_cours(); build_commun(); build_code(); build_index(totaux)
     add_search("Accueil", "index.html", "accueil parcours TD CM progression", "Accueil")
     (OUT / "assets" / "search-index.json").write_text(json.dumps(SEARCH, ensure_ascii=False), encoding="utf-8")
     (OUT / ".nojekyll").write_text("")

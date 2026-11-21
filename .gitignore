@@ -9,3 +9,4 @@ traces/
 dossiers/
 *.log
 site/_build/
+__pycache__/

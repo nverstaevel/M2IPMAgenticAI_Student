@@ -1,0 +1,5 @@
+<section id="sb-entite" class="">
+<p class="eyebrow a">RAPPEL · PERSISTANCE</p>
+<h2>Une entité JPA correspond à une table</h2><div class="cols"><div class="col"><p class="code">@Entity<br>public class Creature {<br>&#160;&#160;&#160;&#160;@Id @GeneratedValue<br>&#160;&#160;&#160;&#160;private Long id;<br><br>&#160;&#160;&#160;&#160;@Column(nullable = false)<br>&#160;&#160;&#160;&#160;private String nom;<br><br>&#160;&#160;&#160;&#160;@ManyToOne(fetch = FetchType.LAZY)<br>&#160;&#160;&#160;&#160;private Proprietaire proprietaire;<br><br>&#160;&#160;&#160;&#160;protected Creature() {}<br>}</p></div><div class="col"><ul class="s"><li>Hibernate crée la table au démarrage (<b>ddl-auto=create-drop</b> en TD)</li><li>Relations : <b>@ManyToOne</b>, <b>@OneToMany(mappedBy = …)</b></li><li><b>LAZY</b> : le lien n’est chargé que s’il est utilisé, dans une transaction</li><li>Constructeur sans argument protégé : exigé par JPA</li></ul></div></div>
+<p class="foot">Extrait raccourci de la classe Creature du TD1.</p>
+</section>

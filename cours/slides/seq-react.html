@@ -1,0 +1,32 @@
+<section id="seq-react" class="">
+<p class="eyebrow a">CM2 · SÉQUENCE</p>
+<h2>Une exécution ReAct, dans le code</h2>
+<p class="n ext" style="left:176px;top:280px;width:236px;height:72px"><span>Client</span></p>
+<p class="n" style="left:509px;top:280px;width:236px;height:72px"><span>AgentReact<br>Service</span></p>
+<p class="n ext" style="left:842px;top:280px;width:236px;height:72px"><span>ChatModel<br>(modèle)</span></p>
+<p class="n" style="left:1175px;top:280px;width:236px;height:72px"><span>ToolCalling<br>Manager</span></p>
+<p class="n" style="left:1508px;top:280px;width:236px;height:72px"><span>TraceStore</span></p>
+<x-connector x1="294" y1="352" x2="294" y2="890" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="627" y1="352" x2="627" y2="890" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="960" y1="352" x2="960" y2="890" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1293" y1="352" x2="1293" y2="890" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="1626" y1="352" x2="1626" y2="890" head="none" style="color:#B9B2A0;border-width:3px;border-style:dashed"></x-connector>
+<p class="nt" style="left:221px;top:524px;width:813px;height:32px"><span>4 · même appel que l’étape précédente ?  oui : BOUCLE_DETECTEE</span></p>
+<p class="nt" style="left:215px;top:726px;width:825px;height:32px"><span>8 · budget de tokens ou plafond d’étapes atteint ?  oui : arrêt</span></p>
+<x-connector x1="294" y1="404" x2="627" y2="404" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="627" y1="452" x2="960" y2="452" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="960" y1="500" x2="627" y2="500" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="627" y1="606" x2="1293" y2="606" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="1293" y1="654" x2="627" y2="654" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<x-connector x1="627" y1="702" x2="1626" y2="702" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="627" y1="808" x2="960" y2="808" style="color:#5F6B76;border-width:3px"></x-connector>
+<x-connector x1="627" y1="856" x2="294" y2="856" style="color:#8A9199;border-width:3px;border-style:dashed"></x-connector>
+<p class="lb" style="left:183px;top:364px;width:555px">1 · POST /api/agent  {demande, maxEtapes}</p>
+<p class="lb" style="left:446px;top:412px;width:696px">2 · modele.call(prompt) : consignes, demande, outils</p>
+<p class="lb r" style="left:599px;top:460px;width:388px">3 · pensée + demande d’outil</p>
+<p class="lb" style="left:702px;top:566px;width:516px">5 · executeToolCalls(outil, arguments)</p>
+<p class="lb r" style="left:670px;top:614px;width:580px">6 · observation (tronquée à 500 caractères)</p>
+<p class="lb" style="left:753px;top:662px;width:747px">7 · ajouter(étape : pensée, outil, résultat, ms, tokens)</p>
+<p class="lb" style="left:478px;top:768px;width:632px">9 · nouveau tour avec l’historique : retour à 3</p>
+<p class="lb r" style="left:128px;top:816px;width:785px">10 · ResultatAgent : réponse, motif d’arrêt, étapes, tokens</p>
+</section>

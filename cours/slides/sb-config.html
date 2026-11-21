@@ -1,0 +1,4 @@
+<section id="sb-config" class="">
+<p class="eyebrow a">RAPPEL · CONFIGURATION</p>
+<h2>Propriétés, profils, secrets</h2><p class="code">spring.datasource.url=jdbc:h2:mem:clinique<br>spring.ai.model.chat=ollama<br>spring.ai.ollama.chat.model=qwen2.5:7b<br>spring.ai.openai.api-key=${OPENAI_API_KEY:cle-non-renseignee}</p><div style="height:24px"></div><ul class="s"><li>Un profil se charge avec <b>--spring.profiles.active=lmstudio</b> (fichier application-lmstudio.properties)</li><li><b>${NOM:défaut}</b> lit une variable d’environnement, avec une valeur par défaut</li><li>Jamais de clé réelle dans Git : variable d’environnement ou fichier local ignoré</li><li>Priorité : arguments de ligne de commande, puis variables d’environnement, puis fichiers</li></ul>
+</section>
