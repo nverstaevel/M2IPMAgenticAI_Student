@@ -4,10 +4,29 @@ resume: Cacher une dépendance externe derrière une interface, pour pouvoir la 
 cm: CM2 — Des ports pour isoler les sources ; Un port pour isoler l’agenda
 td: td3
 ---
-Un **port** est une interface de votre domaine (`AgendaPort`). Un **adaptateur** est une implémentation qui parle à l'extérieur (`GoogleAgendaAdapter`) ; un autre peut être simulé (`AgendaSimule`).
+## L'idée
+Cacher une dépendance externe derrière une **interface** (le port), pour pouvoir la remplacer par une version simulée.
 
+## Comprendre
+{{fig:port_adaptateur}}
+
+- Le **port** (`AgendaPort`) est dans votre domaine : il parle votre langage (`evenementsDuJour`, `creer`).
+- Un **adaptateur** l'implémente : `GoogleAgendaAdapter` pour le réel, `AgendaSimule` pour les tests.
+- Le choix se fait par **profil** : `@Profile("!simule")` / `@Profile("simule")`.
+
+Bénéfice : tests et évaluation tournent **sans réseau, sans compte, sans clé**, et de façon reproductible.
+
+## Dans la clinique
+Même idée pour `WikipediaClient` : en test, on lui passe un `RestClient` préconfiguré qui répond avec des JSON d'exemple.
+
+## À retenir
 - Le reste du code ne connaît que le port.
-- Le choix se fait par **profil** : `@Profile("!simule")` pour le réel, `@Profile("simule")` pour le simulé.
-- Bénéfice : les tests et l'évaluation tournent **sans réseau, sans compte, sans clé**, et de façon reproductible.
+- Un seul adaptateur actif à la fois.
 
-Le même raisonnement s'applique à `WikipediaClient` : on lui passe un `RestClient` préconfiguré dans les tests.
+## Erreurs fréquentes
+- Même annotation de profil sur les deux adaptateurs : deux beans, erreur au démarrage.
+- Faire fuir des types de l'API Google dans le port.
+
+## Auto-test
+Q: Pourquoi `AgendaSimule` est-il nécessaire à l'évaluation de TD ?
+R: Parce que l'évaluation tourne sans réseau ni compte : l'adaptateur réel serait inutilisable.

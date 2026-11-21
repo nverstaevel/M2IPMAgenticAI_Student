@@ -2,8 +2,10 @@
 title: Connecter la clinique au jeu (client MCP)
 resume: Le starter, deux fichiers de propriétés, `JeuMcp`, un point de contrôle.
 td: td6
-notions: mcp, profils-secrets
+notions: mcp, profils-secrets, appel-outils, texte-tiers-injection
 ---
+{{fig:mcp}}
+
 ## 1. Le jeu
 ```bash
 mvn -f jeu-bestiaire/pom.xml spring-boot:run        # http://localhost:8090 ; MCP sur /mcp

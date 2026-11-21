@@ -2,8 +2,10 @@
 title: Obtenir un objet Java plutôt qu'un texte
 resume: Un `record`, un client séparé, `.entity(...)`.
 td: td2, td5
-notions: sortie-structuree
+notions: sortie-structuree, chatclient-prompt
 ---
+{{fig:sortie_structuree}}
+
 ## Squelette
 ```java
 enum Urgence { FAIBLE, MOYENNE, ELEVEE }

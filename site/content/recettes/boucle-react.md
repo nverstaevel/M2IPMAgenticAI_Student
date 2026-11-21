@@ -2,17 +2,10 @@
 title: Écrire une boucle d'agent à la main
 resume: Appeler le ChatModel, exécuter les outils demandés, recommencer, et borner la boucle.
 td: td4
-notions: boucle-react, arrets-agent
+notions: boucle-react, arrets-agent, appel-outils, workflow-ou-agent
 ---
 ## Le schéma
-```
-        ┌───────────────────────────────────────────┐
-        ▼                                           │
- appeler le modèle ──▶ demande d'outils ? ──oui──▶ exécuter les outils ──▶ nouvel historique
-        │non
-        ▼
-  réponse finale
-```
+{{fig:react}}
 
 ## Repère de code (à adapter à la version fournie)
 ```java

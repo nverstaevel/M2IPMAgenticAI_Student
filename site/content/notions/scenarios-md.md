@@ -4,6 +4,10 @@ resume: Trois sections (Entrées, Agents, Graphe) et des flèches : le moteur li
 cm: CM2 — Un graphe d’agents, un fichier .md
 td: td5, td6
 ---
+## L'idée
+Une architecture d'agents se **décrit** dans un fichier Markdown de trois sections ; le moteur le lit, dessine le graphe et l'exécute.
+
+## Comprendre
 ```markdown
 # Titre du scénario
 
@@ -22,9 +26,21 @@ gardien -> humain : APPROUVE, DOUTE, REJETE
 humain -> fin
 ```
 
-- Le **nom** d'un agent dans le `.md` doit correspondre au nom du bean Java (`@Bean("veterinaire")`).
-- Une flèche étiquetée (`: REJETE`) dépend du verdict ; `(max 2)` borne une boucle.
-- Le fichier se place dans `scenarios/` à côté du `pom.xml` ; actualisez la liste dans `/agents`.
-- Un ⚠ dans la liste nomme le champ fautif : lisez le message.
+| Élément | Sens |
+|---|---|
+| `a -> b` | b s'exécute après a |
+| `a -> b : REJETE` | seulement si le verdict de a est REJETE |
+| `(max 2)` | borne une boucle |
+| `a => b, c` | le plan de a est distribué à b et c |
 
-Référence complète : `SCENARIOS.md` et `scenarios/_modele.md` dans votre dossier de TD.
+- Le **nom** d'un agent dans le `.md` doit correspondre au nom du bean Java (`@Bean("veterinaire")`).
+- Un ⚠ dans la liste nomme le champ fautif : lisez le message.
+- Fichier à placer dans `scenarios/` à côté du `pom.xml`.
+
+## À retenir
+- On change d'architecture en **éditant un fichier**, sans recompiler.
+- *Aperçu* (pointillés) avant *Lancer* (graphe réel).
+
+## Auto-test
+Q: Votre scénario affiche « agent inconnu ». Où regarder ?
+R: Le nom dans la section Agents : il doit coïncider avec le nom du bean Java.

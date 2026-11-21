@@ -2,7 +2,7 @@
 title: Lire un classeur Excel une seule fois
 resume: Charger le `.xlsx` au démarrage, interroger une structure en mémoire.
 td: td3
-notions: appel-outils
+notions: appel-outils, interroger-plutot-que-charger, tester-sans-modele
 ---
 Le lecteur de classeur est **fourni** au TD3 (`TarifsExcelReader`) : lisez-le comme modèle.
 

@@ -2,14 +2,10 @@
 title: Proposer, puis confirmer (jamais écrire directement)
 resume: L'outil prépare une proposition expirante ; un endpoint réservé au personnel l'applique.
 td: td2, td3, td4, td5
-notions: confirmation-ecritures, securite-basique
+notions: confirmation-ecritures, securite-basique, appel-outils, couches-spring
 ---
 ## Le schéma
-```
-Utilisateur ─▶ modèle ─▶ outil proposer…() ─▶ Proposition(id, expire dans 10 min)
-                                                 │
-        personnel clique Confirmer ──────────────┘▶ POST /api/propositions/{id}/confirmer ─▶ service métier
-```
+{{fig:proposer_confirmer}}
 
 ## Les cinq choses à faire
 1. L'outil `proposer…` **valide** les données (la créature existe ? le créneau est libre ?) et **n'écrit rien** dans la base.

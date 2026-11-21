@@ -2,7 +2,7 @@
 title: Brancher et vérifier un fournisseur de modèle
 resume: Choisir Ollama, LM Studio ou une API, puis prouver en une commande que ça répond.
 td: td2
-notions: profils-secrets, tester-sans-modele
+notions: profils-secrets, tester-sans-modele, chatclient-prompt
 ---
 ## Quand l'utiliser
 Avant tout TD à partir du TD2, et dès qu'un comportement vous paraît bizarre.

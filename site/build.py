@@ -6,6 +6,9 @@ Dépendances : pip install markdown pygments
 """
 import json, re, shutil, html, pathlib, datetime
 import markdown
+import sys
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import figures
 from markdown.extensions.toc import slugify_unicode
 from pygments.formatters import HtmlFormatter
 
@@ -32,11 +35,14 @@ SEANCES = [("CM1", None, "Appeler un modèle, mémoire, outils, confirmation des
 def esc(s): return html.escape(s, quote=True)
 
 def md_render(text, toc=True):
-    exts = ["tables", "fenced_code", "sane_lists", "attr_list", "codehilite", "toc"]
+    exts = ["tables", "fenced_code", "sane_lists", "attr_list", "md_in_html", "codehilite", "toc"]
     cfg = {"codehilite": {"guess_lang": False, "css_class": "codehilite"},
            "toc": {"slugify": slugify_unicode, "permalink": "#", "permalink_title": "Lien vers cette section", "toc_depth": "2-3"}}
+    text = re.sub(r"^Q: (.*)\n^R: (.*)$", lambda mm: '<details class="qa" markdown="1"><summary>' + mm.group(1) + '</summary>\n\n' + mm.group(2) + '\n\n</details>\n', text, flags=re.M)
+    text = re.sub(r"((?:^- .*\n)+)\{: \.(plus|moins) \}", lambda mm: '<div class="' + mm.group(2) + '" markdown="1">\n<p class="lbl">' + ("Avantages" if mm.group(2) == "plus" else "Limites") + '</p>\n\n' + mm.group(1) + '\n</div>\n', text, flags=re.M)
     m = markdown.Markdown(extensions=exts, extension_configs=cfg)
     h = m.convert(text)
+    h = re.sub(r"<p>\{\{fig:(\w+)\}\}</p>", lambda mm: figures.render(mm.group(1)), h)
     return h, getattr(m, "toc_tokens", [])
 
 def inline(text):
@@ -61,6 +67,9 @@ for p in sorted((CONTENT / "notions").glob("*.md")):
     meta, body = front(p); meta["id"] = p.stem; meta["body"] = body; NOTIONS[p.stem] = meta
 for p in sorted((CONTENT / "recettes").glob("*.md")):
     meta, body = front(p); meta["id"] = p.stem; meta["body"] = body; RECETTES[p.stem] = meta
+PATTERNS = {}
+for p in sorted((CONTENT / "patterns").glob("*.md")):
+    meta, body = front(p); meta["id"] = p.stem; meta["body"] = body; PATTERNS[p.stem] = meta
 AIDES = json.loads((CONTENT / "aides.json").read_text(encoding="utf-8"))
 
 # références croisées : où une notion / recette est utilisée
@@ -95,7 +104,7 @@ def scan_todos():
 TODOS = scan_todos()
 
 # ----------------------------------------------------------------------------- gabarit
-NAV = [("index.html", "Accueil"), ("notions/index.html", "Notions"), ("recettes/index.html", "Recettes"), ("code.html", "Code"),
+NAV = [("index.html", "Accueil"), ("notions/index.html", "Notions"), ("recettes/index.html", "Recettes"), ("architectures/index.html", "Architectures"), ("code.html", "Code"),
        ("depannage.html", "Dépannage"), ("ressources.html", "Ressources"), ("commun.html", "Infos communes")]
 
 def page(rel, titre, corps, side="", extra_head="", td_ctx=None):
@@ -200,8 +209,10 @@ def build_td(td):
     suiv = list(TDS)[list(TDS).index(td) + 1] if td != "td6" else None
     pager = '<nav class="pager">' + (f'<a href="{prec}.html">← {TDS[prec][0]} · {esc(TDS[prec][1])}</a>' if prec else "<span></span>") \
             + (f'<a href="{suiv}.html">{TDS[suiv][0]} · {esc(TDS[suiv][1])} →</a>' if suiv else "<span></span>") + "</nav>"
+    pats_td = PAT_PAR_TD.get(td, [])
+    chips_p = ('<p class="pats">🧩 Architectures de ce TD : ' + "".join(f'<a class="chip p" href="../architectures/{q}.html">{esc(PATTERNS[q]["title"])}</a>' for q in pats_td) + '</p>') if pats_td else ''
     head = (f'<header class="td-head"><p class="kicker">{num} · séance de 3 h · seul ou à deux</p><h1>{esc(theme)}</h1>'
-            f'<p class="livrable"><strong>Vous livrez :</strong> {esc(livrable)}</p>'
+            f'<p class="livrable"><strong>Vous livrez :</strong> {esc(livrable)}</p>{chips_p}'
             f'<div class="progress" data-prefix="{td}-" data-total="{total}"><div class="bar"><i></i></div><span class="pct">0 %</span></div></header>')
     corps = head + fiche + f'<article class="sujet">{h}</article>' + pager
     side = toc_html(tokens)
@@ -209,11 +220,25 @@ def build_td(td):
     add_search(f"{num} — {theme}", f"td/{td}.html", body_md, "TD")
     return total
 
-# ----------------------------------------------------------------------------- notions & recettes
+# ----------------------------------------------------------------------------- notions, recettes, patterns
 def usage_html(uses, root):
     if not uses: return ""
     items = "".join(f'<li><a href="{root}td/{td}.html">{TDS[td][0]}</a>{" · étape " + s if s.isdigit() else (" · avant la séance" if s == "avant" else "")}</li>' for td, s in uses)
     return f'<ul class="usage">{items}</ul>'
+
+PAT_PAR_NOTION = {k: [] for k in NOTIONS}; PAT_PAR_RECETTE = {k: [] for k in RECETTES}; PAT_PAR_TD = {k: [] for k in TDS}
+for pid, p in PATTERNS.items():
+    for n in lst(p.get("notions", "")): PAT_PAR_NOTION.setdefault(n, []).append(pid)
+    for r in lst(p.get("recettes", "")): PAT_PAR_RECETTE.setdefault(r, []).append(pid)
+    for t in lst(p.get("td", "")): PAT_PAR_TD.setdefault(t, []).append(pid)
+
+def liens_recettes(ids, root):
+    return '<div class="liens">' + "".join(
+        f'<a href="{root}recettes/{r}.html"><b>🍳 {esc(RECETTES[r]["title"])}</b><span>{esc(RECETTES[r].get("resume", ""))}</span></a>' for r in ids if r in RECETTES) + "</div>"
+
+def liens_patterns(ids, root):
+    return '<div class="liens">' + "".join(
+        f'<a href="{root}architectures/{p}.html"><b>🧩 {esc(PATTERNS[p]["title"])}</b><span>{esc(PATTERNS[p].get("resume", ""))}</span></a>' for p in ids if p in PATTERNS) + "</div>"
 
 def build_notions():
     cards = []
@@ -221,17 +246,20 @@ def build_notions():
         h, _ = md_render(n["body"])
         tds = sorted({td for td, _ in USAGE_N[nid]} | set(lst(n.get("td", ""))))
         rec = RECETTES_PAR_NOTION.get(nid, [])
-        cm = "".join(f"<li>{esc(x.strip())}</li>" for x in re.split(r"(?<=\))\s*;\s*|\s*;\s*", n.get("cm", "")) if x.strip())
-        corps = (f'<p class="kicker"><a href="index.html">Notions</a></p><h1>{esc(n["title"])}</h1><p class="lead">{esc(n.get("resume",""))}</p>'
+        if not rec: print("ATTENTION : notion sans recette :", nid)
+        cm = "".join(f"<li>{esc(x.strip())}</li>" for x in re.split(r"\s*;\s*", n.get("cm", "")) if x.strip())
+        haut = (f'<p class="aller">👉 <strong>Passer à la pratique :</strong> {chips(rec, "r", "../")}</p>' if rec else "")
+        pratique = (f'<section class="pratique"><h2>Passer à la pratique</h2><p>Vous avez compris la notion ? Mettez-la en œuvre avec :</p>{liens_recettes(rec, "../")}</section>' if rec else "")
+        pats = PAT_PAR_NOTION.get(nid, [])
+        patblock = (f'<section class="card"><h2 class="nodot">Architectures qui s\'appuient sur cette notion</h2>{liens_patterns(pats, "../")}</section>' if pats else "")
+        corps = (f'<p class="kicker"><a href="index.html">Notions</a></p><h1>{esc(n["title"])}</h1><p class="lead">{esc(n.get("resume",""))}</p>{haut}'
                  f'<div class="grid2"><section class="card"><h2 class="nodot">Dans le cours</h2><ul>{cm}</ul>'
                  f'<p class="note">Support de CM distribué en séance : repérez ces titres de diapositives.</p></section>'
-                 f'<section class="card"><h2 class="nodot">Où le retrouver en TD</h2>{usage_html(USAGE_N[nid], "../") or ""}'
-                 + ("<h3>Recettes liées</h3><ul>" + "".join(f'<li><a href="../recettes/{r}.html">{esc(RECETTES[r]["title"])}</a></li>' for r in rec) + "</ul>" if rec else "")
-                 + "</section></div>"
-                 f'<article class="prose">{h}</article>')
+                 f'<section class="card"><h2 class="nodot">Où le retrouver en TD</h2>{usage_html(USAGE_N[nid], "../") or ""}</section></div>'
+                 f'<article class="prose">{h}</article>{pratique}{patblock}')
         page(f"notions/{nid}.html", n["title"], corps)
         add_search(n["title"], f"notions/{nid}.html", n["body"] + " " + n.get("resume", ""), "Notion")
-        cards.append((nid, n, tds))
+        cards.append((nid, n, tds, rec))
     ordre = [("td1", "Spring Boot, en rappel (TD1)"), ("td2", "Parler à un modèle (TD2)"), ("td3", "Sources externes et contexte (TD3)"),
              ("td4", "Boucle d'agent (TD4)"), ("td5", "Agents à rôles (TD5)"), ("td6", "MCP et évaluation (TD6)")]
     sect = []
@@ -240,27 +268,86 @@ def build_notions():
         if not cs: continue
         sect.append(f'<h2 id="{td}">{titre}</h2><div class="cards">' + "".join(
             f'<a class="card link" href="{nid}.html"><h3>{esc(n["title"])}</h3><p>{esc(n.get("resume",""))}</p>'
-            f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in tds)}</p></a>' for nid, n, tds in cs) + "</div>")
+            f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in tds)}<span class="rec">🍳 {len(rec)} recette{"s" if len(rec) > 1 else ""}</span></p></a>' for nid, n, tds, rec in cs) + "</div>")
     page("notions/index.html", "Notions du cours",
-         '<h1>Notions du cours</h1><p class="lead">Chaque fiche rappelle l\'essentiel d\'une notion, dit où la retrouver dans les supports de CM, et renvoie aux étapes de TD qui la mobilisent.</p>' + "".join(sect))
+         '<h1>Notions du cours</h1><p class="lead">Chaque fiche explique une notion avec un schéma, un exemple de la clinique, les erreurs fréquentes et un auto-test, puis vous envoie vers les <strong>recettes</strong> qui la mettent en pratique.</p>'
+         '<p class="note">Parcours conseillé : <strong>notion</strong> (comprendre) → <strong>recette</strong> (faire) → <strong>architecture</strong> (savoir quand l\'utiliser).</p>' + "".join(sect))
 
 def build_recettes():
     for rid, r in RECETTES.items():
         h, _ = md_render(r["body"])
-        notions = lst(r.get("notions", ""))
+        notions = [n for n in lst(r.get("notions", "")) if n in NOTIONS]
+        if len(notions) < 2: print("ATTENTION : recette avec moins de 2 notions :", rid)
+        mob = ('<section class="mobilise"><h2>🧠 Notions mobilisées</h2><ul>' + "".join(
+            f'<li><a href="../notions/{n}.html"><strong>{esc(NOTIONS[n]["title"])}</strong></a> — {esc(NOTIONS[n].get("resume", ""))}</li>' for n in notions) + "</ul></section>") if notions else ""
+        pats = PAT_PAR_RECETTE.get(rid, [])
+        patblock = f'<section class="card"><h2 class="nodot">Architectures où cette recette sert</h2>{liens_patterns(pats, "../")}</section>' if pats else ""
         corps = (f'<p class="kicker"><a href="index.html">Recettes</a> · {" ".join(TDS[t][0] for t in lst(r.get("td","")) if t in TDS)}</p>'
-                 f'<h1>{esc(r["title"])}</h1><p class="lead">{esc(r.get("resume",""))}</p>'
-                 f'<article class="prose">{h}</article>'
-                 + (f'<section class="card"><h2 class="nodot">Pour comprendre</h2><p>{chips(notions, "n", "../")}</p></section>' if notions else "")
+                 f'<h1>{esc(r["title"])}</h1><p class="lead">{esc(r.get("resume",""))}</p>{mob}'
+                 f'<article class="prose">{h}</article>{patblock}'
                  + (f'<section class="card"><h2 class="nodot">Utilisée dans</h2>{usage_html(USAGE_R[rid], "../")}</section>' if USAGE_R[rid] else ""))
         page(f"recettes/{rid}.html", r["title"], corps)
         add_search(r["title"], f"recettes/{rid}.html", r["body"] + " " + r.get("resume", ""), "Recette")
     ordre = sorted(RECETTES.items(), key=lambda kv: (min([int(t[2:]) for t in lst(kv[1].get("td", "td9")) if t.startswith("td")] or [9]), kv[1]["title"]))
     cards = "".join(f'<a class="card link" href="{rid}.html"><h3>{esc(r["title"])}</h3><p>{esc(r.get("resume",""))}</p>'
-                    f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in lst(r.get("td","")) if t in TDS)}</p></a>' for rid, r in ordre)
+                    f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in lst(r.get("td","")) if t in TDS)}'
+                    f'<span class="rec">🧠 {len([n for n in lst(r.get("notions","")) if n in NOTIONS])} notions</span></p></a>' for rid, r in ordre)
     page("recettes/index.html", "Recettes",
-         '<h1>Recettes</h1><p class="lead">Des marches à suivre courtes : ingrédients, squelette de code, vérification, pièges. Les exemples sont <strong>hors clinique</strong> quand ils touchent à ce que vous devez écrire : ils montrent le geste, pas la solution.</p>'
+         '<h1>Recettes</h1><p class="lead">Des marches à suivre courtes : objectif, ingrédients, squelette de code, vérification, pièges. Chaque recette dit <strong>quelles notions elle mobilise</strong>. Les exemples sont <strong>hors clinique</strong> quand ils touchent à ce que vous devez écrire : ils montrent le geste, pas la solution.</p>'
          f'<div class="cards">{cards}</div>')
+
+FAMILLES = [("Outils et sources", "Donner au modèle de quoi lire ou agir"), ("Humain dans la boucle", "Garder la main sur les écritures"),
+            ("Enchaînements et boucles", "Du workflow fixe à l'agent qui décide"), ("Plusieurs agents", "Répartir les rôles"), ("Interopérabilité", "Brancher des outils venus d'ailleurs")]
+
+def build_patterns():
+    comp = []
+    for pid, p in PATTERNS.items():
+        h, _ = md_render(p["body"])
+        niv = int(p.get("niveau", "1") or 1)
+        tds = lst(p.get("td", ""))
+        notions = [n for n in lst(p.get("notions", "")) if n in NOTIONS]; recs = [r for r in lst(p.get("recettes", "")) if r in RECETTES]
+        meta = (f'<div class="pattern-meta"><div><small>Famille</small>{esc(p.get("famille", ""))}</div><div><small>Complexité</small><span class="niv">{"●" * niv}{"○" * (3 - niv)}</span></div>'
+                f'<div><small>Coût en tokens</small>{esc(p.get("cout", ""))}</div><div><small>Qui décide ?</small>{esc(p.get("controle", ""))}</div>'
+                f'<div><small>Vu en</small>{" ".join(f"<a href=\"../td/{t}.html\">{TDS[t][0]}</a>" for t in tds if t in TDS)}</div></div>')
+        aka = f'<p class="note">Aussi appelé : {esc(p["aka"])}</p>' if p.get("aka") else ""
+        bas = (f'<section class="mobilise"><h2>🧠 Notions à connaître</h2><ul>' + "".join(
+            f'<li><a href="../notions/{n}.html"><strong>{esc(NOTIONS[n]["title"])}</strong></a> — {esc(NOTIONS[n].get("resume",""))}</li>' for n in notions) + "</ul></section>") if notions else ""
+        pra = f'<section class="pratique"><h2>Pour l\'implémenter</h2>{liens_recettes(recs, "../")}</section>' if recs else ""
+        autres = [q for q in PATTERNS if q != pid and (set(lst(PATTERNS[q].get("notions", ""))) & set(lst(p.get("notions", ""))))][:4]
+        voisins = f'<section class="card"><h2 class="nodot">Patterns voisins</h2>{liens_patterns(autres, "../")}</section>' if autres else ""
+        corps = (f'<p class="kicker"><a href="index.html">Architectures</a> · design pattern</p><h1>{esc(p["title"])}</h1>{aka}<p class="lead">{esc(p.get("resume",""))}</p>{meta}'
+                 f'<article class="prose">{h}</article>{bas}{pra}{voisins}')
+        page(f"architectures/{pid}.html", p["title"], corps)
+        add_search(p["title"] + " (design pattern)", f"architectures/{pid}.html", p["body"] + " " + p.get("resume", "") + " " + p.get("aka", ""), "Architecture")
+        comp.append((pid, p, niv, tds))
+    lignes = "".join(f'<tr><td><a href="{pid}.html"><strong>{esc(p["title"])}</strong></a></td><td>{esc(p.get("probleme", p.get("resume", "")))}</td><td>{esc(p.get("controle", ""))}</td><td>{esc(p.get("cout", ""))}</td>'
+                     f'<td>{" ".join(TDS[t][0] for t in tds if t in TDS)}</td></tr>' for pid, p, niv, tds in comp)
+    sect = ""
+    for fam, sous in FAMILLES:
+        cs = [c for c in comp if c[1].get("famille") == fam]
+        if not cs: continue
+        sect += f'<h2>{fam}</h2><p class="note">{sous}</p><div class="cards">' + "".join(
+            f'<a class="card link" href="{pid}.html"><h3>{esc(p["title"])}</h3><p>{esc(p.get("resume", ""))}</p><p class="tags"><span class="niv">{"●" * niv}{"○" * (3 - niv)}</span>{"".join(f"<span>{TDS[t][0]}</span>" for t in tds if t in TDS)}</p></a>'
+            for pid, p, niv, tds in cs) + "</div>"
+    idx = ('<h1>Architectures d\'agents</h1><p class="lead">Les montages que nous explorons dans le cours, présentés comme des <strong>design patterns</strong> : une intention, un problème, une structure, une dynamique, des conséquences. Un pattern n\'est pas une recette de code : c\'est un choix d\'architecture que vous justifierez avec des mesures.</p>'
+           '\n\n{{fig:spectre}}\n\n'
+           '<h2>Choisir son pattern</h2><table><thead><tr><th>Votre besoin</th><th>Commencez par</th></tr></thead><tbody>'
+           '<tr><td>Le modèle doit consulter ou modifier des données de l\'application</td><td><a href="assistant-a-outils.html">Assistant à outils</a></td></tr>'
+           '<tr><td>Transformer un texte libre en décision exploitable par le code</td><td><a href="triage-structure.html">Triage structuré</a></td></tr>'
+           '<tr><td>Une écriture ne doit jamais partir sans validation humaine</td><td><a href="confirmation-humaine.html">Proposer, puis confirmer</a></td></tr>'
+           '<tr><td>Une source externe (API, agenda) rend les tests fragiles</td><td><a href="port-et-adaptateur.html">Port et adaptateur</a></td></tr>'
+           '<tr><td>Un gros corpus ne tient pas, ou coûte trop cher, dans le prompt</td><td><a href="outil-de-recherche.html">Outil de recherche</a></td></tr>'
+           '<tr><td>Le déroulé est connu à l\'avance</td><td><a href="chaine-de-prompts.html">Chaîne de prompts</a> (workflow)</td></tr>'
+           '<tr><td>Le déroulé dépend de ce que l\'on découvre en route</td><td><a href="agent-react.html">Agent ReAct</a>, <strong>avec</strong> <a href="boucle-bornee.html">boucle bornée</a></td></tr>'
+           '<tr><td>On veut limiter les erreurs d\'un agent</td><td><a href="acteur-critique.html">Acteur–critique</a></td></tr>'
+           '<tr><td>Une tâche se découpe en sous-tâches indépendantes</td><td><a href="superviseur-travailleurs.html">Superviseur–travailleurs</a></td></tr>'
+           '<tr><td>Un agent lit des textes écrits par des tiers</td><td><a href="moindre-privilege.html">Séparation des rôles et moindre privilège</a></td></tr>'
+           '<tr><td>Les outils sont fournis par un autre programme</td><td><a href="serveur-d-outils-mcp.html">Serveur d\'outils (MCP)</a></td></tr>'
+           '</tbody></table>' + sect +
+           '<h2>Comparer d\'un coup d\'œil</h2><table><thead><tr><th>Pattern</th><th>Problème résolu</th><th>Qui décide ?</th><th>Coût en tokens</th><th>Vu en</th></tr></thead><tbody>' + lignes + '</tbody></table>'
+           '<div class="callout"><strong>Règle d\'ingénieur.</strong> Prenez l\'architecture la plus simple qui résout le problème, puis <strong>mesurez</strong> avant d\'en changer. Au TD5, le workflow classique est la référence à laquelle comparer les agents ; au TD6, le score du jeu fait foi.</div>')
+    h, _ = md_render(idx)
+    page("architectures/index.html", "Architectures d'agents", h)
 
 # ----------------------------------------------------------------------------- pages transverses
 def collecter_sections(titre_h2):
@@ -356,7 +443,7 @@ def main():
         HtmlFormatter(style="default").get_style_defs(".codehilite") + "\n" +
         HtmlFormatter(style="monokai").get_style_defs('[data-theme="dark"] .codehilite'), encoding="utf-8")
     totaux = {td: build_td(td) for td in TDS}
-    build_notions(); build_recettes(); build_depannage(); build_ressources(); build_commun(); build_code(); build_index(totaux)
+    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_commun(); build_code(); build_index(totaux)
     add_search("Accueil", "index.html", "accueil parcours TD CM progression", "Accueil")
     (OUT / "assets" / "search-index.json").write_text(json.dumps(SEARCH, ensure_ascii=False), encoding="utf-8")
     (OUT / ".nojekyll").write_text("")

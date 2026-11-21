@@ -2,7 +2,7 @@
 title: Écrire un scénario d'agents en .md
 resume: Entrées, Agents, Graphe : le fichier minimal et les erreurs courantes.
 td: td5, td6
-notions: scenarios-md, agents-roles
+notions: scenarios-md, agents-roles, moindre-privilege
 ---
 ## Partir du modèle
 Copiez `scenarios/_modele.md` et renommez-le. Relisez `SCENARIOS.md` pour la syntaxe complète.

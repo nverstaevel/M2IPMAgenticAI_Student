@@ -4,7 +4,31 @@ resume: Un profil choisit le fournisseur de modèle ; les clés ne vont jamais d
 cm: CM1 — Rappel Spring Boot : Propriétés, profils, secrets ; Outillage : Trois précautions avec une API hébergée
 td: td1, td2, td6
 ---
-- `application.properties` : valeurs par défaut. `application-<profil>.properties` : surcharge activée par `--spring.profiles.active=<profil>` (plusieurs profils séparés par des virgules : `lmstudio,jeu`).
-- Les clés d'API viennent de **variables d'environnement** (`${GROQ_API_KEY}`) ou de `application-local.yml`, fichier ignoré par Git.
-- Un secret poussé sur GitHub est un secret perdu : révoquez la clé, même si vous supprimez le commit.
-- Un profil spécial, `simule`, remplace le modèle par une réponse déterministe : indispensable pour les tests.
+## L'idée
+Un **profil** Spring change la configuration sans changer le code. C'est ainsi que l'on choisit le fournisseur de modèle, et que l'on remplace le vrai modèle par un simulé.
+
+## Comprendre
+```
+application.properties            valeurs par défaut
+application-lmstudio.properties   surcharge activée par  --spring.profiles.active=lmstudio
+application-local.yml             vos secrets (ignoré par Git)
+```
+- Plusieurs profils se cumulent : `lmstudio,jeu`.
+- Les clés d'API viennent de **variables d'environnement** (`${GROQ_API_KEY}`) ou de `application-local.yml`.
+- **Un secret poussé sur GitHub est un secret perdu** : révoquez la clé, même si vous supprimez le commit.
+
+## Dans la clinique
+| Profil | Effet |
+|---|---|
+| `lmstudio`, `groq`, `claude`, `gemini` | choisit le fournisseur |
+| `simule` | modèle simulé déterministe (tests) |
+| `persistant` | mémoire de conversation en base |
+| `jeu` | active le client MCP (TD6) |
+
+## Erreurs fréquentes
+- Deux profils de **modèle** à la fois.
+- Faute de frappe dans le nom du profil : aucune erreur, simplement rien ne change. Cherchez *The following profiles are active* dans le log.
+
+## Auto-test
+Q: Où mettre une clé d'API ?
+R: Dans une variable d'environnement ou dans `application-local.yml` (ignoré par Git), jamais dans un fichier suivi.

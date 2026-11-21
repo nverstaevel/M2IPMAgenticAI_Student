@@ -2,7 +2,7 @@
 title: Interroger une base sans jamais laisser le modèle écrire du SQL
 resume: Requêtes paramétrées dans votre code, deuxième source de données avec son `@Qualifier`.
 td: td3
-notions: appel-outils, texte-tiers-injection
+notions: appel-outils, texte-tiers-injection, couches-spring
 ---
 ## Principe
 Le modèle fournit des **valeurs** (nom, espèce). Votre code contient le **SQL**, avec des paramètres nommés.

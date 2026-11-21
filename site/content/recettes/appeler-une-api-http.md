@@ -2,7 +2,7 @@
 title: Appeler une API HTTP depuis un outil
 resume: RestClient, en-tête User-Agent, gestion des erreurs, résultat court.
 td: td3
-notions: appel-outils, texte-tiers-injection, port-adaptateur
+notions: appel-outils, texte-tiers-injection, port-adaptateur, tester-sans-modele
 ---
 ## Squelette (exemple hors clinique)
 ```java

@@ -4,15 +4,39 @@ resume: Le modèle ne fait rien : il demande à l'application d'exécuter une m�
 cm: CM1 — Fondements : Du modèle à l’agent ; CM2 — Renvoyer peu, clairement
 td: td2, td3
 ---
-Un **outil** est une méthode Java que le modèle peut demander d'appeler. Le déroulé :
+## L'idée
+Un modèle ne *fait* rien : il **demande** à l'application d'exécuter une méthode, puis lit le résultat pour rédiger sa réponse.
 
-1. l'application envoie la question **et** la liste des outils (nom, description, paramètres) ;
-2. le modèle répond « appelle `rechercherProprietaires` avec `{"nom":"brume"}` » ;
-3. **l'application** exécute la méthode (le modèle n'exécute jamais rien) ;
-4. le résultat repart au modèle, qui rédige la réponse (ou demande un autre outil).
+## Comprendre
+{{fig:tool_calling}}
 
-En Spring AI : `@Tool(description = …)` sur la méthode, `@ToolParam(description = …)` sur les paramètres, `.defaultTools(bean)` sur le client.
+En Spring AI : `@Tool(description = …)` sur la méthode, `@ToolParam(description = …)` sur chaque paramètre, `.defaultTools(bean)` sur le client. Le modèle ne voit que : le **nom**, la **description** et les **paramètres**.
 
-**La description est ce que le modèle lit pour choisir.** Une description vague donne des appels au hasard. Précisez : ce que l'outil fait, ce qu'il renvoie, quand l'utiliser, un exemple de valeur pour chaque paramètre.
+**La description est tout.** C'est le seul indice dont le modèle dispose pour choisir.
 
-**Renvoyez peu** : un outil qui renvoie toute une table sature le contexte. Renvoyez le strict nécessaire, dans un format court.
+| Description faible | Description utile |
+|---|---|
+| « Recherche » | « Cherche des propriétaires par nom. Renvoie au plus 5 lignes (id, nom, téléphone). À utiliser avant de parler d'un propriétaire. » |
+| `String nom` | `@ToolParam(description = "Partie du nom, ex. « brume »")` |
+
+**Renvoyez peu** : un outil qui renvoie une table entière sature le contexte.
+
+## Dans la clinique
+`rechercherCreature`, `listerConsultations`, `consulterTarif`… chacun appelle un **service** (voir *Couches Spring*).
+
+## À retenir
+- Le modèle demande ; l'application exécute.
+- Description = quoi + renvoie quoi + quand + exemple de valeur.
+- Résultat court, format stable.
+
+## Erreurs fréquentes
+- Outil jamais appelé : description vague, ou modèle sans appel d'outils.
+- Argument inventé : pas d'exemple dans `@ToolParam`.
+- Outil qui **écrit** directement : à éviter (voir *Confirmation des écritures*).
+
+## Auto-test
+Q: Le modèle n'appelle jamais votre outil. Trois pistes ?
+R: 1) description trop vague ; 2) le prompt système ne dit pas quand l'utiliser ; 3) le modèle choisi ne gère pas l'appel d'outils.
+
+Q: Qui exécute la méthode Java ?
+R: L'application, pas le modèle.

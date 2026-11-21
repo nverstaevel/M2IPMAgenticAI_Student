@@ -2,8 +2,11 @@
 title: Isoler une dépendance externe (port + deux adaptateurs)
 resume: Une interface, une version réelle, une version simulée, choisies par profil.
 td: td3
-notions: port-adaptateur, tester-sans-modele
+notions: port-adaptateur, tester-sans-modele, profils-secrets
 ---
+## Le schéma
+{{fig:port_adaptateur}}
+
 ## Squelette
 ```java
 public interface AgendaPort {
