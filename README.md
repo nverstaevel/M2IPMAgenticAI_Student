@@ -1,5 +1,7 @@
 # M2IPMAgenticAI — Dépôt étudiants
 
+📚 **Site d'aide aux TD** (sujets, indices progressifs, notions du cours, recettes, dépannage) : <https://nverstaevel.github.io/M2IPMAgenticAI_Student/>
+
 Code fourni pour les TD « IA agentiques avec Spring AI » (M2 MIAGE IPM, Université Toulouse Capitole). Fil rouge : la clinique des créatures fantastiques du Dr Gribouille.
 
 | Dossier | TD | Ce que vous faites |
