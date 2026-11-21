@@ -2,7 +2,7 @@
 title: Profils Spring, propriétés et secrets
 resume: Un profil choisit le fournisseur de modèle ; les clés ne vont jamais dans Git.
 cm: CM1 — Rappel Spring Boot : Propriétés, profils, secrets ; Outillage : Trois précautions avec une API hébergée
-td: td1, td2, td6
+td: td2, td6
 ---
 ## L'idée
 Un **profil** Spring change la configuration sans changer le code. C'est ainsi que l'on choisit le fournisseur de modèle, et que l'on remplace le vrai modèle par un simulé.

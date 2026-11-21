@@ -2,7 +2,7 @@
 title: L'appel d'outils (tool calling)
 resume: Le modèle ne fait rien : il demande à l'application d'exécuter une méthode, puis lit le résultat.
 cm: CM1 — Fondements : Du modèle à l’agent ; CM2 — Renvoyer peu, clairement
-td: td2, td3
+td: td2, td3, td4
 ---
 ## L'idée
 Un modèle ne *fait* rien : il **demande** à l'application d'exécuter une méthode, puis lit le résultat pour rédiger sa réponse.

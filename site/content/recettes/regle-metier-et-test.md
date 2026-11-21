@@ -2,7 +2,7 @@
 title: Ajouter une règle métier au service et la tester
 resume: Écrire la règle dans le service, la signaler par une exception claire, la vérifier par un test.
 td: td1
-notions: couches-spring, spring-data-services, api-rest-validation, tester-sans-modele
+notions: couches-spring, spring-data-services, api-rest-validation
 ---
 ## Objectif
 Faire respecter « deux consultations ne se chevauchent pas » **au bon endroit**, avec un message utile et un test qui le prouve.

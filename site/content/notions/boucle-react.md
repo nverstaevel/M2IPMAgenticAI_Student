@@ -2,7 +2,7 @@
 title: La boucle d'agent ReAct
 resume: Raisonner, agir (appeler un outil), observer le résultat, recommencer jusqu'à pouvoir répondre.
 cm: CM2 — Penser, agir, observer ; Une exécution ReAct, dans le code
-td: td4
+td: td4, td6
 ---
 ## L'idée
 Un **agent** est une boucle autour du modèle : il raisonne, agit (appelle un outil), observe le résultat, et recommence jusqu'à pouvoir répondre.

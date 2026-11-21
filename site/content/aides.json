@@ -1,12 +1,8 @@
 {
  "td1": {
   "1": {
-   "notions": [
-    "profils-secrets"
-   ],
-   "recettes": [
-    "diagnostiquer-une-panne"
-   ],
+   "notions": [],
+   "recettes": [],
    "indices": [
     "Ouvrez le dossier `td1-clinique` (pas la racine du dépôt) dans votre IDE.",
     "Si l'application ne démarre pas, lisez la **première** erreur du log.",
@@ -75,11 +71,9 @@
   },
   "7": {
    "notions": [
-    "spring-data-services",
-    "tester-sans-modele"
+    "spring-data-services"
    ],
    "recettes": [
-    "tester-avec-modele-simule",
     "regle-metier-et-test"
    ],
    "indices": [
@@ -394,11 +388,11 @@
   "2": {
    "notions": [
     "agents-roles",
-    "texte-tiers-injection"
+    "moindre-privilege"
    ],
    "recettes": [
     "sortie-structuree",
-    "se-proteger-d-un-texte-piege"
+    "donner-ses-outils-a-un-role"
    ],
    "indices": [
     "Le critique n'a **qu'un** outil : `chercherDansWikipedia`. Aucun outil d'écriture.",
@@ -458,7 +452,8 @@
   },
   "7": {
    "notions": [
-    "evaluer-agent"
+    "evaluer-agent",
+    "workflow-ou-agent"
    ],
    "recettes": [
     "workflow-classique",
@@ -517,6 +512,7 @@
   "4": {
    "notions": [
     "agents-roles",
+    "moindre-privilege",
     "texte-tiers-injection"
    ],
    "recettes": [
