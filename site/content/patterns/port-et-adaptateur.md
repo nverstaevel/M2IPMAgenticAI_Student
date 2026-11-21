@@ -4,8 +4,8 @@ aka: Hexagonal architecture, gateway, test double
 famille: Outils et sources
 niveau: 1
 cout: aucun
-controle: le code (profil Spring)
-resume: Une interface côté domaine, un adaptateur réel et un adaptateur simulé choisis par profil.
+controle: le code (configuration Spring)
+resume: Une interface côté domaine, un adaptateur réel et un adaptateur simulé choisis par configuration.
 probleme: Tester et évaluer sans réseau ni compte.
 td: td3
 notions: port-adaptateur, tester-sans-modele, profils-secrets
@@ -24,12 +24,13 @@ Un agent qui appelle directement Google Agenda ne peut être testé ni sans comp
 | Participant | Rôle |
 |---|---|
 | Port (interface) | décrit ce dont le domaine a besoin |
-| Adaptateur réel | parle à l'extérieur (`@Profile("!simule")`) |
-| Adaptateur simulé | liste en mémoire (`@Profile("simule")`) |
+| Adaptateur réel | parle à l'extérieur (`GoogleAgendaAdapter`) |
+| Adaptateur simulé | liste en mémoire (`AgendaSimule`) |
+| Configuration | `AgendaConfig` choisit l'adaptateur selon `agenda.mode` |
 | Outil | ne connaît que le port |
 
 ## Dynamique
-Au démarrage, Spring active **un seul** adaptateur selon le profil. L'outil appelle le port ; le comportement est identique pour lui.
+Au démarrage, Spring crée **un seul** adaptateur, selon la propriété `agenda.mode` (`simule` par défaut). L'outil appelle le port ; le comportement est identique pour lui.
 
 ## Conséquences
 - Tests et évaluation **rapides, reproductibles, gratuits**.

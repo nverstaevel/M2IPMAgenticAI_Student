@@ -26,6 +26,11 @@ Deux manières d'enchaîner des appels au modèle : un **workflow** (le code dé
 - Le workflow classique est la **référence** à laquelle on compare un agent (TD5).
 - Autonomie ≠ qualité.
 
+## Erreurs fréquentes
+- Choisir un agent « parce que c'est moderne » : si le déroulé est connu, un workflow est moins cher et plus prévisible.
+- Comparer sur un seul essai : un agent varie, il faut plusieurs exécutions.
+- Oublier le coût de la maintenance : ajouter un cas à un workflow, c'est écrire du code ; à un agent, c'est parfois modifier un prompt.
+
 ## Auto-test
 Q: Le traitement d'une consultation suit toujours les mêmes quatre étapes. Workflow ou agent ?
 R: Workflow : le déroulé est connu, donc le code peut l'imposer, pour moins cher et plus sûr.

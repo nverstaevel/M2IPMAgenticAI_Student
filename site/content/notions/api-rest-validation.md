@@ -8,6 +8,9 @@ td: td1
 Le contrôleur **valide** ce qui entre et **traduit** les erreurs métier en codes HTTP lisibles. Il ne décide de rien d'autre.
 
 ## Comprendre
+
+{{fig:http_erreurs}}
+
 | Situation | Code | Comment |
 |---|---|---|
 | corps invalide (nom vide…) | 400 | `@Valid` + contraintes sur le `record` d'entrée |

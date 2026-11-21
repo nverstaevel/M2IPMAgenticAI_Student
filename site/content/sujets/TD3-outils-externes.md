@@ -2,7 +2,7 @@
 
 ## Objectifs de la séance
 
-Sortir de la clinique. Le Dr Gribouille gagne quatre outils qui vont chercher de l'information ou agir à l'extérieur : Wikipedia, un fichier Excel, une base de données de médicaments et Google Agenda. Une expérience chiffrée vous montre ensuite pourquoi il vaut mieux interroger une source que la verser entière dans le contexte.
+Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'information ou agir à l'extérieur, répartis sur quatre sources : Wikipedia, un fichier Excel, une base de données de médicaments et un agenda. Une expérience chiffrée vous montre ensuite pourquoi il vaut mieux interroger une source que la verser entière dans le contexte.
 
 À la fin de la séance, vous saurez :
 
@@ -12,7 +12,7 @@ Sortir de la clinique. Le Dr Gribouille gagne quatre outils qui vont chercher de
 4. **mesurer** l'effet de la taille du contexte (tokens, latence, coût, exactitude) et choisir entre « tout dans le prompt » et « outil de recherche » ;
 5. **repérer les textes écrits par un tiers** qui entrent dans le contexte du modèle : vous y reviendrez au TD6, quand l'agent lira des notes écrites par des tiers.
 
-**Vous avez réussi si** vos quatre outils répondent correctement à la grille de questions, si `mesures.csv` contient 20 lignes (10 questions × 2 stratégies) et si vous pouvez dire, chiffres à l'appui, à partir de quelle taille la stratégie A n'est plus raisonnable.
+**Vous avez réussi si** vos outils (Wikipedia, Excel, médicaments, agenda simulé) répondent correctement à la grille de questions, si `mesures.csv` contient 20 lignes (10 questions × 2 stratégies) et si vous pouvez dire, chiffres à l'appui, à partir de quelle taille la stratégie A n'est plus raisonnable.
 
 | Vous écrivez | Fourni dans le dossier de départ |
 | --- | --- |
@@ -20,8 +20,8 @@ Sortir de la clinique. Le Dr Gribouille gagne quatre outils qui vont chercher de
 
 ## Avant la séance
 
-- [ ] Copiez `td2-chat` en `td3-outils-externes` (ou prenez le dossier de reprise) et travaillez dans la copie.
-- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), le fichier du compte de service Google, et votre propre agenda de test (à créer : voir l'étape 4).
+- [ ] Partez du dossier de départ `td3-outils-externes` (il contient votre TD2 corrigé plus le code fourni) ou, pour garder votre propre TD2, copiez `td2-chat` en `td3-outils-externes` et ajoutez-y le code fourni. Travaillez dans la copie.
+- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), et, pour l'extension Google Agenda seulement, le fichier du compte de service Google.
 - [ ] Contrôlez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`.
 - [ ] Relisez dans le support de CM2 : *Ports et adaptateurs*, *Sources externes*, *Interroger plutôt que charger*.
 
@@ -77,16 +77,16 @@ La seconde source de données (`CatalogueConfig`) est déjà configurée : vous 
 
 ### Étape 4 — Google Agenda
 
-Ajoutez le client Google Calendar et authentifiez-vous avec le compte de service (créez d'abord votre agenda de test dans Google Agenda, partagez-le avec l'adresse du compte de service avec le droit « Apporter des modifications aux événements », puis notez son identifiant dans la configuration). Cachez la technique derrière une interface `AgendaPort` qui a deux implémentations : `GoogleAgendaAdapter` et `AgendaSimule`. Les tests et l'évaluation de TD utiliseront la seconde.
+L'agenda est caché derrière une interface `AgendaPort` qui a deux implémentations : `GoogleAgendaAdapter` (réel, fourni) et `AgendaSimule` (en mémoire). Les tests et l'évaluation de TD utilisent la seconde, parce qu'elle ne dépend ni du réseau ni d'un compte. Vous écrivez `AgendaSimule` et les deux outils ; l'essai avec l'agenda réel est une extension (voir « Extensions »).
 
-`AgendaPort` et `GoogleAgendaAdapter` sont fournis. Vous écrivez `AgendaSimule` (celui des tests et de l'évaluation de TD) et les deux outils. L'essai avec l'agenda réel est une extension.
+`AgendaSimule` démarre avec deux créneaux déjà occupés, le 3 décembre 2026 à 10 h et à 14 h 30 : utilisez ce jour pour vos tests.
 
 ```java
 public interface AgendaPort {
-    List<Creneau> evenementsDuJour(LocalDate jour);          // lecture
-    Evenement creer(Evenement e);                            // écriture : jamais appelée par un outil
+    List<LocalTime> creneauxLibres(LocalDate jour);                              // lecture : heures de début libres
+    String creerEvenement(String titre, LocalDateTime debut, int dureeMinutes);  // écriture : jamais appelée par un outil
 }
-// choix de l'implémentation par profil : @Profile("!simule") GoogleAgendaAdapter, @Profile("simule") AgendaSimule
+// choix de l'implémentation par la propriété agenda.mode : simule (défaut) ou google (classe AgendaConfig)
 ```
 
 | Outil | Comportement |
@@ -127,7 +127,7 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 | Symptôme | Cause fréquente | Que faire |
 | --- | --- | --- |
 | Wikipedia répond 403 | pas de `User-Agent` | ajouter un en-tête qui nomme votre application et un contact |
-| Erreur d'authentification Google | agenda non partagé avec le compte de service | vérifier l'identifiant de l'agenda et le partage ; sinon, profil `simule` |
+| Erreur d'authentification Google | agenda non partagé avec le compte de service | vérifier l'identifiant de l'agenda et le partage ; sinon, revenir à `agenda.mode=simule` |
 | Tokens à 0 dans les métadonnées | le fournisseur ne les annonce pas | estimer (1 token pour 4 caractères) et le noter dans le journal |
 | « context length exceeded » en stratégie A | corpus plus grand que la fenêtre du modèle | c'est un résultat : notez la taille qui fait échouer |
 | Le modèle n'appelle pas l'outil | description d'outil trop vague | reformuler la description et les `@ToolParam` |
@@ -142,14 +142,14 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 
 ## Livrable
 
-- Le dossier `td3-outils-externes` : quatre outils fonctionnels derrière leurs interfaces, un test unitaire par outil (réponse Wikipedia enregistrée, agenda simulé).
+- Le dossier `td3-outils-externes` : vos outils fonctionnels (Wikipedia, Excel, médicaments, agenda) derrière leurs interfaces, un test unitaire par outil (réponse Wikipedia enregistrée, agenda simulé).
 - `mesures.csv` et, dans `JOURNAL.md`, le tableau de synthèse de l'expérience avec cinq lignes de conclusion.
 
 ## Extensions
 
 Si le socle est terminé avant la fin de la séance :
 
-- essayez `GoogleAgendaAdapter` avec le compte de service et votre agenda de test (sans profil `simule`) ;
+- essayez `GoogleAgendaAdapter` : dans Google Agenda, créez un agenda vide dédié au TD, partagez-le avec l'adresse du compte de service (fournie en séance) avec le droit « Apporter des modifications aux événements », puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de votre agenda) et `agenda.google.credentials-file` (chemin du fichier du compte de service) dans `application-local.yml` ;
 - faites varier la position du passage utile (début, milieu, fin) et la quantité de texte parasite (aucune, moitié, double) avec la stratégie A, et notez les résultats dans le journal ;
 - implémentez la stratégie C (similarité) et comparez-la à B ;
 - écrivez vous-même `TarifsExcelReader` avec Apache POI avant de lire celui qui est fourni.

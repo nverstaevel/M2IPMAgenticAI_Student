@@ -15,6 +15,9 @@ mvn spring-boot:run -Dspring-boot.run.profiles=lmstudio,jeu
 mvn spring-boot:run -Dspring-boot.run.arguments=--spring.profiles.active=lmstudio,jeu
 ```
 
+## Vos réglages personnels
+Copiez `application-local.yml.example` en `application-local.yml` (ignoré par Git), puis ajoutez le profil `local` à la liste : `-Dspring-boot.run.profiles=lmstudio,local`. Sans ce profil, le fichier n'est pas lu.
+
 ## IDE (Spring Tools)
 *Run Configurations… → Spring Boot App → onglet Profile*, ou argument de programme `--spring.profiles.active=lmstudio,jeu`.
 
@@ -26,5 +29,6 @@ $env:GROQ_API_KEY="…"        # PowerShell
 
 ## Pièges
 - Un **seul** profil de modèle à la fois (`lmstudio` **ou** `groq`…).
-- Les profils se **cumulent** : `lmstudio,jeu`.
+- Les profils se **cumulent** : `lmstudio,jeu`. Le dernier de la liste l'emporte en cas de conflit.
+- `application-local.yml` n'est lu que si le profil `local` est actif.
 - Un profil qui n'existe pas ne provoque pas d'erreur : vérifiez l'orthographe dans les logs de démarrage (*The following profiles are active*).

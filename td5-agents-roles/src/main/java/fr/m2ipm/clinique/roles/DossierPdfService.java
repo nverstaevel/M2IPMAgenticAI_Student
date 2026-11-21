@@ -66,9 +66,9 @@ public class DossierPdfService {
             p.ligne("Patient : " + cas.creature() + " (" + cas.espece() + "), propriétaire : " + cas.proprietaire() + " (fictif)");
             p.ligne("Motif : " + cas.symptome());
             p.espace();
-            // TODO TD5 (étape 6) : un bloc par tour (sousTitre « Tour n », puis lignes : diagnostic, traitements,
+            // TODO TD5 (étape 5) : un bloc par tour (sousTitre « Tour n », puis lignes : diagnostic, traitements,
             // justification, verdict du gardien, objections, sources ; utilisez sure(...) pour les listes éventuellement nulles).
-            // TODO TD5 (étape 6) : section « Décision » : issue du duo (run.statut()), état de la validation humaine
+            // TODO TD5 (étape 5) : section « Décision » : issue du duo (run.statut()), état de la validation humaine
             // (run.validation(), et par qui / quand si run.validePar() n'est pas nul), et la mention qu'aucun traitement
             // n'est appliqué tant qu'un agent humain n'a pas validé le dossier.
             p.sousTitre("Annexe technique");

@@ -28,6 +28,11 @@ La page `/agents` dessine le **graphe réel** d'une exécution (pointillés = pr
 - On comprend un agent en **lisant**, pas en devinant.
 - Notez au moins **une trace commentée par échec** dans `JOURNAL.md`.
 
+## Erreurs fréquentes
+- Lire seulement la réponse finale : le chemin dit pourquoi l'agent s'est arrêté et ce qu'il a coûté.
+- Croire le « raisonnement » affiché : c'est un texte produit par le modèle, pas une explication fiable.
+- Comparer deux exécutions sans regarder les tokens et le motif d'arrêt.
+
 ## Auto-test
 Q: Un agent répond juste sans avoir appelé aucun outil. Bon signe ?
 R: Pas forcément : il a peut-être deviné. Vérifiez qu'un outil était nécessaire ; sinon c'est une « réponse sans preuve ».

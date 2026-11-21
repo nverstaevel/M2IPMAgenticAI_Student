@@ -38,3 +38,9 @@ Un test de service crée une consultation, tente d'en créer une qui chevauche, 
 La transaction est annulée (*rollback*) : aucune écriture partielle n'est conservée.
 
 </details>
+
+Q: Que fait Spring Data de la méthode `findByNomContainingIgnoreCase(String nom)` ?
+R: Il en déduit la requête à partir du nom : recherche partielle, insensible à la casse, sans que vous écriviez de SQL.
+
+Q: Pourquoi annoter une méthode d'écriture du service avec `@Transactional` ?
+R: Pour que la vérification et l'écriture forment un tout : en cas d'exception, rien n'est enregistré.

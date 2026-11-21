@@ -22,6 +22,11 @@ On ne tranche pas à l'intuition : on **mesure** (`mesures.csv` : tokens, latenc
 - La taille du corpus décide : petit → A suffit ; grand → B.
 - Mesurer, puis conclure avec des chiffres… et leurs limites.
 
+## Erreurs fréquentes
+- Chercher avec les mots de l'utilisateur, tels quels : « mon dragon tousse » ne contient peut-être pas le mot du passage. Faites reformuler en mots-clés.
+- Renvoyer des passages trop longs : le contexte regonfle et l'économie disparaît.
+- Croire que B est toujours meilleur : sur un petit corpus, tout charger est plus simple et plus fiable.
+
 ## Auto-test
 Q: Le corpus passe de 10 Ko à 1 Mo. Qu'est-ce qui change le plus pour A ?
 R: Le coût et la latence par question, proportionnels à la taille, et le risque que le passage utile soit noyé.

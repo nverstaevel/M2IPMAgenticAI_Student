@@ -8,12 +8,16 @@ td: td1, td2, td6
 Un **profil** Spring change la configuration sans changer le code. C'est ainsi que l'on choisit le fournisseur de modèle, et que l'on remplace le vrai modèle par un simulé.
 
 ## Comprendre
+
+{{fig:profils_config}}
+
 ```
 application.properties            valeurs par défaut
 application-lmstudio.properties   surcharge activée par  --spring.profiles.active=lmstudio
-application-local.yml             vos secrets (ignoré par Git)
+application-local.yml             vos réglages et secrets (ignoré par Git) : profil « local »
 ```
-- Plusieurs profils se cumulent : `lmstudio,jeu`.
+- Plusieurs profils se cumulent : `lmstudio,jeu`. En cas de conflit, le **dernier** profil de la liste l'emporte.
+- `application-local.yml` n'est lu **que si le profil `local` est actif** : `--spring.profiles.active=lmstudio,local`. Sans lui, vos réglages sont ignorés, sans message d'erreur.
 - Les clés d'API viennent de **variables d'environnement** (`${GROQ_API_KEY}`) ou de `application-local.yml`.
 - **Un secret poussé sur GitHub est un secret perdu** : révoquez la clé, même si vous supprimez le commit.
 
@@ -27,6 +31,7 @@ application-local.yml             vos secrets (ignoré par Git)
 
 ## Erreurs fréquentes
 - Deux profils de **modèle** à la fois.
+- Oublier d'activer le profil `local` : votre `application-local.yml` existe mais n'est pas lu.
 - Faute de frappe dans le nom du profil : aucune erreur, simplement rien ne change. Cherchez *The following profiles are active* dans le log.
 
 ## Auto-test

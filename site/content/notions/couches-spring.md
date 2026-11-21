@@ -20,7 +20,7 @@ Une application Spring Boot se range en quatre couches. Chacune a **une** respon
 **Pourquoi tant de rigueur ?** Parce qu'au TD2 un *deuxième client* arrive : le modèle de langage. Ses outils appellent les **services**. Si la règle « pas de chevauchement de consultations » est dans le service, elle protège l'API REST *et* l'agent. Si elle était dans le contrôleur, l'agent la contournerait.
 
 ## Dans la clinique
-`planifierConsultation(...)` vit dans `ClinicService`. Elle vérifie que le soigneur soigne l'espèce, que le créneau est libre, puis enregistre. Le contrôleur ne fait que traduire l'exception `ConflitDeCreneauException` en code 409.
+`planifierConsultation(...)` vit dans `CliniqueService`. Elle vérifie que le soigneur soigne l'espèce, que le créneau est libre, puis enregistre. Le contrôleur ne fait que traduire l'exception `ConflitDeCreneauException` en code 409.
 
 ## À retenir
 - Une règle métier = **un seul endroit** : le service.

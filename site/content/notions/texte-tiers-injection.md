@@ -25,6 +25,11 @@ TD3 : les pages Wikipédia. TD6 : les **notes des propriétaires** du jeu, écri
 - Un texte non maîtrisé est une surface d'attaque.
 - La meilleure défense est **structurelle** (outils, confirmation), pas seulement un prompt.
 
+## Erreurs fréquentes
+- Croire qu'une consigne placée avant le texte tiers suffit à s'en protéger.
+- Oublier que **tout** texte venu d'ailleurs compte : page Wikipédia, note d'un propriétaire, résultat d'un outil MCP.
+- Protéger la lecture et oublier l'écriture : c'est l'écriture qui fait des dégâts.
+
 ## Auto-test
 Q: Un agent qui lit une note piégée n'a aucun outil d'écriture. Est-il en danger ?
 R: Beaucoup moins : il peut mal répondre, mais pas écrire. C'est le principe du moindre privilège.

@@ -8,6 +8,9 @@ td: td5, td6
 Une architecture d'agents se **décrit** dans un fichier Markdown de trois sections ; le moteur le lit, dessine le graphe et l'exécute.
 
 ## Comprendre
+
+{{fig:md_graphe}}
+
 ```markdown
 # Titre du scénario
 
@@ -40,6 +43,11 @@ humain -> fin
 ## À retenir
 - On change d'architecture en **éditant un fichier**, sans recompiler.
 - *Aperçu* (pointillés) avant *Lancer* (graphe réel).
+
+## Erreurs fréquentes
+- Un nom d'agent dans le graphe qui ne correspond pas au nom du bean : le scénario est marqué ⚠.
+- Une boucle sans étiquette (`REJETE (max 2)`) : le moteur la refuse.
+- Écrire le comportement des agents dans le `.md` : il ne câble que le graphe et les outils autorisés ; le comportement reste en Java.
 
 ## Auto-test
 Q: Votre scénario affiche « agent inconnu ». Où regarder ?

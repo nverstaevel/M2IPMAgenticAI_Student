@@ -244,6 +244,58 @@ def evaluation():
     b += A([(150, 75), (220, 100)]) + A([(150, 145), (220, 130)]) + A([(370, 90), (420, 75)]) + A([(370, 130), (420, 145)]) + A([(570, 75), (620, 100)]) + A([(570, 145), (620, 120)])
     return svg(190, b, "Comparer des architectures", "Un essai ne prouve rien : on rejoue, on mesure la dispersion, on lit les traces.")
 
+@fig
+def http_erreurs():
+    b = B(10, 40, 130, 44, "Service lève\nune exception") + N(75, 102, "règle métier ou\ndonnée absente", "middle")
+    b += B(195, 6, 150, 140, "@RestControllerAdvice\ntraduit chaque\nexception en\nréponse HTTP", "acc")
+    b += A([(140, 62), (195, 62)])
+    rows = [("404", "« Aucune créature d'identifiant 42 »"), ("409", "« Le soigneur 3 est déjà pris le 12/03 »"), ("400", "« Le motif est obligatoire »")]
+    for i, (code, msg) in enumerate(rows):
+        y = 18 + i * 44
+        b += A([(345, 76), (385, y + 17)])
+        b += B(385, y, 56, 34, code, "warn") + N(452, y + 17, msg, "start", "t s")
+    return svg(170, b, "Des exceptions aux codes HTTP", "Le contrôleur ne contient aucun try/catch : une exception métier devient un code HTTP et une phrase lisible, par l'humain comme par le modèle.")
+
+@fig
+def profils_config():
+    b = N(20, 18, "plus la couche est basse, plus elle gagne", "start", "t s")
+    layers = [("application.properties", "valeurs par défaut, dans Git"),
+              ("application-<profil>.properties", "un fournisseur, le simulé, le jeu (profil actif)"),
+              ("application-local.yml", "profil « local » : vos réglages, ignoré par Git"),
+              ("variables d'environnement", "les clés d'API : jamais dans un fichier versionné")]
+    for i, (nom, d) in enumerate(layers):
+        y = 34 + i * 58
+        b += B(20 + i * 12, y, 330, 44, nom, "acc" if i == 3 else "")
+        b += N(370 + i * 12, y + 22, d, "start", "t s")
+    b += A([(8, 40), (8, 240)], cls="")
+    return svg(272, b, "Ordre des sources de configuration", "Une valeur définie plus bas écrase la même valeur définie plus haut : c'est pourquoi une clé en variable d'environnement l'emporte sans toucher au code.")
+
+@fig
+def md_graphe():
+    b = B(10, 10, 250, 150, "", "")
+    for i, l in enumerate(["## Entrées", "- cas : 1 = Cas 1 | 2 = Cas 2", "## Agents", "- veterinaire : outils dossier", "- gardien : outils bestiaire", "## Graphe", "entrée -> veterinaire -> gardien"]):
+        b += N(26, 30 + i * 19, l, "start", "t s")
+    b += N(135, 180, "le fichier .md", "middle", "t s")
+    b += A([(260, 85), (330, 85)], "lecture", cls="")
+    b += B(330, 14, 120, 30, "Entrée", "") + B(330, 64, 120, 30, "veterinaire", "acc") + B(330, 114, 120, 30, "gardien", "acc")
+    b += A([(390, 44), (390, 64)]) + A([(390, 94), (390, 114)])
+    b += A([(450, 129), (480, 129), (480, 79), (450, 79)], cls="bad dash")
+    b += N(490, 104, "REJETE\n(max 2)", "start", "t s bad")
+    b += N(390, 168, "le graphe : le câblage", "middle", "t s")
+    b += B(560, 46, 150, 64, "code Java :\nbeans Agent\n(le comportement)", "warn")
+    b += A([(560, 78), (542, 78)], cls="dash")
+    return svg(196, b, "Du fichier .md au graphe", "Le .md décrit qui parle à qui et avec quels outils ; ce que fait chaque agent reste écrit en Java.")
+
+@fig
+def securite_roles():
+    b = B(20, 14, 120, 40, "visiteur\nrôle LECTURE") + B(20, 84, 120, 40, "gribouille\nrôle PERSONNEL", "acc")
+    b += B(300, 6, 160, 30, "GET /api/**", "") + B(300, 50, 160, 30, "POST /api/** (écriture)", "") + B(300, 94, 190, 30, "POST …/confirmer", "warn")
+    b += A([(140, 28), (300, 21)], "200") + A([(140, 38), (300, 65)], "403", cls="bad dash")
+    b += A([(140, 98), (300, 21)], "") + A([(140, 104), (300, 65)], "") + A([(140, 110), (300, 109)])
+    b += N(520, 109, "réservé au personnel :\nle modèle n'a pas ce droit", "start", "t s")
+    b += N(20, 150, "401 = je ne sais pas qui vous êtes   ·   403 = je sais qui vous êtes, mais vous n'avez pas le droit", "start", "t s")
+    return svg(170, b, "Rôles et accès aux URL", "L'identité (qui ?) et le droit (quoi ?) sont deux questions distinctes : 401 et 403.")
+
 def render(name):
     f = FIG.get(name)
     return f() if f else f"<p>[figure inconnue : {e(name)}]</p>"

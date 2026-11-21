@@ -14,6 +14,9 @@ mvn spring-boot:run          # ajoutez -Dspring-boot.run.profiles=simule pour tr
 mvn test
 ```
 
+## Agenda réel (extension)
+Par défaut `agenda.mode=simule` : l'agenda est `AgendaSimule`, en mémoire. Pour essayer Google Agenda, créez un agenda de test vide, partagez-le avec l'adresse du compte de service, puis renseignez dans `application-local.yml` : `agenda.mode: google`, `agenda.google.calendar-id`, `agenda.google.credentials-file`. Le fichier du compte de service ne va jamais dans Git.
+
 ## Remarques
 Les tests `OutilsExternesTest`, `WikipediaClientTest`, `ExperienceContexteTest` décrivent le comportement attendu.
 

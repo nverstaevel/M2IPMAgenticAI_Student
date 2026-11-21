@@ -17,7 +17,7 @@
 
 ## Avant la séance
 
-- [ ] Copiez `td3-outils-externes` en `td4-agent-react` (ou prenez le dossier de reprise) et travaillez dans la copie.
+- [ ] Partez du dossier de départ `td4-agent-react` (il contient votre TD3 corrigé plus le code fourni) ou, pour garder votre propre TD3, copiez `td3-outils-externes` en `td4-agent-react` et ajoutez-y le code fourni. Travaillez dans la copie.
 - [ ] Lancez l'application avec le profil de votre fournisseur, puis vérifiez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`. Sans modèle disponible, utilisez le profil `simule` : toutes les étapes de ce sujet restent faisables, avec des réponses déterministes.
 - [ ] Ouvrez `http://localhost:8080/agents` (gribouille/gribouille). La page est vide pour l'instant : c'est normal, elle se remplira dès que votre boucle tournera (étape 1).
 - [ ] Relisez dans le support de CM2 : *Penser, agir, observer*, *Quand s'arrêter*, *Lire une trace*.
@@ -107,7 +107,7 @@ Le test de boucle détectée se pilote avec le modèle simulé : `outil:NOM:{jso
 
 Cette partie est déjà écrite dans le squelette : lisez-la pour comprendre ce que la page `/agents` reçoit. Extension : réécrivez-la vous-même.
 
-La page `/agents` dessine ce que vous publiez dans `SuiviExecution`. Quatre appels suffisent :
+La page `/agents` dessine ce que vous publiez dans `SuiviExecution`. Cinq appels suffisent (`demarrer`, `noeud`, `maj`, `jetons`, `terminer`) :
 
 ```java
 suivi.demarrer(runId, "ReAct : " + abreger(demande));                       // début de l'exécution

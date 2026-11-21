@@ -11,7 +11,7 @@ Ordre des séances : CM1, TD1, TD2, CM2, TD3, TD4, TD5, CM3, TD6, CM4. Le CM2 co
 | --- | --- | --- |
 | TD1 | Application Spring Boot classique | La clinique, sans IA |
 | TD2 | Un chat qui interroge l'application | Le Dr Gribouille et ses outils internes |
-| TD3 | Outils externes et contexte | Quatre outils et un tableau de mesures |
+| TD3 | Outils externes et contexte | Des outils externes et un tableau de mesures |
 | TD4 | Agent ReAct | Une boucle d'agent et ses traces commentées |
 | TD5 | Agents à rôles | Un duo vétérinaire / gardien du bestiaire et un dossier PDF |
 | TD6 | Le jeu de la clinique en MCP | Des architectures d'agents qui jouent, comparées par leurs scores |
@@ -20,7 +20,7 @@ Les TD ne sont pas notés, mais l'évaluation de TD (CM4, 1 h sur machine) porte
 
 ## Comment est construit chaque sujet
 
-Tous les sujets suivent le même plan, pour que vous puissiez les faire en autonomie :
+Tous les sujets suivent le même plan, pour que vous puissiez les faire en autonomie. Le site d'aide du dépôt étudiant (<https://nverstaevel.github.io/M2IPMAgenticAI_Student/>) reprend ces sujets et ajoute, pour chaque étape, des rappels de cours, des recettes pas à pas, des schémas et des indices à ouvrir seulement si vous êtes bloqué :
 
 | Section | Ce que vous y trouvez |
 | --- | --- |
@@ -37,6 +37,7 @@ Un **point de contrôle** est une vérification que vous pouvez faire seul (une 
 ## Outils communs
 
 - **Fournisseur de modèle.** Du TD2 au TD6, choisissez un fournisseur (Ollama ou LM Studio en local, ou une API : Claude, Gemini, Groq) par un profil Spring. Le tableau et les commandes sont au TD2. Le contrôle est toujours le même : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`.
+- **Profil `simule`.** Sans modèle disponible, ce profil remplace le modèle par une réponse déterministe : il sert aux tests et à travailler hors ligne. Il ne dit rien de la qualité d'un vrai modèle.
 - **Page `/agents`** (à partir du TD4). Elle dessine le graphe d'exécution d'un agent : étapes, appels d'outils, retours, tokens, durée. Elle sert à lire une trace, à comparer ce qui était prévu et ce qui s'est passé, et à rejouer un scénario. Ouvrez-la dès que vous voulez comprendre pourquoi un agent a fait ce qu'il a fait.
 - **Scénarios en Markdown** (TD5, TD6). Une architecture d'agents se décrit dans un fichier `.md` du dossier `scenarios/` : trois sections : Entrées, Agents (beans Java et outils autorisés) et Graphe, dessiné avec des flèches (a -> b, boucles avec max). `SCENARIOS.md` explique le format et `scenarios/_modele.md` est un point de départ à copier.
 - **Suivi de l'exécution.** Les classes `SuiviExecution` et `SuiviOutils` du dossier fourni enregistrent les étapes, les tokens et les erreurs. Un outil appelé plus de 15 fois dans une même exécution est coupé : c'est un garde-fou, pas un bug.
@@ -56,7 +57,7 @@ Le journal sert à deux moments : l'analyse critique du TD6 et la préparation d
 
 - **Secrets.** Clés d'API et fichier du compte de service Google ne vont jamais dans Git. Utilisez des variables d'environnement ou un fichier `application-local.yml`, déjà ignoré par le `.gitignore` fourni.
 - **Données.** Uniquement des données fictives. N'écrivez jamais de donnée personnelle réelle dans un prompt, surtout vers un modèle hébergé.
-- **Agenda.** Créez votre propre agenda de test (un agenda vide, dédié à la séance) et n'utilisez que lui. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
+- **Agenda.** Le TD3 travaille avec un agenda simulé en mémoire. Si vous essayez l'agenda Google réel (extension), créez votre propre agenda de test, vide, et n'utilisez que lui. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
 - **Budget.** Un modèle hébergé a un plafond de dépense. Surveillez les tokens consommés dès le TD2.
 - **Actions d'écriture.** Le modèle ne décide jamais seul d'écrire en base ou dans l'agenda : une confirmation passe par un endpoint distinct, que le modèle ne peut pas appeler (introduit au TD2).
 - **Assistants IA.** Libres en TD, pour apprendre. Notez dans le journal ce que vous avez demandé et ce que vous avez vérifié. Interdits pendant les évaluations.

@@ -11,14 +11,18 @@ La clinique ne vit plus seule : une seconde application, le jeu **Clinique du be
 3. **décrire une architecture d'agents qui joue** dans un fichier `.md`, avec les outils autorisés pour chaque rôle ;
 4. **comparer vos architectures** par des parties mesurées (même graine, mêmes patients) et en tirer une analyse chiffrée.
 
-**Fourni** : le module `jeu-bestiaire` (ne le modifiez pas), le lanceur de partie (`JoueurService`, `POST /api/agent/jeu/partie`), le moteur de scénarios du TD5. **Vous écrivez** : la connexion MCP, le groupe d'outils `jeu`, les agents et les fichiers `.md` de vos architectures, `ANALYSE.md`.
+**Vous avez réussi si** trois architectures (Gribouille seul, l'équipe, la vôtre) ont joué les mêmes trois parties, et si `ANALYSE.md` contient au moins trois affirmations, chacune appuyée par une mesure et accompagnée de sa limite.
+
+| Vous écrivez | Fourni dans le dossier de départ |
+| --- | --- |
+| `JeuMcp` (accès aux outils MCP du jeu), le groupe d'outils `jeu` dans `OutilsDisponibles`, les agents de l'équipe (classe `AgentsJeu`), vos fichiers `scenarios/*.md`, `ANALYSE.md` | le module `jeu-bestiaire` (ne le modifiez pas), le starter client MCP dans le `pom.xml`, `application-jeu.properties`, le lanceur de partie (`JoueurService`, `POST /api/agent/jeu/partie`), le moteur de scénarios du TD5 et vos agents du TD5 (`AgentsExemples`) |
 
 ## Avant la séance
 
-- Le TD5 est terminé. Prenez le dossier td6-mcp-jeu du dépôt M2IPMAgenticAI\_Student (cloné ou téléchargé en ZIP) (le dossier jeu-bestiaire, le jeu, est fourni à côté), ou, pour garder votre code, copiez votre dossier `td5-agents-roles` en `td6-mcp-jeu`.
-- Un modèle est disponible (Ollama, LM Studio ou API) : le jeu fait beaucoup d'appels, préférez un modèle local rapide ou un fournisseur gratuit.
-- Java 21, Maven, et le port 8090 libre (le jeu) en plus du 8080 (la clinique).
-- Lisez `SCENARIOS.md` (5 minutes) et les diapositives du CM3.
+- [ ] Le TD5 est terminé. Prenez le dossier `td6-mcp-jeu` du dépôt M2IPMAgenticAI\_Student (cloné ou téléchargé en ZIP ; le dossier `jeu-bestiaire`, le jeu, est fourni à côté), ou, pour garder votre code, copiez votre dossier `td5-agents-roles` en `td6-mcp-jeu` et ajoutez-y le code fourni.
+- [ ] Un modèle est disponible (Ollama, LM Studio ou API) : le jeu fait beaucoup d'appels, préférez un modèle local rapide ou un fournisseur gratuit. Contrôle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` répond `"statut":"OK"`.
+- [ ] Java 21, Maven, et le port 8090 libre (le jeu) en plus du 8080 (la clinique).
+- [ ] Lisez `SCENARIOS.md` (5 minutes) et les diapositives du CM3 (protocole MCP, confiance, évaluation).
 
 ## Ressources
 
@@ -26,8 +30,8 @@ La clinique ne vit plus seule : une seconde application, le jeu **Clinique du be
 | --- | --- |
 | `jeu-bestiaire/README.md` | règles du jeu, outils, démarrage, remise à zéro |
 | `SCENARIOS.md` et `scenarios/_modele.md` | syntaxe du graphe, outils autorisés, boucles |
-| `scenarios/jeu-gribouille-seul.md` et `jeu-equipe.md` | deux architectures complètes, à lire avant d'écrire la vôtre |
-| `AgentsExemples`, `AgentsJeu` | modèles d'agents Java (un bean `Agent` par rôle) |
+| Les deux fichiers `.md` donnés dans les étapes 3 et 4 de ce sujet | deux architectures complètes, à recopier puis à comprendre avant d'écrire la vôtre |
+| `AgentsExemples` (vos agents du TD5) | modèles d'agents Java : un bean `Agent` par rôle, avec ses outils autorisés par le `.md` |
 | MCP Inspector (`npx @modelcontextprotocol/inspector`) | explorer le serveur du jeu sans écrire de code |
 | [Spring AI, client MCP](https://docs.spring.io/spring-ai/reference/2.0/api/mcp/mcp-client-boot-starter-docs.html) | propriétés du starter client |
 | [Spring AI, serveur MCP Streamable HTTP](https://docs.spring.io/spring-ai/reference/2.0/api/mcp/mcp-streamable-http-server-boot-starter-docs.html) | ce que fait le jeu côté serveur |
@@ -43,7 +47,7 @@ La clinique ne vit plus seule : une seconde application, le jeu **Clinique du be
 | 5. Votre architecture | 40 min | un troisième scénario `.md` | une partie jouée, comparée aux deux autres |
 | 6. Comparer | 30 min | tableau de scores et `ANALYSE.md` | trois graines, trois architectures, chiffres |
 
-Si le temps manque, les étapes 1 à 4 sont indispensables. Terminez 5 et 6 chez vous (environ 1 h 30).
+Si le temps manque, les étapes 1 à 4 sont indispensables. Terminez 5 et 6 chez vous (environ 1 h 10).
 
 ### Étape 1 — Lancer et explorer
 
@@ -57,29 +61,27 @@ Règles à retenir : 5 points d'action par jour (examiner et soigner en coûtent
 
 ### Étape 2 — Connecter la clinique
 
-Ajoutez le starter client dans le `pom.xml` :
-
-```xml
-<dependency>
-  <groupId>org.springframework.ai</groupId>
-  <artifactId>spring-ai-starter-mcp-client</artifactId>
-</dependency>
-```
-
-Dans `application.properties`, désactivez le client par défaut (la clinique doit démarrer sans le jeu), puis créez `application-jeu.properties` :
+Le starter client est déjà dans le `pom.xml` (`spring-ai-starter-mcp-client`). Deux fichiers de configuration sont fournis : lisez-les, ils expliquent la connexion.
 
 ```properties
-# application.properties
+# application.properties : le client est désactivé par défaut (la clinique doit démarrer sans le jeu)
 spring.ai.mcp.client.enabled=false
 
-# application-jeu.properties
+# application-jeu.properties : le profil « jeu » l'active et indique où se trouve le serveur
 spring.ai.mcp.client.enabled=true
-spring.ai.mcp.client.streamable-http.connections.jeu.url=http://localhost:8090
+spring.ai.mcp.client.streamable-http.connections.jeu.url=${JEU_URL:http://localhost:8090}
 spring.ai.mcp.client.request-timeout=60s
-agent.budget-tokens=200000
+agent.budget-tokens=200000          # une partie fait beaucoup d'appels : budget relevé
 ```
 
-Écrivez `JeuMcp`, un composant qui reçoit le `ToolCallbackProvider` publié par le starter et expose `outils()` (les `ToolCallback` du jeu) et `appeler(nom, json)`. Un outil MCP distant est un `ToolCallback` comme un autre : c'est tout ce que vous avez à retenir.
+Ce que vous écrivez : les quatre méthodes de `JeuMcp` (marquées `TODO TD6`). La classe reçoit le `ToolCallbackProvider` publié par le starter (dans un `ObjectProvider`, car il n'existe que si le profil `jeu` est actif). Un outil MCP distant est un `ToolCallback` comme un autre : c'est tout ce que vous avez à retenir.
+
+| Méthode | Ce qu'elle fait |
+| --- | --- |
+| `outils()` | les `ToolCallback` publiés par le jeu, ou un tableau vide si le profil n'est pas actif |
+| `connecte()` | vrai si `outils()` n'est pas vide |
+| `appeler(nom, json)` | trouve l'outil par son nom (`getToolDefinition().name()`) et l'appelle avec les arguments JSON |
+| `etat()` | appelle `etat_clinique` et lit les champs avec les méthodes `entier` et `booleen` fournies |
 
 Lancez la clinique avec le profil `jeu` en plus de votre profil de modèle, par exemple `--spring.profiles.active=lmstudio,jeu`.
 
@@ -87,9 +89,9 @@ Lancez la clinique avec le profil `jeu` en plus de votre profil de modèle, par 
 
 ### Étape 3 — Gribouille seul
 
-Dans `OutilsDisponibles`, ajoutez le groupe **`jeu`** : l'ensemble des outils découverts par MCP, interrogés à chaque usage (le serveur peut démarrer après la clinique). Les noms d'outils isolés (`soigner`, `fiche_espece`…) deviennent aussi utilisables dans un `.md`.
+Dans `OutilsDisponibles` (repère `TODO TD6`), ajoutez le groupe **`jeu`** : l'ensemble des outils découverts par MCP, interrogés à chaque usage (le serveur peut démarrer après la clinique). Les noms d'outils isolés (`soigner`, `fiche_espece`…) deviennent aussi utilisables dans un `.md`.
 
-Créez `scenarios/jeu-gribouille-seul.md` :
+Créez `src/main/resources/scenarios/jeu-gribouille-seul.md` (les scénarios sont lus à cet endroit, et dans `scenarios/` à côté du `pom.xml`) :
 
 ```markdown
 # Gribouille joue seul (ReAct)
@@ -126,7 +128,21 @@ gardien -> apothicaire : APPROUVE, DOUTE, REJETE
 apothicaire -> fin
 ```
 
-Écrivez les trois beans (modèle : `AgentsJeu`, qui s'inspire de `AgentsExemples`). Deux détails qui font gagner du temps : le texte transmis à l'agent suivant est la sortie de l'agent précédent, donc le gardien doit **recopier le plan** dans sa réponse, avec son verdict ; et le diagnosticien, relancé après un rejet, doit retrouver la consigne d'origine (`e.donnee("demande", …)`).
+Écrivez les trois beans dans une nouvelle classe `jeu/AgentsJeu` (annotée `@Configuration`), en vous inspirant de `veterinaire`, `gardien` et `travailleur` dans `AgentsExemples`. La structure est la même pour les trois :
+
+```java
+@Bean("diagnosticien")
+Agent diagnosticien(ChatClient.Builder builder) {
+    ChatClient client = builder.clone().defaultAdvisors(ComptageJetons.advisor()).build();
+    return e -> Resultat.texte(client.prompt()
+            .system("Tu es le diagnosticien… (rôle, format du plan, règles du jeu)")
+            .user(e.donnee("demande", e.texte()))        // la consigne d'origine, même après un rejet
+            .toolCallbacks(e.outilsAutorises())          // uniquement les outils que le .md autorise
+            .call().content());
+}
+```
+
+Pour le gardien, la réponse est structurée (un `record Avis(String verdict, List<String> objections)` lu avec `.entity(Avis.class)`) et vous la convertissez en `Resultat`. Deux détails qui font gagner du temps : le texte transmis à l'agent suivant est la sortie de l'agent précédent, donc le gardien doit **recopier le plan** dans sa réponse, avec son verdict ; et le diagnosticien, relancé après un rejet, doit retrouver la consigne d'origine (`e.donnee("demande", …)`) et les objections (`e.retours()`).
 
 **Point de contrôle** : sur le graphe d'une journée, un rejet du gardien fait repasser par le diagnosticien (`diagnosticien-2`), et l'apothicaire n'agit qu'après un avis.
 
@@ -171,9 +187,16 @@ Dans `ANALYSE.md`, une page : ce que vous affirmez, la mesure qui le montre, la 
 | Le score est le même qu'une partie passive | l'agent ne soigne pas (outil non autorisé) | lire la trace : quels outils a-t-il vus ? |
 | Port 8090 déjà pris | ancien jeu encore lancé | l'arrêter, ou `--server.port=…` et `JEU_URL` |
 
+## Questions de réflexion
+
+1. Qu'est-ce qui change quand un outil vient d'un autre programme par MCP ? Qu'est-ce qui ne change pas pour l'agent ?
+2. Quelle information a fait la différence entre votre architecture et Gribouille seul : une meilleure décision, un outil de moins, ou un point de contrôle ?
+3. Le gardien coûte des tokens. Combien de morts évitées justifient ce coût ? Comment le mesureriez-vous sur plus de parties ?
+4. La note du patient P05 est écrite par un tiers et lue par vos agents. Quelle protection est la plus solide : le prompt, la liste d'outils d'un rôle, ou une règle dans le serveur du jeu ?
+
 ## Livrable
 
-- Le dossier `td6-mcp-jeu` : `application-jeu.properties`, `JeuMcp`, le groupe d'outils `jeu`, vos agents, vos fichiers `scenarios/*.md`.
+- Le dossier `td6-mcp-jeu` : `JeuMcp`, le groupe d'outils `jeu`, vos agents (`AgentsJeu`), vos fichiers `scenarios/*.md`.
 - `ANALYSE.md` : tableau de scores et une page argumentée.
 - `JOURNAL.md` : 5 à 10 lignes (ce qui a surpris, ce qui a échoué, ce que vous referiez).
 

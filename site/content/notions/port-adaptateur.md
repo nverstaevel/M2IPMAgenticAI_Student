@@ -10,9 +10,9 @@ Cacher une dépendance externe derrière une **interface** (le port), pour pouvo
 ## Comprendre
 {{fig:port_adaptateur}}
 
-- Le **port** (`AgendaPort`) est dans votre domaine : il parle votre langage (`evenementsDuJour`, `creer`).
+- Le **port** (`AgendaPort`) est dans votre domaine : il parle votre langage (`creneauxLibres`, `creerEvenement`).
 - Un **adaptateur** l'implémente : `GoogleAgendaAdapter` pour le réel, `AgendaSimule` pour les tests.
-- Le choix se fait par **profil** : `@Profile("!simule")` / `@Profile("simule")`.
+- Le choix se fait par **configuration** : une propriété (`agenda.mode=simule` ou `google`) lue par une classe `@Configuration` qui crée un seul des deux adaptateurs (`@ConditionalOnProperty`).
 
 Bénéfice : tests et évaluation tournent **sans réseau, sans compte, sans clé**, et de façon reproductible.
 
@@ -24,7 +24,7 @@ Même idée pour `WikipediaClient` : en test, on lui passe un `RestClient` préc
 - Un seul adaptateur actif à la fois.
 
 ## Erreurs fréquentes
-- Même annotation de profil sur les deux adaptateurs : deux beans, erreur au démarrage.
+- Créer les deux adaptateurs en même temps : deux beans pour un seul port, erreur au démarrage. Une condition (`@ConditionalOnProperty`) n'en laisse vivre qu'un.
 - Faire fuir des types de l'API Google dans le port.
 
 ## Auto-test

@@ -23,6 +23,11 @@ C'est la version « agents » de la séparation lecture / écriture : on rend ce
 - Peu d'outils par agent = prompt plus court, choix d'outil plus fiable, surface d'attaque réduite.
 - Lecture et écriture ne vont pas dans le même rôle quand un texte tiers est lu.
 
+## Erreurs fréquentes
+- Donner « tous les outils » à un agent pour gagner du temps : la séparation des rôles disparaît.
+- Protéger seulement par le prompt (« n'écris jamais ») : une consigne n'est pas une barrière.
+- Oublier qu'un outil d'écriture caché dans un groupe d'outils « de lecture » annule la séparation.
+
 ## Auto-test
 Q: Pourquoi séparer le diagnosticien (qui lit les notes) de l'apothicaire (qui écrit) ?
 R: Si une note piégée trompe le diagnosticien, il n'a aucun outil pour agir : le dégât reste limité à une mauvaise réponse.

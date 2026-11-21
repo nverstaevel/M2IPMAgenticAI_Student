@@ -1,37 +1,51 @@
 ---
 title: Isoler une dépendance externe (port + deux adaptateurs)
-resume: Une interface, une version réelle, une version simulée, choisies par profil.
+resume: Une interface, une version réelle, une version simulée, choisies par une propriété de configuration.
 td: td3
 notions: port-adaptateur, tester-sans-modele, profils-secrets
 ---
 ## Le schéma
 {{fig:port_adaptateur}}
 
-## Squelette
+## Quand l'utiliser
+Dès qu'un outil dépend de quelque chose qui demande un réseau, une clé ou un compte : sans isolation, vous ne pouvez ni le tester, ni l'évaluer de façon reproductible.
+
+## Squelette (exemple hors clinique : une météo)
 ```java
-public interface AgendaPort {
-    List<Creneau> evenementsDuJour(LocalDate jour);     // lecture
-    Evenement creer(Evenement e);                       // écriture : jamais appelée par un outil
+// 1. Le port : ce dont le domaine a besoin, rien de plus
+public interface MeteoPort {
+    double temperature(String ville);            // lecture seule
 }
 
-@Component @Profile("!simule")
-class GoogleAgendaAdapter implements AgendaPort { /* fourni */ }
+// 2. Deux adaptateurs
+class MeteoHttp implements MeteoPort {            // le vrai : appelle un service sur le réseau
+    public double temperature(String ville) { /* RestClient … */ return 0; }
+}
+class MeteoSimulee implements MeteoPort {         // le faux : des valeurs fixes, en mémoire
+    public double temperature(String ville) { return 18.0; }
+}
 
-@Component @Profile("simule")
-class AgendaSimule implements AgendaPort {
-    private final List<Evenement> evenements = new ArrayList<>();   // une liste en mémoire suffit
-    /* à vous */
+// 3. Un seul est créé, selon une propriété (défaut : le simulé)
+@Configuration
+class MeteoConfig {
+    @Bean @ConditionalOnProperty(name = "meteo.mode", havingValue = "simule", matchIfMissing = true)
+    MeteoPort simulee() { return new MeteoSimulee(); }
+
+    @Bean @ConditionalOnProperty(name = "meteo.mode", havingValue = "http")
+    MeteoPort http() { return new MeteoHttp(); }
 }
 ```
 
-## Créneaux libres : l'idée
-Parcourez la journée de 9 h à 18 h par pas de 30 minutes ; un créneau est libre s'il ne **chevauche** aucun événement.
-Deux intervalles `[a1, a2)` et `[b1, b2)` se chevauchent si `a1 < b2 && b1 < a2`.
+L'outil (`@Tool`) ne connaît que `MeteoPort`. Pour passer au réel : `meteo.mode=http` dans `application-local.yml`, sans toucher au code de l'outil.
 
 ## À tester
-- agenda vide → 18 créneaux libres ; un événement de 10 h à 11 h retire deux créneaux ;
-- le créneau qui commence **exactement** à la fin d'un événement reste libre.
+- avec le simulé, l'outil renvoie toujours la même valeur : le test est **déterministe** et ne touche pas le réseau ;
+- un test qui démarre l'application sans aucune propriété trouve bien **un seul** bean `MeteoPort`.
 
 ## Pièges
-- Mettre la même annotation de profil sur les deux adaptateurs : deux beans, une erreur de démarrage.
-- Confondre les fuseaux horaires : travaillez en `LocalDateTime`.
+- Créer les deux adaptateurs sans condition : deux beans pour un port, erreur au démarrage.
+- Mettre dans le port une méthode qui n'a de sens que pour un adaptateur (un en-tête HTTP, un identifiant Google) : le port doit rester **neutre**.
+- Un simulé trop gentil : il ne reproduit jamais l'erreur, donc votre outil n'a jamais à la gérer. Ajoutez au moins un cas d'échec.
+
+## Dans le TD
+TD3, étape 4 : `AgendaPort` avec `GoogleAgendaAdapter` (fourni) et `AgendaSimule` (à écrire), choisis par `agenda.mode`.

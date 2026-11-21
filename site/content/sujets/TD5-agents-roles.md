@@ -20,7 +20,7 @@ La clinique engage une équipe : un vétérinaire propose un traitement, un gard
 
 ## Avant la séance
 
-- [ ] Copiez `td4-agent-react` en `td5-agents-roles` (ou prenez le dossier de reprise). Vos outils et votre boucle ReAct du TD4 sont conservés ; vos traces sont la matière première du dossier.
+- [ ] Partez du dossier de départ `td5-agents-roles` (il contient votre TD4 corrigé plus le moteur de scénarios) ou, pour garder votre propre TD4, copiez `td4-agent-react` en `td5-agents-roles` et ajoutez-y le code fourni. Vos outils et votre boucle ReAct du TD4 sont conservés ; vos traces sont la matière première du dossier.
 - [ ] Lisez `SCENARIOS.md` (5 minutes) : la syntaxe des flèches (enchaînement, fan-out, jonction, boucle avec max, délégation), la section Agents avec les outils autorisés, l'interface `Agent`.
 - [ ] Vérifiez `GET /api/diagnostic/modele`, puis ouvrez `/agents` : le type d'agent « Scénario (fichier .md) » liste les scénarios fournis.
 - [ ] Relisez dans le support de CM2 : *Workflow ou agent ?*, *Acteur et critique*, *Orchestrateur et travailleurs*.
@@ -83,7 +83,7 @@ Sont fournis, à lire : les `record` `Diagnostic` (créature, diagnostic, traite
 
 ### Étape 1 — L'acteur
 
-`VeterinaireAgent` : outils du dossier, de la pharmacie et du tarif, deux profils de prompt. Il reçoit le cas et, à partir du deuxième tour, les objections du critique. Puis exposez-le au moteur :
+`VeterinaireAgent` : outils du dossier et de la pharmacie, des profils de prompt (`PRUDENT`, `PRESSE`, `OBSTINE`). Il reçoit le cas et, à partir du deuxième tour, les objections du critique. Puis exposez-le au moteur. Les beans `Agent` de ce TD se déclarent dans la classe `scenario/AgentsExemples`, à côté du bean `react` :
 
 ```java
 @Bean("veterinaire")
@@ -124,7 +124,7 @@ Le vétérinaire propose, le gardien critique. S'il rejette, le vétérinaire re
 les objections (2 reprises au plus) ; s'il doute, la décision part vers un humain.
 
 ## Entrées
-- cas (Cas du bestiaire) : 1 = Cas 1 | 2 = Cas 2 | 3 = Cas 3
+- cas (Cas du bestiaire) : 1 = Cas 1 | 2 = Cas 2 | 3 = Cas 3 | 4 = Cas 4 | 5 = Cas 5
 - profil (Profil du vétérinaire) : PRUDENT = Prudent | PRESSE = Pressé
 
 ## Agents
@@ -266,7 +266,7 @@ Si le socle est terminé avant la fin de la séance :
 
 ## Pour aller plus loin
 
-- Ajoutez un troisième rôle, un contrôleur de gestion qui critique le devis à partir des tarifs : une `séquence suffit : entrée -> veterinaire -> controleur -> fin`.
-- Écrivez `la boucle acteur-critique avec (max 1) puis ajoutez un routeur (Resultat.route) qui oriente vers deux travailleurs` : que devient le graphe quand le critique rejette ?
+- Ajoutez un troisième rôle, un contrôleur de gestion qui critique le devis à partir des tarifs : une séquence suffit : `entrée -> veterinaire -> controleur -> fin`.
+- Écrivez la boucle acteur-critique avec `(max 1)`, puis ajoutez un routeur (`Resultat.route`) qui oriente vers deux travailleurs : que devient le graphe quand le critique rejette ?
 - Faites exécuter les travailleurs en parallèle quand ils sont indépendants.
 - Joignez au PDF les prompts exacts de chaque tour, dans une annexe.

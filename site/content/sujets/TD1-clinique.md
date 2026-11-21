@@ -22,7 +22,7 @@ Construire en 3 h l'application de base, sans IA : API REST, pages Thymeleaf, s�
 ## Avant la séance
 
 - [ ] Java 21, Maven et un IDE installés (Git est recommandé, pas obligatoire). `java -version` et `mvn -version` répondent.
-- [ ] Le squelette (inspiré de Spring Petclinic) compile : `mvn -q verify` passe avant que vous écriviez quoi que ce soit.
+- [ ] Le squelette (inspiré de Spring Petclinic) compile : `mvn -q compile` passe avant que vous écriviez quoi que ce soit. L'application ne démarre pas encore : il n'y a aucune entité, donc aucune table pour `data.sql` (c'est normal, voir l'étape 1).
 - [ ] À relire : entités JPA et `@OneToMany`, Spring Data, `@RestController`, Thymeleaf, Spring Security. Le support de CM1 contient un rappel Spring Boot avec cette même clinique (*Rappel Spring Boot*).
 
 ## Ressources
@@ -53,7 +53,7 @@ Le jeu de données du squelette est loufoque à dessein : un dragon enrhumé, un
 
 | Étape | Durée | Vous faites | Point de contrôle |
 | --- | --- | --- | --- |
-| 1. Mise en route | 15 min | ouvrir, lancer, lire le journal de démarrage | le schéma est créé et `data.sql` s'exécute |
+| 1. Mise en route | 15 min | ouvrir, compiler, lire `data.sql`, voir l'échec attendu au démarrage | vous savez dire quelles tables et colonnes `data.sql` attend |
 | 2. Entités et données | 35 min | cinq entités, relations, `data.sql` | un propriétaire retrouve ses créatures |
 | 3. Repositories et services | 30 min | Spring Data, `CliniqueService` | les sept signatures imposées existent et compilent |
 | 4. API REST | 35 min | DTO, validation, `@ControllerAdvice` | 200, 404, 400 et 409 sur les bons cas |
@@ -63,11 +63,22 @@ Le jeu de données du squelette est loufoque à dessein : un dragon enrhumé, un
 
 ### Étape 1 — Mise en route
 
-Ouvrez le squelette, lancez l'application (classe `CliniqueApplication`, ou `mvn spring-boot:run`) et vérifiez dans le journal de démarrage que le schéma est créé et que `data.sql` s'exécute (Spring Boot 4 ne fournit plus la console H2). Application sur `http://localhost:8080`.
+Ouvrez le squelette et lisez `src/main/resources/data.sql` et `application.properties`. Les tables ne sont pas écrites à la main : Hibernate les crée à partir de **vos entités** (`ddl-auto=create-drop`), puis exécute `data.sql`. Lancez quand même l'application (`CliniqueApplication`, ou `mvn spring-boot:run`) : elle échoue avec une erreur du type *Table "ESPECE" not found*. C'est le résultat attendu : sans entités, il n'y a rien à remplir. Retenez cette erreur, vous la reverrez si une entité ne correspond pas à `data.sql`.
+
+Point de contrôle : vous pouvez remplir ce tableau à partir de `data.sql` (il vous sert à l'étape 2).
+
+| Table | Colonnes lues dans `data.sql` |
+| --- | --- |
+| `espece` | `nom`, `habitat` |
+| `proprietaire` | `nom`, `prenom`, `ville`, `telephone` |
+| `creature` | `nom`, `date_naissance`, `espece_id`, `proprietaire_id` |
+| `soigneur` | `nom` |
+| `soigneur_espece` | `soigneur_id`, `espece_id` (table de jointure) |
+| `consultation` | `date_heure`, `creature_id`, `soigneur_id`, `motif`, `diagnostic`, `traitement`, `tarif` |
 
 ### Étape 2 — Entités et données
 
-Écrivez les cinq entités et leurs relations. Chargez `data.sql`. Un exemple de relation et de requête dérivée :
+Écrivez les cinq entités et leurs relations **pour que les noms collent à `data.sql`** (tableau de l'étape 1). Spring transforme `dateNaissance` en `date_naissance` et `@ManyToOne Espece espece` en colonne `espece_id`. La relation plusieurs-à-plusieurs entre soigneurs et espèces doit utiliser la table `soigneur_espece`. Un exemple de relation et de requête dérivée :
 
 ```java
 @Entity
@@ -85,7 +96,17 @@ public interface ProprietaireRepository extends JpaRepository<Proprietaire, Long
 }
 ```
 
-Vérifiez qu'un propriétaire retrouve ses créatures : « Brumevent » possède Paillette et Rebelote.
+La table de jointure se déclare ainsi (à placer sur `Soigneur`) :
+
+```java
+@ManyToMany
+@JoinTable(name = "soigneur_espece",
+        joinColumns = @JoinColumn(name = "soigneur_id"),
+        inverseJoinColumns = @JoinColumn(name = "espece_id"))
+private Set<Espece> especesSoignees = new HashSet<>();
+```
+
+Point de contrôle : l'application démarre sans erreur et un propriétaire retrouve ses créatures : « Brumevent » possède Paillette et Rebelote.
 
 ### Étape 3 — Repositories et services
 
@@ -102,6 +123,8 @@ Créez les repositories Spring Data et la couche service. Les signatures ci-dess
 | `void enregistrerDiagnostic(Long consultationId, String diagnostic, String traitement)` | clôt une consultation | écriture |
 
 Deux règles de gestion sont obligatoires. Une consultation dure 30 minutes. Un soigneur ne peut pas avoir deux consultations qui se chevauchent : `planifierConsultation` lève alors une `ConflitDeCreneauException`.
+
+Pour détecter un chevauchement, rappelez-vous que deux intervalles `[début1, fin1[` et `[début2, fin2[` se chevauchent si `début1 < fin2 && début2 < fin1`. Comparez la nouvelle consultation (début, début + 30 minutes) aux consultations du même soigneur. Annotez la méthode d'écriture avec `@Transactional`.
 
 Tous les messages d'erreur doivent être lisibles par un humain **et** par un modèle, par exemple « Aucune créature d'identifiant 42 » ou « Le soigneur 3 est déjà pris le 12/03 à 14 h ». Ils seront relus par l'assistant au TD2.
 
@@ -169,6 +192,7 @@ void deuxConsultationsQuiSeChevauchentSontRefusees() {
 
 | Symptôme | Cause fréquente | Que faire |
 | --- | --- | --- |
+| `Table "ESPECE" not found` (ou une autre table) au démarrage | pas encore d'entité, ou noms qui ne correspondent pas à `data.sql` | comparer vos entités au tableau de l'étape 1 (noms de tables et de colonnes) |
 | `data.sql` s'exécute avant la création des tables | initialisation différée absente | `spring.jpa.defer-datasource-initialization=true` |
 | Clés étrangères qui ne correspondent pas | identifiants générés écrits en dur | retrouver par le nom : `(SELECT id FROM espece WHERE nom = 'Dragon')` (voir l'annexe) |
 | `LazyInitializationException` | entité exposée hors de la transaction | renvoyer des DTO, construits dans le service |
@@ -194,7 +218,7 @@ void deuxConsultationsQuiSeChevauchentSontRefusees() {
 
 ## Annexe : extrait du jeu de données
 
-Adaptez les noms de colonnes à vos entités. Avec des identifiants générés, n'écrivez pas les id dans data.sql : retrouvez les clés étrangères par le nom, par exemple (SELECT id FROM espece WHERE nom = 'Dragon').
+Cet extrait montre les données avec des identifiants écrits en dur, pour que vous voyiez les liens. Le vrai `data.sql` fourni n'écrit aucun identifiant : il retrouve les clés étrangères par le nom, par exemple `(SELECT id FROM espece WHERE nom = 'Dragon')`. C'est plus robuste avec des identifiants générés.
 
 ```sql
 INSERT INTO espece (id, nom, habitat) VALUES

@@ -28,6 +28,11 @@ On teste donc **ce qui vous appartient** : les outils, la boucle, les arrêts, l
 - Un test d'agent est **déterministe**, rapide, gratuit.
 - Le réseau et les clés n'ont rien à faire dans un test unitaire.
 
+## Erreurs fréquentes
+- Tester la **qualité** d'un modèle avec le simulé : il vérifie votre code (outils, arrêts, câblage), pas l'intelligence du modèle.
+- Un test qui dépend d'un vrai modèle : lent, coûteux et différent à chaque exécution.
+- Un modèle simulé trop gentil qui ne provoque jamais d'erreur : ajoutez un cas d'échec.
+
 ## Auto-test
 Q: Comment tester que la boucle s'arrête sur `BOUCLE_DETECTEE` ?
 R: Avec le modèle simulé, répéter le même `outil:NOM:{json}` ; vérifier le motif d'arrêt.

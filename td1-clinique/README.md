@@ -10,11 +10,11 @@ entités, repositories, `CliniqueService`, contrôleurs, DTO, gabarits de pages,
 
 ## Lancer
 ```bash
-mvn spring-boot:run          # ajoutez -Dspring-boot.run.profiles=simule pour travailler sans modèle
+mvn spring-boot:run
 mvn test
 ```
 
 ## Remarques
-Il n'y a pas de tests fournis : les écrire fait partie du TD. L'application démarre déjà (schéma + `data.sql`).
+Il n'y a pas de tests fournis : les écrire fait partie du TD. L'application ne démarre pas tant que vos entités ne correspondent pas aux tables de `data.sql` (erreur attendue au début : *Table ESPECE not found*). Le sujet, étape 1, explique comment lire `data.sql`.
 
 Notez dans `JOURNAL.md`, au fil du TD : ce que vous avez fait, ce qui a cassé, ce que vous avez compris.

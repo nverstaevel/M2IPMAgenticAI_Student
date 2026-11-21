@@ -22,7 +22,7 @@ En Spring AI : `@Tool(description = …)` sur la méthode, `@ToolParam(descripti
 **Renvoyez peu** : un outil qui renvoie une table entière sature le contexte.
 
 ## Dans la clinique
-`rechercherCreature`, `listerConsultations`, `consulterTarif`… chacun appelle un **service** (voir *Couches Spring*).
+`rechercherProprietaires`, `consultationsDeLaCreature`, `consulterTarif`… chacun appelle un **service** (voir *Couches Spring*).
 
 ## À retenir
 - Le modèle demande ; l'application exécute.

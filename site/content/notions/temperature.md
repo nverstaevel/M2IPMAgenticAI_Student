@@ -23,6 +23,11 @@ td: td2
 - Basse pour agir, haute pour imaginer.
 - Variabilité ≠ bug : c'est la nature du modèle.
 
+## Erreurs fréquentes
+- Croire que température 0 rend le modèle exact : il reste capable de se tromper, simplement de la même façon à chaque fois.
+- Comparer deux prompts avec une température élevée : le hasard brouille la comparaison.
+- Changer plusieurs paramètres à la fois : vous ne saurez pas lequel a eu un effet.
+
 ## Auto-test
 Q: Votre test passe 9 fois sur 10 avec un vrai modèle. Que faire ?
 R: Ne pas tester la phrase : tester ce qui vous appartient (outil appelé, argument, motif d'arrêt) avec le modèle simulé.

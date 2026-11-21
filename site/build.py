@@ -22,7 +22,7 @@ SITE_URL = "https://nverstaevel.github.io/M2IPMAgenticAI_Student/"
 TDS = {
     "td1": ("TD1", "Application Spring Boot classique", "td1-clinique", "TD1-clinique.md", "La clinique, sans IA"),
     "td2": ("TD2", "Un chat qui interroge l'application", "td2-chat", "TD2-chat.md", "Le Dr Gribouille et ses outils internes"),
-    "td3": ("TD3", "Outils externes et contexte", "td3-outils-externes", "TD3-outils-externes.md", "Quatre outils et un tableau de mesures"),
+    "td3": ("TD3", "Outils externes et contexte", "td3-outils-externes", "TD3-outils-externes.md", "Des outils externes et un tableau de mesures"),
     "td4": ("TD4", "Agent ReAct", "td4-agent-react", "TD4-agent-react.md", "Une boucle d'agent et ses traces commentées"),
     "td5": ("TD5", "Agents à rôles", "td5-agents-roles", "TD5-agents-roles.md", "Un duo vétérinaire / gardien et un dossier PDF"),
     "td6": ("TD6", "Le jeu de la clinique en MCP", "td6-mcp-jeu", "TD6-jeu-mcp.md", "Des architectures d'agents comparées par leurs scores"),

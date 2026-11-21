@@ -21,7 +21,7 @@ Donner une voix à la clinique. Vous branchez un modèle sur l'application avec 
 
 ## Avant la séance
 
-- [ ] Copiez `td1-clinique` en `td2-chat` (ou prenez le dossier de reprise) et travaillez dans la copie.
+- [ ] Partez du dossier de départ `td2-chat` (il contient une application TD1 complète plus le code fourni) ou, pour garder votre propre TD1, copiez `td1-clinique` en `td2-chat` et ajoutez-y le code fourni. Travaillez dans la copie.
 - [ ] Choisissez **un** fournisseur de modèle et vérifiez-le (voir le tableau ci-dessous). Le modèle doit gérer l'appel d'outils.
 - [ ] Relisez dans le support de CM1 : *Tokens et contexte*, *Température*, *Appel d'outils*, *Confirmation des écritures*.
 
@@ -70,7 +70,7 @@ curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele
 
 ### Étape 1 — Configuration
 
-Renseignez dans `application-local.yml` (copié depuis `application-local.yml.example`, ignoré par Git) l'adresse du serveur de modèles, le nom du modèle et la température. Faites dire bonjour au modèle depuis un `CommandLineRunner`, puis supprimez-le.
+Renseignez dans `application-local.yml` (copié depuis `application-local.yml.example`, ignoré par Git) l'adresse du serveur de modèles, le nom du modèle et la température. Ce fichier n'est lu que si le profil `local` est actif : lancez avec `-Dspring-boot.run.profiles=local` (Ollama) ou `lmstudio,local` (le dernier profil l'emporte, donc vos réglages surchargent ceux de `lmstudio`). Faites dire bonjour au modèle depuis un `CommandLineRunner`, puis supprimez-le.
 
 ### Étape 2 — Le Dr Gribouille
 
@@ -103,12 +103,12 @@ Activez le journal de débogage (`logging.level.org.springframework.ai=DEBUG`) p
 
 ### Étape 4 — Outils de lecture
 
-Exposez cinq services du TD1 comme outils avec `@Tool` et `@ToolParam`, branchés avec `.defaultTools(...)`. Un outil se résume à une méthode annotée (extrait indicatif) ; **la description est ce que le modèle lit pour choisir** :
+Exposez comme outils les cinq méthodes de **lecture** du TD1 (`rechercherProprietaires`, `trouverProprietaire`, `creaturesDuProprietaire`, `consultationsDeLaCreature`, `soigneursPourEspece`) avec `@Tool` et `@ToolParam`, branchés avec `.defaultTools(...)`. Les deux méthodes d'écriture ne deviennent **pas** des outils directs (étape 6). Un outil se résume à une méthode annotée (extrait indicatif) ; **la description est ce que le modèle lit pour choisir** :
 
 ```java
 @Component
 class OutilsClinique {
-    private final ClinicService service;
+    private final CliniqueService service;
 
     @Tool(description = "Cherche les propriétaires dont le nom contient le texte donné. Renvoie id, nom, prénom et ville.")
     List<ProprietaireDto> rechercherProprietaires(
@@ -166,6 +166,7 @@ Complétez la grille, mesurez les tokens (voir la première question de réflexi
 | Le modèle n'appelle jamais d'outil | modèle sans appel d'outils | choisir un autre modèle (voir le README) |
 | « conversationId is required » | identifiant manquant dans l'appel | `.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, id))` |
 | Les outils sont ignorés avec un `ChatModel` maison | options qui ne sont pas des `ToolCallingChatOptions` | partir de `chatModel.getOptions()` |
+| Vos réglages de `application-local.yml` n'ont aucun effet | le profil `local` n'est pas actif | ajouter `local` à la liste : `--spring.profiles.active=lmstudio,local` |
 | 401 sur `/api/chat` | non connecté | `-u gribouille:gribouille` |
 | La réponse invente un fait | description d'outil vague ou prompt trop permissif | reformuler, puis comparer sur la grille |
 
