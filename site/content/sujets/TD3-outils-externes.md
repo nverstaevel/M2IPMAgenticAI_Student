@@ -77,7 +77,7 @@ La seconde source de données (`CatalogueConfig`) est déjà configurée : vous 
 
 ### Étape 4 — Google Agenda
 
-L'agenda est caché derrière une interface `AgendaPort` qui a deux implémentations : `GoogleAgendaAdapter` (réel, fourni) et `AgendaSimule` (en mémoire). Les tests et l'évaluation de TD utilisent la seconde, parce qu'elle ne dépend ni du réseau ni d'un compte. Vous écrivez `AgendaSimule` et les deux outils ; l'essai avec l'agenda réel est une extension (voir « Extensions »).
+L'agenda est caché derrière une interface `AgendaPort` qui a deux implémentations : `GoogleAgendaAdapter` (réel, fourni) et `AgendaSimule` (en mémoire). Les tests utilisent la seconde, parce qu'elle ne dépend ni du réseau ni d'un compte. Vous écrivez `AgendaSimule` et les deux outils ; l'essai avec l'agenda réel est une extension (voir « Extensions »).
 
 `AgendaSimule` démarre avec deux créneaux déjà occupés, le 3 décembre 2026 à 10 h et à 14 h 30 : utilisez ce jour pour vos tests.
 

@@ -31,8 +31,7 @@ TDS = {
 }
 SEANCES = [("CM1", None, "Appeler un modèle, mémoire, outils, confirmation des écritures"), ("TD1", "td1", None), ("TD2", "td2", None),
            ("CM2", None, "Sources externes, contexte, boucle d'agent (ReAct), rôles"), ("TD3", "td3", None), ("TD4", "td4", None),
-           ("TD5", "td5", None), ("CM3", None, "Le protocole MCP et le jeu de la clinique"), ("TD6", "td6", None),
-           ("CM4", None, "Évaluation de TD sur machine (1 h)")]
+           ("TD5", "td5", None), ("CM3", None, "Le protocole MCP et le jeu de la clinique"), ("TD6", "td6", None)]
 
 def esc(s): return html.escape(s, quote=True)
 
@@ -510,7 +509,7 @@ def build_index(totaux):
                          f'<span class="s-l">{esc(livrable)}</span><span class="bar"><i></i></span><span class="pct">0 %</span></a>')
         else:
             cm = nom.lower()
-            lien = f'cours/{cm}.html' if nom != "CM4" else "commun.html"
+            lien = f'cours/{cm}.html'
             cards.append(f'<a class="seance cm" href="{lien}"><span class="s-n">{nom}</span><strong>Cours magistral</strong><span class="s-l">{esc(resume)}</span></a>')
     corps = f"""<section class="hero"><p class="kicker">M2 MIAGE IPM · Université Toulouse Capitole</p>
 <h1>Réussir les TD <em>IA agentiques</em> avec Spring AI</h1>
@@ -531,7 +530,7 @@ def build_index(totaux):
  -Dspring-boot.run.profiles=lmstudio</code></pre><p><a href="recettes/profils-lancement.html">Recette →</a></p></div>
 <div class="card"><h3>Tenir le journal</h3><pre><code>JOURNAL.md
 5 à 10 lignes par TD</code></pre><p><a href="recettes/journal.html">Recette →</a></p></div></div>
-<h2>Règle d'or</h2><p class="callout">Les TD ne sont pas notés, mais l'<strong>évaluation de TD</strong> (CM4, 1 h sur machine) porte sur ce que vous y avez appris : corriger et câbler un outil, analyser une trace d'agent, rédiger une courte analyse critique. Vos livrables sont donc votre préparation. Un assistant IA est libre en TD (notez ce que vous lui demandez), <strong>interdit pendant les évaluations</strong>.</p>"""
+<h2>Règle d'or</h2><p class="callout">Faites chaque TD à votre rythme, avec les points de contrôle : si un point échoue, ne continuez pas, lisez le tableau « En cas de blocage ». Un assistant IA est libre en TD : notez ce que vous lui demandez et ce que vous vérifiez. Deux évaluations sont prévues (à mi-parcours et en fin d'UE) ; leur forme n'est pas encore fixée.</p>"""
     page("index.html", "Accueil", corps)
 
 # ----------------------------------------------------------------------------- main

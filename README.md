@@ -29,6 +29,6 @@ Code fourni pour les TD « IA agentiques avec Spring AI » (M2 MIAGE IPM, Univer
 ## Avant de lancer
 
 - Un modèle de langage : en local (LM Studio, Ollama) ou par API (Groq, Gemini, Claude) via un profil Spring ; sans modèle, le profil `simule` permet de faire tourner les tests. Les clés d'API ne vont jamais dans Git (variables d'environnement ou `application-local.yml`, déjà ignoré).
-- Tenez un `JOURNAL.md` dans votre dossier de travail : 5 à 10 lignes par TD ; il sert à l'analyse critique du TD6 et à l'évaluation de TD.
+- Tenez un `JOURNAL.md` dans votre dossier de travail : 5 à 10 lignes par TD ; il sert à l'analyse critique du TD6.
 - **TD6** : lancez d'abord le jeu (`mvn spring-boot:run` dans `jeu-bestiaire`, port 8090), puis la clinique avec le profil `jeu`.
 - Le sujet de chaque TD, les supports de CM et la matrice de compétences sont distribués en cours.

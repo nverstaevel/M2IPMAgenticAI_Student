@@ -30,5 +30,5 @@ Même idée pour `WikipediaClient` : en test, on lui passe un `RestClient` préc
 - Faire fuir des types de l'API Google dans le port.
 
 ## Auto-test
-Q: Pourquoi `AgendaSimule` est-il nécessaire à l'évaluation de TD ?
-R: Parce que l'évaluation tourne sans réseau ni compte : l'adaptateur réel serait inutilisable.
+Q: Pourquoi `AgendaSimule` est-il nécessaire aux tests ?
+R: Parce que les tests tournent sans réseau ni compte : l'adaptateur réel serait inutilisable.

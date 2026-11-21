@@ -200,9 +200,9 @@ Dans `ANALYSE.md`, une page : ce que vous affirmez, la mesure qui le montre, la 
 - `ANALYSE.md` : tableau de scores et une page argumentée.
 - `JOURNAL.md` : 5 à 10 lignes (ce qui a surpris, ce qui a échoué, ce que vous referiez).
 
-## Préparer l'évaluation
+## Pour s'entraîner
 
-L'évaluation de TD (CM4, 1 h sur machine, sans assistant IA) reprend ces gestes : corriger ou câbler un outil, lire une trace d'agent, rédiger une courte analyse critique. Entraînez-vous à expliquer, à partir du graphe d'une journée, pourquoi un patient est mort ou a été guéri.
+Ces gestes (corriger ou câbler un outil, lire une trace d'agent, rédiger une courte analyse critique) valent la peine d'être exercés. Entraînez-vous à expliquer, à partir du graphe d'une journée, pourquoi un patient est mort ou a été guéri.
 
 ## Pour aller plus loin
 

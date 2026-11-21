@@ -5,7 +5,7 @@
 
 Six TD de 3 h, faits seul ou à deux (comme vous préférez), construisent une même application sur tout le semestre : la clinique des créatures fantastiques et son assistant, le Dr Gribouille. Chaque TD part du résultat du précédent. Si vous êtes en retard, vous récupérez un dossier de reprise (le dossier `tdN-…` du TD précédent, fourni par l'enseignant) au début de la séance suivante.
 
-Ordre des séances : CM1, TD1, TD2, CM2, TD3, TD4, TD5, CM3, TD6, CM4. Le CM2 couvre les sources externes, la gestion du contexte et la boucle d'agent (ReAct) : il prépare TD3, TD4 et TD5. Le CM3 présente le protocole MCP et le jeu de la clinique (architecture, confiance, évaluation) et prépare le TD6.
+Ordre des séances : CM1, TD1, TD2, CM2, TD3, TD4, TD5, CM3, TD6. Le CM2 couvre les sources externes, la gestion du contexte et la boucle d'agent (ReAct) : il prépare TD3, TD4 et TD5. Le CM3 présente le protocole MCP et le jeu de la clinique (architecture, confiance, évaluation) et prépare le TD6.
 
 | TD | Thème | Ce que vous livrez |
 | --- | --- | --- |
@@ -16,7 +16,7 @@ Ordre des séances : CM1, TD1, TD2, CM2, TD3, TD4, TD5, CM3, TD6, CM4. Le CM2 co
 | TD5 | Agents à rôles | Un duo vétérinaire / gardien du bestiaire et un dossier PDF |
 | TD6 | Le jeu de la clinique en MCP | Des architectures d'agents qui jouent, comparées par leurs scores |
 
-Les TD ne sont pas notés, mais l'évaluation de TD (CM4, 1 h sur machine) porte sur ce que vous y aurez appris : corriger et câbler un outil, analyser une trace d'agent, rédiger une courte analyse critique. Vos livrables sont donc votre préparation.
+Deux évaluations sont prévues, l'une à mi-parcours et l'autre en fin d'UE. Leur forme et leur contenu ne sont pas encore fixés : l'enseignant les précisera en cours.
 
 ## Comment est construit chaque sujet
 
@@ -30,7 +30,7 @@ Tous les sujets suivent le même plan, pour que vous puissiez les faire en auton
 | Ressources | les supports de cours, documentations et exemples, avec l'étape où les utiliser |
 | Parcours guidé | un tableau d'étapes avec durées et points de contrôle, puis le détail de chaque étape avec exemples de code |
 | En cas de blocage | symptôme, cause fréquente, que faire |
-| Questions de réflexion, Livrable, Pour aller plus loin | ce qui prépare l'évaluation de TD |
+| Questions de réflexion, Livrable, Pour aller plus loin | ce qui approfondit le TD |
 
 Un **point de contrôle** est une vérification que vous pouvez faire seul (une commande, une page, un test) avant de passer à l'étape suivante. Si un point de contrôle échoue, ne continuez pas : reportez-vous à « En cas de blocage », puis demandez de l'aide. Les extraits de code sont des repères : la documentation de Spring AI fait foi pour la version fournie.
 
@@ -51,7 +51,7 @@ Un **point de contrôle** est une vérification que vous pouvez faire seul (une 
 - Chaque service public a au moins un test. Aucun test n'appelle un vrai modèle : utilisez le modèle simulé fourni.
 - Tenez un fichier `JOURNAL.md`. À chaque TD, notez 5 à 10 lignes : ce qui a marché, ce qui vous a surpris, une réponse absurde du modèle (copiée telle quelle), une décision prise et pourquoi.
 
-Le journal sert à deux moments : l'analyse critique du TD6 et la préparation de l'évaluation de TD.
+Le journal sert à l'analyse critique du TD6 et à garder une trace de votre progression.
 
 ## Règles de sécurité
 
@@ -60,4 +60,4 @@ Le journal sert à deux moments : l'analyse critique du TD6 et la préparation d
 - **Agenda.** Le TD3 travaille avec un agenda simulé en mémoire. Si vous essayez l'agenda Google réel (extension), créez votre propre agenda de test, vide, et n'utilisez que lui. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
 - **Budget.** Un modèle hébergé a un plafond de dépense. Surveillez les tokens consommés dès le TD2.
 - **Actions d'écriture.** Le modèle ne décide jamais seul d'écrire en base ou dans l'agenda : une confirmation passe par un endpoint distinct, que le modèle ne peut pas appeler (introduit au TD2).
-- **Assistants IA.** Libres en TD, pour apprendre. Notez dans le journal ce que vous avez demandé et ce que vous avez vérifié. Interdits pendant les évaluations.
+- **Assistants IA.** Libres en TD, pour apprendre. Notez dans le journal ce que vous avez demandé et ce que vous avez vérifié.

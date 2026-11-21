@@ -1,12 +1,12 @@
 ---
 title: Tenir son JOURNAL.md
-resume: Cinq à dix lignes par TD : ce qu'il faut noter pour préparer l'évaluation.
+resume: Cinq à dix lignes par TD : ce qu'il faut noter pour suivre sa progression.
 td: td1, td2, td3, td4, td5, td6
 famille: methode
 ordre: 1
 notions: evaluer-agent, traces-graphe, temperature
 ---
-Le journal sert à deux moments : l'**analyse critique du TD6** et la **préparation de l'évaluation de TD**.
+Le journal sert à l'**analyse critique du TD6** et à garder une trace de votre progression.
 
 ## Modèle de section
 ```markdown
@@ -23,4 +23,4 @@ Le journal sert à deux moments : l'**analyse critique du TD6** et la **prépara
 ## Conseils
 - Notez **pendant** la séance, pas le soir.
 - Copiez les **traces** et les **réponses** telles quelles : on apprend plus d'un échec cité que d'un échec résumé.
-- Un assistant IA est libre en TD, **interdit pendant les évaluations** : notez ce que vous lui avez demandé et ce que vous avez vérifié.
+- Un assistant IA est libre en TD : notez ce que vous lui avez demandé et ce que vous avez vérifié.

@@ -143,7 +143,7 @@ Cliquez sur un nœud : le panneau de droite montre arguments, résultat, durée 
 
 ### Fourni — Les traces
 
-Chaque `Etape` contient : numéro, raisonnement, outil, arguments en JSON, résultat tronqué à 500 caractères, durée, tokens. TraceStore (fourni) les écrit dans `traces/{runId}.jsonl`, une ligne par étape. Les endpoints fournis sont `POST /api/agent` (résultat et `runId`) et `GET /api/agent/{runId}/trace`. Ces traces servent trois fois : au TD5, où elles alimentent le dossier PDF ; au TD6, pour comparer vos architectures et analyser une partie ; à l'évaluation de TD, où vous devrez en lire une.
+Chaque `Etape` contient : numéro, raisonnement, outil, arguments en JSON, résultat tronqué à 500 caractères, durée, tokens. TraceStore (fourni) les écrit dans `traces/{runId}.jsonl`, une ligne par étape. Les endpoints fournis sont `POST /api/agent` (résultat et `runId`) et `GET /api/agent/{runId}/trace`. Ces traces servent deux fois : au TD5, où elles alimentent le dossier PDF ; au TD6, pour comparer vos architectures et analyser une partie.
 
 Exemple d'une ligne :
 
