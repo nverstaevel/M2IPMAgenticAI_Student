@@ -56,7 +56,7 @@ Le journal sert à deux moments : l'analyse critique du TD6 et la préparation d
 
 - **Secrets.** Clés d'API et fichier du compte de service Google ne vont jamais dans Git. Utilisez des variables d'environnement ou un fichier `application-local.yml`, déjà ignoré par le `.gitignore` fourni.
 - **Données.** Uniquement des données fictives. N'écrivez jamais de donnée personnelle réelle dans un prompt, surtout vers un modèle hébergé.
-- **Agenda.** Utilisez seulement l'agenda de test qui vous est fourni. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
+- **Agenda.** Créez votre propre agenda de test (un agenda vide, dédié à la séance) et n'utilisez que lui. Aucune invitation n'est envoyée et aucun autre agenda n'est modifié.
 - **Budget.** Un modèle hébergé a un plafond de dépense. Surveillez les tokens consommés dès le TD2.
 - **Actions d'écriture.** Le modèle ne décide jamais seul d'écrire en base ou dans l'agenda : une confirmation passe par un endpoint distinct, que le modèle ne peut pas appeler (introduit au TD2).
 - **Assistants IA.** Libres en TD, pour apprendre. Notez dans le journal ce que vous avez demandé et ce que vous avez vérifié. Interdits pendant les évaluations.
