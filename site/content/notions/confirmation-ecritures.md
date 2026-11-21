@@ -3,6 +3,8 @@ title: « Proposer, jamais écrire » : la confirmation humaine
 resume: Le modèle prépare une action d'écriture ; seul un humain, par un autre chemin, la valide.
 cm: CM1 — Confirmation des écritures ; CM2 — La proposition d’abord ; Écrire dans l’agenda : proposer, puis confirmer
 td: td2, td3, td4, td5
+famille: outils
+ordre: 2
 ---
 ## L'idée
 Un modèle peut mal comprendre, être trompé par un texte piégé, ou inventer un identifiant. On ne lui donne donc **jamais** le pouvoir d'écrire seul : il **propose**, un humain **confirme**.

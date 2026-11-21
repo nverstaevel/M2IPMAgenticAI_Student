@@ -3,6 +3,8 @@ title: Le protocole MCP (Model Context Protocol)
 resume: Un standard pour qu'un agent découvre et appelle des outils exposés par un autre programme.
 cm: CM3 — MCP en un tableau ; Ce que le serveur MCP publie ; Deux applications, un protocole
 td: td6
+famille: agents
+ordre: 8
 ---
 ## L'idée
 **MCP** (Model Context Protocol) est un standard pour qu'une application découvre et appelle des outils exposés par un autre programme.

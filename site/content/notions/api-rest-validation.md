@@ -3,6 +3,8 @@ title: API REST, validation et erreurs
 resume: Le contrôleur valide l'entrée et traduit les exceptions métier en codes HTTP.
 cm: CM1 — Rappel Spring Boot : Un contrôleur REST ; Valider les entrées, traduire les erreurs
 td: td1
+famille: spring
+ordre: 4
 ---
 ## L'idée
 Le contrôleur **valide** ce qui entre et **traduit** les erreurs métier en codes HTTP lisibles. Il ne décide de rien d'autre.

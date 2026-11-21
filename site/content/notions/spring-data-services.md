@@ -3,6 +3,8 @@ title: Dépôt Spring Data et service transactionnel
 resume: Une interface suffit pour le dépôt ; le service décide, la transaction protège.
 cm: CM1 — Rappel Spring Boot : Un dépôt Spring Data ; Le service porte les règles et les transactions
 td: td1
+famille: spring
+ordre: 3
 ---
 ## L'idée
 Un **dépôt** Spring Data s'écrit avec une interface seulement ; un **service** transactionnel décide et protège les écritures.

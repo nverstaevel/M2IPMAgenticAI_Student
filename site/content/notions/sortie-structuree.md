@@ -3,6 +3,8 @@ title: Sortie structurée
 resume: Texte libre en entrée, objet Java en sortie : « .entity(Record.class) ».
 cm: CM1 — ChatClient en quelques lignes ; CM2 — Un modèle en critique un autre
 td: td2, td5
+famille: modele
+ordre: 6
 ---
 ## L'idée
 Au lieu de parser une phrase, on demande au modèle de **remplir un objet Java** : `.entity(Triage.class)`.

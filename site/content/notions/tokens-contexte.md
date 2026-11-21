@@ -3,6 +3,8 @@ title: Tokens, fenêtre de contexte et coût
 resume: Tout se compte en tokens : ce que le modèle lit, écrit, et ce que vous payez.
 cm: CM1 — Fondements : La fenêtre de contexte borne et facture tout ; Outillage : Tout se compte en tokens
 td: td2, td3
+famille: modele
+ordre: 5
 ---
 ## L'idée
 Le modèle lit et écrit des **tokens**. Tout ce qu'il lit — instructions, outils, historique, résultats d'outils — consomme une fenêtre limitée, qui est aussi ce que vous payez.

@@ -3,6 +3,8 @@ title: Traces et graphe d'exécution
 resume: Lire ce que l'agent a réellement fait : étapes, outils, tokens, durée.
 cm: CM2 — Une ligne par étape, pour comprendre ; CM2 — Lire le graphe d’exécution d’un agent
 td: td4, td5, td6
+famille: agents
+ordre: 4
 ---
 ## L'idée
 Une **trace** est ce que l'agent a réellement fait : étapes, outils, arguments, tokens, durée. C'est votre document d'enquête.

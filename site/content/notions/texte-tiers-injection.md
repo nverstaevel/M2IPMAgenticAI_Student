@@ -3,6 +3,8 @@ title: Texte écrit par un tiers et injection de prompt
 resume: Tout ce qu'un outil renvoie peut contenir des consignes déguisées ; le modèle ne sait pas faire la différence.
 cm: CM1 — Regard critique sur les LLM ; CM3 — Brancher un serveur MCP, c’est lui faire confiance
 td: td3, td6
+famille: outils
+ordre: 5
 ---
 ## L'idée
 Tout ce qu'un outil renvoie entre dans le contexte du modèle **au même titre que vos instructions**. Un texte écrit par un tiers peut donc contenir des consignes déguisées.

@@ -3,6 +3,8 @@ title: Température et non-déterminisme
 resume: Un même prompt peut donner des réponses différentes ; la température règle la dispersion.
 cm: CM1 — Fondements : Comment choisir le prochain token ; Les réglages qui comptent
 td: td2
+famille: modele
+ordre: 3
 ---
 ## L'idée
 À chaque mot, le modèle tire au sort parmi les suites probables. La **température** règle ce hasard : basse = presque toujours le choix le plus probable ; haute = plus de variété.

@@ -3,6 +3,8 @@ title: Entités JPA et relations
 resume: Une classe annotée correspond à une table ; les relations se déclarent côté propriétaire de la clé étrangère.
 cm: CM1 — Rappel Spring Boot : Une entité JPA correspond à une table
 td: td1
+famille: spring
+ordre: 2
 ---
 ## L'idée
 Une **entité** est une classe Java dont chaque instance correspond à une ligne de table. JPA fait la traduction objet ⇄ relationnel à votre place.

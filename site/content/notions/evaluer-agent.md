@@ -3,6 +3,8 @@ title: Évaluer et comparer des agents
 resume: Des mesures (tokens, coût, exactitude, score) plutôt qu'une impression.
 cm: CM2 — Un essai ne prouve rien ; Un critère de choix ; CM3 — Comparer deux architectures
 td: td3, td4, td5, td6
+famille: methode
+ordre: 2
 ---
 ## L'idée
 Un agent est non déterministe : **une exécution ne prouve rien**. On compare des architectures avec des mesures, pas avec une impression.

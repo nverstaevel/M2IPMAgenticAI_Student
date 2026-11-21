@@ -3,6 +3,8 @@ title: Moindre privilège : chaque rôle ses outils
 resume: Donner à chaque agent seulement les outils utiles, et séparer lecture et écriture.
 cm: CM2 — Un superviseur qui délègue ; CM3 — Brancher un serveur MCP, c’est lui faire confiance
 td: td5, td6
+famille: agents
+ordre: 6
 ---
 ## L'idée
 Chaque agent ne reçoit que **les outils dont il a besoin**. Moins un agent peut faire, moins une erreur ou une consigne piégée coûte cher.

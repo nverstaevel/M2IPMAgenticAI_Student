@@ -3,6 +3,8 @@ title: Les quatre couches d'une application Spring Boot
 resume: Contrôleur, service, dépôt, domaine : chacun son rôle, un seul sens de dépendance.
 cm: CM1 — Rappel Spring Boot : Quatre couches, un seul sens de dépendance
 td: td1
+famille: spring
+ordre: 1
 ---
 ## L'idée
 Une application Spring Boot se range en quatre couches. Chacune a **une** responsabilité et ne connaît que la couche située juste en dessous.

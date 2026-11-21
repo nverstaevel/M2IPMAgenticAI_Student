@@ -3,6 +3,8 @@ title: Les arrêts d'un agent
 resume: Rien ne garantit qu'un agent s'arrête : c'est à vous de borner la boucle.
 cm: CM2 — Cinq motifs d’arrêt
 td: td4
+famille: agents
+ordre: 2
 ---
 ## L'idée
 Rien ne garantit qu'un agent s'arrête : c'est à vous de **borner la boucle**. Chaque arrêt est un signal observable, comparé à un seuil.

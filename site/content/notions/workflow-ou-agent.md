@@ -3,6 +3,8 @@ title: Workflow ou agent : qui décide de la suite ?
 resume: Un workflow enchaîne selon votre code ; un agent laisse le modèle choisir.
 cm: CM2 — Penser, agir, observer ; CM3 — Comparer deux architectures
 td: td4, td5
+famille: agents
+ordre: 3
 ---
 ## L'idée
 Deux manières d'enchaîner des appels au modèle : un **workflow** (le code décide de l'enchaînement) ou un **agent** (le modèle décide de la suite).

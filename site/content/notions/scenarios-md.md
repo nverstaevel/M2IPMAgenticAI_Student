@@ -3,6 +3,8 @@ title: Décrire une architecture d'agents en Markdown
 resume: Trois sections (Entrées, Agents, Graphe) et des flèches : le moteur lit, dessine et exécute.
 cm: CM2 — Un graphe d’agents, un fichier .md
 td: td5, td6
+famille: agents
+ordre: 7
 ---
 ## L'idée
 Une architecture d'agents se **décrit** dans un fichier Markdown de trois sections ; le moteur le lit, dessine le graphe et l'exécute.

@@ -3,6 +3,8 @@ title: Agents à rôles : acteur, critique, superviseur
 resume: Séparer ceux qui proposent, ceux qui vérifient et ceux qui coordonnent.
 cm: CM2 — Un modèle en critique un autre ; Acteur et critique : un tour de boucle ; Un superviseur qui délègue
 td: td5, td6
+famille: agents
+ordre: 5
 ---
 ## L'idée
 Au lieu d'un seul agent qui fait tout, on **sépare les rôles** : ceux qui proposent, ceux qui vérifient, ceux qui coordonnent.

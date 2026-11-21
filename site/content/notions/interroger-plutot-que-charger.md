@@ -3,6 +3,8 @@ title: Interroger plutôt que charger
 resume: Donner au modèle un outil de recherche plutôt que verser tout le corpus dans le contexte.
 cm: CM2 — Tout dans le prompt, ou un outil de recherche ? ; Retrouver avant de répondre
 td: td3
+famille: outils
+ordre: 3
 ---
 ## L'idée
 Pour qu'un modèle réponde à partir d'un gros document, deux voies : tout verser dans le prompt, ou lui donner un **outil de recherche** qui renvoie quelques passages.

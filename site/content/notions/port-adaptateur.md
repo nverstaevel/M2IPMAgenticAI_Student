@@ -3,6 +3,8 @@ title: Port et adaptateur
 resume: Cacher une dépendance externe derrière une interface, pour pouvoir la remplacer par une version simulée.
 cm: CM2 — Des ports pour isoler les sources ; Un port pour isoler l’agenda
 td: td3
+famille: outils
+ordre: 4
 ---
 ## L'idée
 Cacher une dépendance externe derrière une **interface** (le port), pour pouvoir la remplacer par une version simulée.

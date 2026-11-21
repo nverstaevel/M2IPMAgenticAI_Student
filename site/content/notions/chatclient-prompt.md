@@ -3,6 +3,8 @@ title: ChatClient et prompt système
 resume: Le ChatClient est l'API fluide de Spring AI ; le prompt système fixe le rôle.
 cm: CM1 — Deux niveaux d’abstraction ; ChatClient en quelques lignes
 td: td2
+famille: modele
+ordre: 2
 ---
 ## L'idée
 Le `ChatClient` est l'objet qui parle au modèle. Le **prompt système** lui donne son rôle ; les conseillers (*advisors*) et les outils lui donnent des capacités.

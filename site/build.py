@@ -254,7 +254,26 @@ def lien_slide(texte, root="../"):
     if m: return f'<a href="{root}cours/cm{m.group(1)}.html">{esc(texte)}</a>'
     return esc(texte)
 
+FAM_REC = [("methode", "Méthode : à garder sous la main", "Les trois gestes qui servent à tous les TD : tenir son journal, tester sans vrai modèle, diagnostiquer une panne.", "dès le TD1"),
+           ("spring", "Spring Boot, le socle", "Une application en couches : données, règles métier, API, sécurité. Rien d'IA ici, mais les TD suivants s'appuieront dessus.", "TD1"),
+           ("modele", "Parler à un modèle", "Brancher un fournisseur, écrire un prompt, garder une mémoire, obtenir un objet Java.", "TD2"),
+           ("outils", "Outils, sources et contexte", "Donner au modèle de quoi lire ou agir, sans lui laisser la main sur les écritures, et mesurer ce que cela coûte.", "TD2 à TD3"),
+           ("agents", "Agents", "De la boucle d'agent à plusieurs agents qui se répartissent les rôles, puis au jeu MCP.", "TD4 à TD6")]
+FAM_IDX = {f[0]: i for i, f in enumerate(FAM_REC, 1)}
+
+INTRO_NOT = {"methode": "Deux idées qui traversent tous les TD : tester sans vrai modèle, évaluer et comparer des agents.",
+             "spring": "Ce que vous savez déjà de Spring Boot, et sur quoi le modèle de langage s'appuiera : couches, données, API, sécurité.",
+             "modele": "Comment un modèle reçoit une demande et y répond : configuration, prompt, réglages, mémoire, coût, sortie structurée.",
+             "outils": "Comment le modèle lit ou agit sur le monde extérieur, et pourquoi l'humain garde la main sur les écritures.",
+             "agents": "La boucle, ses arrêts, ses traces, puis les agents à rôles, les scénarios Markdown et le protocole MCP."}
+
+def num_not(n): return f'{FAM_IDX.get(n.get("famille"), 0)}.{n.get("ordre", "0")}'
+
+def parcours_not():
+    return sorted(NOTIONS.items(), key=lambda kv: (FAM_IDX.get(kv[1].get("famille"), 9), int(kv[1].get("ordre", "99") or 99)))
+
 def build_notions():
+    PARCN = parcours_not(); POSN = {k: i for i, (k, _) in enumerate(PARCN)}
     cards = []
     for nid, n in NOTIONS.items():
         h, _ = md_render(n["body"])
@@ -266,33 +285,38 @@ def build_notions():
         pratique = (f'<section class="pratique"><h2>Passer à la pratique</h2><p>Vous avez compris la notion ? Mettez-la en œuvre avec :</p>{liens_recettes(rec, "../")}</section>' if rec else "")
         pats = PAT_PAR_NOTION.get(nid, [])
         patblock = (f'<section class="card"><h2 class="nodot">Architectures qui s\'appuient sur cette notion</h2>{liens_patterns(pats, "../")}</section>' if pats else "")
-        corps = (f'<p class="kicker"><a href="index.html">Notions</a></p><h1>{esc(n["title"])}</h1><p class="lead">{esc(n.get("resume",""))}</p>{haut}'
+        fam = next((f for f in FAM_REC if f[0] == n.get("famille")), None)
+        i = POSN[nid]; pv = PARCN[i - 1] if i > 0 else None; nx = PARCN[i + 1] if i + 1 < len(PARCN) else None
+        nav_pn = ('<nav class="pager">' + (f'<a href="{pv[0]}.html">← {num_not(pv[1])} {esc(pv[1]["title"])}</a>' if pv else "<span></span>")
+                  + (f'<a href="{nx[0]}.html">{num_not(nx[1])} {esc(nx[1]["title"])} →</a>' if nx else "<span></span>") + "</nav>")
+        corps = (f'<p class="kicker"><a href="index.html">Notions</a> · {f"famille {FAM_IDX[fam[0]]} · {esc(fam[1])} · " if fam else ""}<strong>{num_not(n)}</strong></p><h1>{esc(n["title"])}</h1><p class="lead">{esc(n.get("resume",""))}</p>{haut}'
                  f'<div class="grid2"><section class="card"><h2 class="nodot">Dans le cours</h2><ul>{cm}</ul>'
                  f'<p class="note">Les titres cliquables ouvrent la diapositive correspondante dans la page <a href="../cours/index.html">Cours</a>.</p></section>'
                  f'<section class="card"><h2 class="nodot">Où le retrouver en TD</h2>{usage_html(USAGE_N[nid], "../") or ""}</section></div>'
-                 f'<article class="prose">{h}</article>{pratique}{patblock}')
+                 f'<article class="prose">{h}</article>{pratique}{patblock}{nav_pn}')
         page(f"notions/{nid}.html", n["title"], corps)
         add_search(n["title"], f"notions/{nid}.html", n["body"] + " " + n.get("resume", ""), "Notion")
         cards.append((nid, n, tds, rec))
-    ordre = [("td1", "Spring Boot, en rappel (TD1)"), ("td2", "Parler à un modèle (TD2)"), ("td3", "Sources externes et contexte (TD3)"),
-             ("td4", "Boucle d'agent (TD4)"), ("td5", "Agents à rôles (TD5)"), ("td6", "MCP et évaluation (TD6)")]
-    sect = []
-    for td, titre in ordre:
-        cs = [c for c in cards if (c[2][0] if c[2] else "td6") == td]
-        if not cs: continue
-        sect.append(f'<h2 id="{td}">{titre}</h2><div class="cards">' + "".join(
-            f'<a class="card link" href="{nid}.html"><h3>{esc(n["title"])}</h3><p>{esc(n.get("resume",""))}</p>'
-            f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in tds)}<span class="rec">🍳 {len(rec)} recette{"s" if len(rec) > 1 else ""}</span></p></a>' for nid, n, tds, rec in cs) + "</div>")
+    byid = {c[0]: c for c in cards}
+    def carte(nid, n, tds, rec):
+        return (f'<a class="card link rec" href="{nid}.html" data-fam="{n.get("famille")}" data-td="{" ".join(tds)}"><h3><span class="num">{num_not(n)}</span> {esc(n["title"])}</h3><p>{esc(n.get("resume",""))}</p>'
+                f'<p class="tags">{"".join(f"<span>{TDS[t][0]}</span>" for t in tds)}<span class="rec">🍳 {len(rec)} recette{"s" if len(rec) > 1 else ""}</span></p></a>')
+    sect = ""
+    for k, (fid, titre, _i, quand) in enumerate(FAM_REC, 1):
+        cs = "".join(carte(*byid[nid]) for nid, n in PARCN if n.get("famille") == fid)
+        sect += f'<section class="famrec" id="{fid}"><h2><span class="num">{k}</span> {esc(titre)} <small>{quand}</small></h2><p class="intro">{esc(INTRO_NOT[fid])}</p><div class="cards">{cs}</div></section>'
+    filtre = ('<div class="filtres" id="filtres"><span>Famille :</span><button class="chip on" data-f="fam" data-v="">Toutes</button>'
+              + "".join(f'<button class="chip" data-f="fam" data-v="{f[0]}">{FAM_IDX[f[0]]} · {esc(f[1].split(":")[0])}</button>' for f in FAM_REC)
+              + '<br><span>TD :</span><button class="chip on" data-f="td" data-v="">Tous</button>'
+              + "".join(f'<button class="chip" data-f="td" data-v="{t}">{TDS[t][0]}</button>' for t in TDS) + '</div>')
+    js = ("<script>(function(){var s={fam:'',td:''},bs=document.querySelectorAll('#filtres button');"
+          "function ap(){document.querySelectorAll('a.rec').forEach(function(c){var ok=(!s.fam||c.dataset.fam===s.fam)&&(!s.td||c.dataset.td.split(' ').indexOf(s.td)>=0);c.style.display=ok?'':'none';});"
+          "document.querySelectorAll('.famrec').forEach(function(f){var v=[].some.call(f.querySelectorAll('a.rec'),function(c){return c.style.display!=='none';});f.style.display=v?'':'none';});}"
+          "bs.forEach(function(b){b.addEventListener('click',function(){s[b.dataset.f]=b.dataset.v;bs.forEach(function(x){if(x.dataset.f===b.dataset.f)x.classList.toggle('on',x===b);});ap();});});})();</script>")
     page("notions/index.html", "Notions du cours",
-         '<h1>Notions du cours</h1><p class="lead">Chaque fiche explique une notion avec un schéma, un exemple de la clinique, les erreurs fréquentes et un auto-test, puis vous envoie vers les <strong>recettes</strong> qui la mettent en pratique.</p>'
-         '<p class="note">Parcours conseillé : <strong>notion</strong> (comprendre) → <strong>recette</strong> (faire) → <strong>architecture</strong> (savoir quand l\'utiliser).</p>' + "".join(sect))
+         '<h1>Notions du cours</h1><p class="lead">Chaque fiche explique une notion avec un schéma, un exemple de la clinique, les erreurs fréquentes et un auto-test, puis vous envoie vers les <strong>recettes</strong> qui la mettent en pratique. Elles sont rangées <strong>dans l\'ordre du parcours</strong> : la famille 1 sert à tous les TD, les familles 2 à 5 suivent les séances.</p>'
+         '<p class="note">Parcours conseillé : <strong>notion</strong> (comprendre) → <strong>recette</strong> (faire) → <strong>architecture</strong> (savoir quand l\'utiliser).</p>' + filtre + sect + js)
 
-FAM_REC = [("methode", "Méthode : à garder sous la main", "Les trois gestes qui servent à tous les TD : tenir son journal, tester sans vrai modèle, diagnostiquer une panne.", "dès le TD1"),
-           ("spring", "Spring Boot, le socle", "Une application en couches : données, règles métier, API, sécurité. Rien d'IA ici, mais les TD suivants s'appuieront dessus.", "TD1"),
-           ("modele", "Parler à un modèle", "Brancher un fournisseur, écrire un prompt, garder une mémoire, obtenir un objet Java.", "TD2"),
-           ("outils", "Outils, sources et contexte", "Donner au modèle de quoi lire ou agir, sans lui laisser la main sur les écritures, et mesurer ce que cela coûte.", "TD2 à TD3"),
-           ("agents", "Agents", "De la boucle d'agent à plusieurs agents qui se répartissent les rôles, puis au jeu MCP.", "TD4 à TD6")]
-FAM_IDX = {f[0]: i for i, f in enumerate(FAM_REC, 1)}
 
 def num_rec(r): return f'{FAM_IDX.get(r.get("famille"), 0)}.{r.get("ordre", "0")}'
 
@@ -334,8 +358,8 @@ def build_recettes():
               + '<br><span>TD :</span><button class="chip on" data-f="td" data-v="">Tous</button>'
               + "".join(f'<button class="chip" data-f="td" data-v="{t}">{TDS[t][0]}</button>' for t in TDS) + '</div>')
     js = ("<script>(function(){var s={fam:'',td:''},bs=document.querySelectorAll('#filtres button');"
-          "function ap(){document.querySelectorAll('.rec').forEach(function(c){var ok=(!s.fam||c.dataset.fam===s.fam)&&(!s.td||c.dataset.td.split(' ').indexOf(s.td)>=0);c.style.display=ok?'':'none';});"
-          "document.querySelectorAll('.famrec').forEach(function(f){var v=[].some.call(f.querySelectorAll('.rec'),function(c){return c.style.display!=='none';});f.style.display=v?'':'none';});}"
+          "function ap(){document.querySelectorAll('a.rec').forEach(function(c){var ok=(!s.fam||c.dataset.fam===s.fam)&&(!s.td||c.dataset.td.split(' ').indexOf(s.td)>=0);c.style.display=ok?'':'none';});"
+          "document.querySelectorAll('.famrec').forEach(function(f){var v=[].some.call(f.querySelectorAll('a.rec'),function(c){return c.style.display!=='none';});f.style.display=v?'':'none';});}"
           "bs.forEach(function(b){b.addEventListener('click',function(){s[b.dataset.f]=b.dataset.v;bs.forEach(function(x){if(x.dataset.f===b.dataset.f)x.classList.toggle('on',x===b);});ap();});});})();</script>")
     page("recettes/index.html", "Recettes",
          '<h1>Recettes</h1><p class="lead">Des marches à suivre courtes : objectif, ingrédients, squelette de code, vérification, pièges. Elles sont rangées <strong>dans l\'ordre du parcours</strong> : commencez par la famille 1 (méthode), puis suivez les familles 2 à 5 au rythme des TD. Chaque recette dit <strong>quelles notions elle mobilise</strong>.</p>'

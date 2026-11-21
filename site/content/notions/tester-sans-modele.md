@@ -3,6 +3,8 @@ title: Tester sans vrai modèle
 resume: Le profil `simule` rend les tests déterministes, rapides et gratuits.
 cm: CM1 — Outillage : Mettre au point sans se perdre ; Symptôme, cause probable, premier geste
 td: td2, td3, td4, td5
+famille: methode
+ordre: 1
 ---
 ## L'idée
 Aucun test n'appelle un vrai modèle. Le profil `simule` le remplace par une réponse **déterministe**.

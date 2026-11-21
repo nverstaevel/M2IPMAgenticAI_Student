@@ -3,6 +3,8 @@ title: Sécurité : rôles, authentification, CSRF
 resume: Deux rôles (PERSONNEL, ADMIN) et une règle simple pour l'API.
 cm: CM1 — Rappel Spring Boot : Tester l’API sans navigateur ; Confirmation des écritures
 td: td1, td2
+famille: spring
+ordre: 5
 ---
 ## L'idée
 Spring Security protège les URL par **rôle**. Deux rôles suffisent ici : `PERSONNEL` et `ADMIN`.

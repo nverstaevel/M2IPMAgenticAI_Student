@@ -3,6 +3,8 @@ title: Mémoire de conversation
 resume: Le modèle n'a pas de mémoire : l'application renvoie l'historique à chaque appel.
 cm: CM1 — Un échange est une liste de messages ; La mémoire, c’est à l’application de la gérer
 td: td2
+famille: modele
+ordre: 4
 ---
 ## L'idée
 Un modèle n'a **aucune mémoire** : c'est l'application qui renvoie l'historique à chaque appel.
