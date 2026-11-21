@@ -112,7 +112,7 @@ def jpa():
     b += A([(180, 136), (250, 136)], "N → 1", ly=-6) + A([(325, 110), (325, 54)], "N → 1", lx=24, ly=0) + A([(400, 136), (470, 136)], "1 ← N", ly=-6)
     b += A([(500, 32), (400, 32)], "N ↔ N", ly=-9)
     b += N(360, 200, "@ManyToOne porte la clé étrangère : c'est la créature qui connaît son propriétaire et son espèce.")
-    return svg(220, b, "Modèle de données de la clinique", "Chaque flèche se lit « N créatures ont 1 propriétaire ».")
+    return svg(220, b, "Modèle de données de la clinique", "Une flèche N → 1 se lit « N créatures ont 1 propriétaire » ; N ↔ N passe par une table de jointure.")
 
 @fig
 def sortie_structuree():
