@@ -48,7 +48,7 @@ Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La pa
 
 ### Le tableau de bord, case par case
 
-![La page du jeu, avec ses neuf zones numérotées](img/jeu/jeu-vue-ensemble.png)
+![La page du jeu, avec ses dix zones numérotées](img/jeu/jeu-vue-ensemble.png)
 
 *Jour 1, avant la première consultation : trois patients attendent, aucun point d'action n'est encore dépensé.*
 
@@ -63,6 +63,7 @@ Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La pa
 | 7 | À droite, en haut | Le **dossier du patient** (voir plus bas). |
 | 8 | À droite, au milieu | La **pharmacie** : un clic sur un flacon en commande un exemplaire. Le badge indique le stock (rouge s'il en reste un ou aucun), « +1 🚚 » une commande en route ; le survol affiche le prix et la description. |
 | 9 | À droite, en bas | Le **journal** : toutes les actions de la partie, la plus récente en premier. |
+| 10 | À droite, sous la pharmacie | Le **carnet de soins** : la mémoire de la clinique. Chaque soin donné y inscrit son effet (✅ guérit, ☠️ toxique, 💚 redonne des forces, 🤷 sans effet), groupé par espèce. Il ne contient que ce que vous avez **essayé** : un agent le lit avec l'outil `carnet_soins`. |
 
 La page se rafraîchit toute seule chaque seconde : gardez-la ouverte pendant les étapes 3 à 6, vous regarderez votre agent soigner en direct, avec le même suspense qu'un match de football.
 
