@@ -22,7 +22,7 @@ class LiaisonMcpTest {
     @Test
     void lesOutilsDuJeuSontDecouvertsEtAppelables() {
         var noms = java.util.Arrays.stream(jeu.outils()).map(o -> o.getToolDefinition().name()).toList();
-        assertThat(noms).contains("etat_clinique", "lister_patients", "fiche_espece", "consulter_pharmacie",
+        assertThat(noms).contains("etat_clinique", "lister_patients", "fiche_espece", "carnet_soins", "consulter_pharmacie",
                 "examiner_patient", "soigner", "commander", "fin_de_journee");
         JeuMcp.Etat etat = jeu.etat();
         assertThat(etat.jour()).isEqualTo(1);
