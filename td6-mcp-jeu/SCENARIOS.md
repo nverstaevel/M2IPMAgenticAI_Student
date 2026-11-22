@@ -93,4 +93,4 @@ Agent monProducteur(ChatClient.Builder builder) {
 
 ## Le groupe d'outils `jeu` (TD6)
 
-Avec le profil `jeu`, `outils jeu` donne à un agent les huit outils du jeu (`etat_clinique`, `lister_patients`, `fiche_espece`, `consulter_pharmacie`, `examiner_patient`, `soigner`, `commander`, `fin_de_journee`) ; on peut aussi les nommer un par un pour restreindre un rôle. Exemples : `scenarios/jeu-gribouille-seul.md`, `scenarios/jeu-equipe.md`. Une exécution = une journée ; la partie complète se lance par `POST /api/agent/jeu/partie`.
+Avec le profil `jeu`, `outils jeu` donne à un agent les neuf outils du jeu (`etat_clinique`, `lister_patients`, `fiche_espece`, `carnet_soins`, `consulter_pharmacie`, `examiner_patient`, `soigner`, `commander`, `fin_de_journee`) ; on peut aussi les nommer un par un pour restreindre un rôle. Exemples : `scenarios/jeu-gribouille-seul.md`, `scenarios/jeu-equipe.md`. Une exécution = une journée ; la partie complète se lance par `POST /api/agent/jeu/partie`.

@@ -20,7 +20,7 @@ public class JeuController {
     @GetMapping("/partie")
     public Map<String, Object> partie() {
         Jeu j = parties.jeu();
-        return Map.of("etat", j.etat(), "patients", j.patients(), "pharmacie", j.pharmacie(), "journal", j.journal());
+        return Map.of("etat", j.etat(), "patients", j.patients(), "pharmacie", j.pharmacie(), "journal", j.journal(), "carnet", j.carnet());
     }
 
     @PostMapping("/nouvelle-partie")
@@ -43,6 +43,9 @@ public class JeuController {
 
     @PostMapping("/fin-de-journee")
     public Jeu.Compte finDeJournee() { return parties.jeu().finDeJournee(); }
+
+    @GetMapping("/carnet")
+    public List<Jeu.Observation> carnet() { return parties.jeu().carnet(); }
 
     @GetMapping("/journal")
     public List<String> journal() { return parties.jeu().journal(); }

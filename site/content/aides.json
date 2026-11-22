@@ -533,7 +533,7 @@
    ],
    "indices": [
     "Client désactivé par défaut ; activé seulement par le profil `jeu`.",
-    "Contrôle : `/api/agent/jeu/outils` répond `connecte: true` et liste huit outils.",
+    "Contrôle : `/api/agent/jeu/outils` répond `connecte: true` et liste neuf outils.",
     "Un outil MCP est un `ToolCallback` comme un autre.",
     "`JeuMcp` et le groupe `jeu` sont fournis : lisez-les, ne les modifiez pas."
    ]

@@ -9,7 +9,7 @@ import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-/** Le contexte démarre avec le serveur MCP, et les huit outils du jeu sont publiés. */
+/** Le contexte démarre avec le serveur MCP, et les neuf outils du jeu sont publiés. */
 @SpringBootTest
 class ServeurMcpTest {
 
@@ -21,6 +21,6 @@ class ServeurMcpTest {
         List<String> noms = fournisseurs.stream().flatMap(f -> Arrays.stream(f.getToolCallbacks()))
                 .map(c -> c.getToolDefinition().name()).toList();
         assertThat(noms).contains("etat_clinique", "lister_patients", "fiche_espece", "consulter_pharmacie",
-                "examiner_patient", "soigner", "commander", "fin_de_journee");
+                "carnet_soins", "examiner_patient", "soigner", "commander", "fin_de_journee");
     }
 }

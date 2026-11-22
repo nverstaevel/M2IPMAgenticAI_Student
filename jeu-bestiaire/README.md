@@ -1,6 +1,6 @@
 # Clinique du bestiaire — le jeu (TD6)
 
-Application Spring Boot **fournie** : à ne pas modifier. Elle simule une clinique (patients, pharmacie, trésorerie) et publie huit outils par **MCP** (Streamable HTTP) : `etat_clinique`, `lister_patients`, `fiche_espece`, `consulter_pharmacie`, `examiner_patient`, `soigner`, `commander`, `fin_de_journee`.
+Application Spring Boot **fournie** : à ne pas modifier. Elle simule une clinique (patients, pharmacie, trésorerie) et publie neuf outils par **MCP** (Streamable HTTP) : `etat_clinique`, `lister_patients`, `fiche_espece`, `carnet_soins`, `consulter_pharmacie`, `examiner_patient`, `soigner`, `commander`, `fin_de_journee`.
 
 ```bash
 mvn spring-boot:run        # http://localhost:8090 (tableau de bord), MCP sur http://localhost:8090/mcp

@@ -44,7 +44,7 @@ Chaque étape suit la même forme : **Objectif**, **Pas à pas**, **Point de con
 
 Un dragonnet qui tousse de la fumée jaune sur la moquette, un loup-garou qui se gratte en jurant que ce ne sont pas des puces, une licorne qui boude, un vampire qui voulait un rendez-vous *avant* le coucher du soleil : la salle d'attente est pleine, et le seul praticien disponible est un chatbot en blouse. Vous avez **5 jours**, **5 points d'action par jour**, une pharmacie de onze flacons et un score qui ne pardonne pas les décès.
 
-Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La page ci-dessous, c'est ce que *vous* voyez ; ce que l'agent verra, ce sont huit outils MCP. Les deux décrivent la même clinique.
+Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La page ci-dessous, c'est ce que *vous* voyez ; ce que l'agent verra, ce sont neuf outils MCP. Les deux décrivent la même clinique.
 
 ### Le tableau de bord, case par case
 
@@ -109,18 +109,19 @@ Votre agent n'a pas d'yeux, seulement des outils. Chaque zone de la page a son �
 | Le bouton 🔎 Examiner | `examiner_patient` |
 | Le bouton 💉 Soigner | `soigner` |
 | La pharmacie : stock et prix | `consulter_pharmacie` |
+| Le panneau 📒 Carnet de soins (ce qui a déjà été essayé : guérit, toxique, sans effet) | `carnet_soins` |
 | Un clic sur un flacon | `commander` |
 | Le bouton 🌙 Fin de journée | `fin_de_journee` |
 | *(aucun bouton)* | `fiche_espece` : le manuel du bestiaire, avec les maladies de l'espèce, leurs signes, leurs remèdes et les médicaments toxiques |
 
-Un seul outil n'a pas de bouton : `fiche_espece`. Sur la page, vous devez tâtonner ; l'agent, lui, peut lire le manuel (encore faut-il qu'il le lise). Pour le consulter vous aussi, utilisez MCP Inspector à l'étape 1. Ce que Gribouille ne verra jamais : les animations, les étincelles, et le vampire qui soupire.
+Un seul outil n'a pas de bouton : `fiche_espece`. Le **carnet de soins** garde la mémoire de la partie : chaque effet découvert (un remède qui guérit, un médicament toxique pour une espèce) y est noté, et `carnet_soins` le rend aux agents comme à vous. Sur la page, vous devez tâtonner ; l'agent, lui, peut lire le manuel (encore faut-il qu'il le lise). Pour le consulter vous aussi, utilisez MCP Inspector à l'étape 1. Ce que Gribouille ne verra jamais : les animations, les étincelles, et le vampire qui soupire.
 
 ## Parcours guidé
 
 | Étape | Durée | Vous produisez | Point de contrôle |
 | --- | --- | --- | --- |
 | 1. Lancer et explorer | 20 min | une partie jouée à la main, votre score de référence | le tableau de bord reflète vos actions |
-| 2. Connecter la clinique | 15 min | la liste des outils du jeu | `GET /api/agent/jeu/outils` : `connecte: true`, 8 outils |
+| 2. Connecter la clinique | 15 min | la liste des outils du jeu | `GET /api/agent/jeu/outils` : `connecte: true`, 9 outils |
 | 3. Gribouille seul | 30 min | `jeu-gribouille-seul.md`, une prédiction, une partie | une partie de 5 jours, un score |
 | 4. Une équipe | 45 min | les trois prompts de rôle et `jeu-equipe.md` | le gardien rejette ou approuve sur le graphe |
 | 5. Votre architecture | 40 min | une hypothèse et un troisième scénario `.md` | une partie jouée, comparée aux deux autres |
@@ -166,7 +167,7 @@ agent.budget-tokens=200000          # une partie fait beaucoup d'appels : budget
 3. Lancez la clinique avec le profil `jeu` en plus de votre profil de modèle, par exemple `--spring.profiles.active=lmstudio,jeu`.
 4. 🧠 Dans le journal : en quoi l'agent doit-il faire **plus** ou **moins** confiance à un outil venu d'un autre programme ?
 
-**Point de contrôle.** `curl -u gribouille:gribouille http://localhost:8080/api/agent/jeu/outils` répond `connecte: true` et liste huit outils. Sinon, voir « En cas de blocage ».
+**Point de contrôle.** `curl -u gribouille:gribouille http://localhost:8080/api/agent/jeu/outils` répond `connecte: true` et liste neuf outils. Sinon, voir « En cas de blocage ».
 
 ### Étape 3 — Gribouille seul
 
@@ -217,8 +218,8 @@ L'équipe : le **diagnosticien** observe et propose un plan (il ne peut pas soig
 
 ```markdown
 ## Agents
-- diagnosticien : outils etat_clinique, lister_patients, fiche_espece, examiner_patient
-- gardien = gardien-jeu : outils fiche_espece, consulter_pharmacie
+- diagnosticien : outils etat_clinique, lister_patients, fiche_espece, carnet_soins, examiner_patient
+- gardien = gardien-jeu : outils fiche_espece, carnet_soins, consulter_pharmacie
 - apothicaire : outils etat_clinique, consulter_pharmacie, commander, soigner, fin_de_journee
 
 ## Graphe

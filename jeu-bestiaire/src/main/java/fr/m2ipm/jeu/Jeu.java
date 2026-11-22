@@ -51,6 +51,8 @@ public class Jeu {
     private int gueris, morts, compteur;
     private boolean terminee;
     private final List<String> journal = new ArrayList<>();
+    /** Carnet de soins : ce que la pratique a appris, une ligne par (espèce, médicament, effet, maladie). */
+    private final Map<String, Observation> carnet = new LinkedHashMap<>();
 
     public Jeu(long graine, int jours, int arriveesParJour) {
         this.hasard = new Random(graine);
@@ -75,6 +77,12 @@ public class Jeu {
     public record LignePharmacie(String medicament, int prix, int stock, int enCommande, String description) {}
 
     public record Compte(boolean ok, String message, Etat etat) {}
+
+    /**
+     * Un effet de soin découvert. {@code effet} : GUERISON, TOXIQUE, REVIGORANT ou AUCUN_EFFET. {@code maladie} : la maladie
+     * soignée (guérison) ou, pour un aucun-effet, le signe distinctif si le patient avait été examiné (sinon vide).
+     */
+    public record Observation(String espece, String medicament, String effet, String maladie, int fois) {}
 
     // ---- observation (gratuite) ----
 
@@ -132,6 +140,15 @@ public class Jeu {
         return ok(quantite + " × " + m.nom() + " commandé(s), livraison demain (" + cout + ").");
     }
 
+    /** Le carnet de soins : uniquement ce qui a été observé dans cette partie, jamais ce qui n'a pas été essayé. */
+    public synchronized List<Observation> carnet() { return List.copyOf(carnet.values()); }
+
+    private void noter(Patient p, String medicament, String effet, String maladie) {
+        carnet.merge(p.espece + "|" + medicament + "|" + effet + "|" + maladie,
+                new Observation(p.espece, medicament, effet, maladie, 1),
+                (a, b) -> new Observation(a.espece(), a.medicament(), a.effet(), a.maladie(), a.fois() + 1));
+    }
+
     public synchronized Compte soigner(String idPatient, String nomMedicament) {
         Compte refus = verifier(idPatient);
         if (refus != null) { return refus; }
@@ -143,6 +160,7 @@ public class Jeu {
         points--;
         stock.merge(m.nom(), -1, Integer::sum);
         if (m.nom().equals(p.maladie.remede())) {
+            noter(p, m.nom(), "GUERISON", p.maladie.nom());
             presents.remove(p.id);
             gueris++;
             tresorerie += HONORAIRES;
@@ -150,14 +168,17 @@ public class Jeu {
             return ok(p.nom + " est guéri(e). Honoraires : " + HONORAIRES + ".");
         }
         if (Catalogue.CONTRE_INDICATIONS.get(p.espece).contains(m.nom())) {
+            noter(p, m.nom(), "TOXIQUE", "");
             p.pv -= 50;
             String suite = verifierMort(p);
             return ok(m.nom() + " est toxique pour un " + p.espece + " !" + suite);
         }
         if (m.nom().equals("tisane-de-sauge")) {
+            noter(p, m.nom(), "REVIGORANT", "");
             p.pv = Math.min(100, p.pv + 15);
             return ok(p.nom + " reprend des forces (PV " + p.pv + "), mais n'est pas soigné(e).");
         }
+        noter(p, m.nom(), "AUCUN_EFFET", p.examine ? p.maladie.signeDistinctif() : "");
         p.pv -= 5;
         return ok(m.nom() + " n'a aucun effet sur " + p.nom + " (PV " + p.pv + ").");
     }

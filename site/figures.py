@@ -212,7 +212,7 @@ def workflow():
 
 @fig
 def mcp():
-    b = B(20, 30, 270, 120, "Clinique (client MCP)\n\nagent · ToolCallbacks\nJeuMcp.appeler(nom, json)", "acc") + B(430, 30, 270, 120, "Jeu du bestiaire (serveur MCP)\n\nhuit outils : état, soigner,\ncommander, jour suivant…")
+    b = B(20, 30, 270, 120, "Clinique (client MCP)\n\nagent · ToolCallbacks\nJeuMcp.appeler(nom, json)", "acc") + B(430, 30, 270, 120, "Jeu du bestiaire (serveur MCP)\n\nneuf outils : état, soigner,\ncommander, jour suivant…")
     b += A([(290, 60), (430, 60)], "1 · List tools", ly=-8) + A([(430, 84), (290, 84)], "outils + descriptions", ly=14, cls="dash") + A([(290, 128), (430, 128)], "2 · call(nom, json)", ly=-8)
     b += N(360, 12, "HTTP /mcp  (Streamable HTTP, port 8090)", cls="t s")
     b += N(360, 185, "Un outil MCP est un ToolCallback comme un autre : votre code d'agent ne change pas.")

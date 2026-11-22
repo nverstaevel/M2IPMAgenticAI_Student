@@ -106,4 +106,19 @@ class JeuTest {
         assertThat(actif.etat().score()).isGreaterThan(passif.etat().score());
         assertThat(actif.etat().gueris()).isGreaterThan(passif.etat().gueris());
     }
+
+    @Test
+    void leCarnetNeRetientQueCeQuiAEteEssaye() {
+        Jeu j = new Jeu(7, 5, 3);
+        assertThat(j.carnet()).isEmpty();
+        var p = j.patients().get(0);
+        String r = remede(j, p);
+        j.soigner(p.id(), r);
+        assertThat(j.carnet()).hasSize(1);
+        var o = j.carnet().get(0);
+        assertThat(o.espece()).isEqualTo(p.espece());
+        assertThat(o.medicament()).isEqualTo(r);
+        assertThat(o.effet()).isEqualTo("GUERISON");
+        assertThat(o.fois()).isEqualTo(1);
+    }
 }

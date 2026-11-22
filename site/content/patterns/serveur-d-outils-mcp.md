@@ -45,7 +45,7 @@ Chaque application expose ses fonctions à sa façon. Écrire un adaptateur par 
 Quand les outils sont fournis par un **autre programme** ou une autre équipe.
 
 ## Dans la clinique
-TD6 : le jeu du bestiaire expose huit outils sur `/mcp` ; le client est activé par le profil `jeu`.
+TD6 : le jeu du bestiaire expose neuf outils sur `/mcp` ; le client est activé par le profil `jeu`.
 
 ## Mesurer
 Outils découverts, latence par appel, erreurs de connexion ; et, côté sécurité, ce que l'agent peut faire avec chaque outil.

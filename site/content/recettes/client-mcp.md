@@ -38,7 +38,7 @@ agent.budget-tokens=200000
 ## 4. Contrôle
 ```bash
 curl -u gribouille:gribouille http://localhost:8080/api/agent/jeu/outils
-# connecte: true, huit outils
+# connecte: true, neuf outils
 ```
 
 ## Pièges

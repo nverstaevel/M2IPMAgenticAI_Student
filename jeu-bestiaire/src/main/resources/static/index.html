@@ -96,6 +96,7 @@ main{display:flex;flex-wrap:wrap;gap:14px;padding:14px;justify-content:center}
   <div class="cote">
     <div class="carte"><h3>🔎 Dossier du patient</h3><div id="fiche"><div class="vide">Clique sur une créature de la salle d'attente.</div></div></div>
     <div class="carte"><h3>💊 Pharmacie <small>(clic = commander 1)</small></h3><div id="etagere"></div></div>
+    <div class="carte"><h3>📒 Carnet de soins <small>(ce qui a été essayé)</small></h3><ul id="carnet"><li class="vide">Rien d'essayé pour l'instant.</li></ul></div>
     <div class="carte"><h3>📜 Journal</h3><ul id="journal"></ul></div>
   </div>
 </main>
@@ -189,6 +190,10 @@ function maj(d){
     +'<span class="ic">'+(IC[m.medicament]||'🧪')+'</span>'+m.medicament+'<span class="n">'+m.stock+(m.enCommande?' +'+m.enCommande+'🚚':'')+'</span></div>').join('');
   et.querySelectorAll('.flacon').forEach(f=>{f.onclick=()=>agir('commander',{medicament:f.dataset.n,quantite:1});
     if(vieux[f.dataset.n]!==undefined&&vieux[f.dataset.n]!==+f.dataset.s)anim(f,'flash',900)});
+  const EFF={GUERISON:'✅ guérit',TOXIQUE:'☠️ toxique pour',REVIGORANT:'💚 redonne des forces à',AUCUN_EFFET:'🤷 sans effet sur'};
+  const cn=$('carnet');cn.innerHTML=(d.carnet&&d.carnet.length?d.carnet:[null]).map(()=>'<li></li>').join('');
+  [...cn.children].forEach((li,i)=>{const o=d.carnet&&d.carnet[i];
+    li.textContent=o?o.medicament+' '+EFF[o.effet]+' '+o.espece+(o.maladie?' ('+o.maladie+')':'')+(o.fois>1?' ×'+o.fois:''):'Rien d\'essayé pour l\'instant.'});
   $('journal').innerHTML=d.journal.slice().reverse().slice(0,40).map(l=>'<li></li>').join('');
   [...$('journal').children].forEach((li,i)=>li.textContent=d.journal.slice().reverse()[i]);
   if(e.terminee){$('fint').textContent=e.morts===0?'🎉 Bravo !':'Partie terminée';$('finp').textContent='Score '+e.score+' · '+e.gueris+' guéris · '+e.morts+' morts';$('fin').classList.add('on')}

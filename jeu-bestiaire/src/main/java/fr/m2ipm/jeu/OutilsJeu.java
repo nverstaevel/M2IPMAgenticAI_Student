@@ -4,6 +4,7 @@ import fr.m2ipm.jeu.Jeu.Compte;
 import fr.m2ipm.jeu.Jeu.Etat;
 import fr.m2ipm.jeu.Jeu.Fiche;
 import fr.m2ipm.jeu.Jeu.LignePharmacie;
+import fr.m2ipm.jeu.Jeu.Observation;
 import fr.m2ipm.jeu.Jeu.PatientVue;
 import java.util.List;
 import org.springframework.ai.tool.annotation.Tool;
@@ -29,6 +30,9 @@ public class OutilsJeu {
 
     @Tool(name = "fiche_espece", description = "Fiche du bestiaire pour une espèce (dragonnet, loup-garou, vampire, licorne) : ses maladies, leur signe distinctif, le remède de chacune et les médicaments toxiques. Gratuit.")
     public Fiche ficheEspece(@ToolParam(description = "Nom de l'espèce, par exemple vampire") String espece) { return parties.jeu().fiche(espece); }
+
+    @Tool(name = "carnet_soins", description = "Carnet de soins : les effets de soins déjà observés dans cette partie (espèce, médicament, effet GUERISON / TOXIQUE / REVIGORANT / AUCUN_EFFET, maladie ou signe distinctif concerné, nombre de fois). Mémoire de la clinique : ne contient que ce qui a été essayé. Gratuit.")
+    public List<Observation> carnetSoins() { return parties.jeu().carnet(); }
 
     @Tool(name = "consulter_pharmacie", description = "Stock de la pharmacie : prix unitaire, quantité en stock, quantité en commande (livrée à la fin de la journée). Gratuit.")
     public List<LignePharmacie> consulterPharmacie() { return parties.jeu().pharmacie(); }
