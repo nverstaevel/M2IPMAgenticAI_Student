@@ -43,30 +43,48 @@ public class PropositionService {
     /** Vérifie les données (créature, soigneur, créneau libre) puis mémorise la proposition. N'écrit rien en base. */
     public PropositionConsultation proposer(String conversationId, Long creatureId, Long soigneurId,
                                             LocalDateTime dateHeure, String motif) {
-                                                // TODO TD2 : à écrire
-                                                throw new UnsupportedOperationException("À écrire : proposer");
-                                            }
+        var creature = clinique.trouverCreature(creatureId);
+        var soigneur = clinique.trouverSoigneur(soigneurId);
+        clinique.verifierDisponibilite(soigneurId, dateHeure);
+        var p = new PropositionConsultation(UUID.randomUUID().toString(), conversationId, creatureId, creature.nom(),
+                soigneurId, soigneur.nom(), dateHeure, motif, Instant.now(horloge).plus(duree));
+        propositions.put(p.id(), p);
+        return p;
+    }
 
     /** Propositions non expirées d'une conversation. */
     public List<PropositionConsultation> enAttente(String conversationId) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : enAttente");
+        purger();
+        return propositions.values().stream()
+                .filter(p -> p.conversationId().equals(conversationId))
+                .sorted(java.util.Comparator.comparing(PropositionConsultation::expiration))
+                .toList();
     }
 
     /** Oublie les propositions en attente d'une conversation (réinitialisation du chat). N'écrit rien en base. */
     public void oublier(String conversationId) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : oublier");
+        propositions.values().removeIf(p -> p.conversationId().equals(conversationId));
     }
 
     /** Crée réellement la consultation. À n'appeler que depuis un endpoint réservé au personnel. */
     public ConsultationDto confirmer(String id) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : confirmer");
+        PropositionConsultation p = propositions.get(id);
+        if (p == null) {
+            throw new RessourceIntrouvableException("Aucune proposition d'identifiant " + id);
+        }
+        if (p.expiration().isBefore(Instant.now(horloge))) {
+            propositions.remove(id);
+            throw new OperationInvalideException("La proposition " + id + " a expiré : demandez-en une nouvelle.");
+        }
+        // Si le créneau a été pris entre-temps, planifierConsultation lève ConflitDeCreneauException
+        // et la proposition reste en attente (le personnel peut la refuser ou en demander une autre).
+        ConsultationDto c = clinique.planifierConsultation(p.creatureId(), p.soigneurId(), p.dateHeure(), p.motif());
+        propositions.remove(id);
+        return c;
     }
 
     private void purger() {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : purger");
+        Instant maintenant = Instant.now(horloge);
+        propositions.values().removeIf(p -> p.expiration().isBefore(maintenant));
     }
 }

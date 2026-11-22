@@ -13,11 +13,15 @@ Donner une voix à la clinique. Vous branchez un modèle sur l'application avec 
 5. **appliquer « le modèle propose, l'humain confirme »** à une écriture, et expliquer pourquoi la confirmation n'est pas un outil ;
 6. **mesurer** les tokens d'une conversation et dire ce qui pèse le plus.
 
-**Vous avez réussi si** le Dr Gribouille répond « Gaspard Fumerolle » à « Qui est le propriétaire de Grognon ? » en appelant vos outils, se souvient de la question précédente, et si une proposition de consultation n'est créée qu'après votre clic sur Confirmer.
+**Vous avez réussi si** `mvn test` est vert, que le Dr Gribouille répond « Gaspard Fumerolle » à « Qui est le propriétaire de Grognon ? » en appelant vos outils, se souvient de la question précédente, et si une proposition de consultation n'est créée qu'après votre clic sur Confirmer.
 
-| Vous écrivez | Fourni dans le dossier de départ |
+Ce TD est surtout un TD de **conception** : quels outils donner au modèle, avec quelles descriptions, quel prompt, et comment protéger l'écriture. La plomberie Spring AI (configuration du `ChatClient`, mémoire, flux, triage, mécanisme de proposition et de confirmation) est **déjà écrite et testée**. Vous la lisez, vous la faites tourner avec **votre LLM**, vous la jugez.
+
+| 🧰 Fourni, prêt à l'emploi | 🧠 À vous |
 | --- | --- |
-| la configuration du `ChatClient`, le prompt système, les outils, le triage, la proposition et sa confirmation | les dépendances Spring AI, les profils de fournisseurs, `ModeleSimule` pour les tests, la page `chat.html`, le diagnostic du modèle |
+| les dépendances Spring AI, les profils de fournisseurs, `ModeleSimule`, la page `chat.html`, le diagnostic du modèle, **`ChatConfig`** (client, mémoire, client de triage), **`ChatController`** (chat, flux, triage, propositions), **`PropositionService`**, deux outils de lecture écrits en entier et l'outil d'écriture `proposerConsultation`, le prompt de base | l'**analyse** des outils (étape 0), le **prompt strict** et la comparaison de variantes, **trois outils de lecture** (3 lignes chacun, indications dans le code), l'**évaluation** sur la grille de questions, la **lecture critique** de la confirmation, le bilan de tokens |
+
+Chaque étape suit la même forme : **Objectif**, **Pas à pas**, **Point de contrôle**. Ne passez pas à l'étape suivante tant que le point de contrôle n'est pas vert.
 
 ## Avant la séance
 
@@ -49,7 +53,7 @@ curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele
 | Ressource | Pour quoi faire | Quand |
 | --- | --- | --- |
 | Support de CM1 | le fonctionnement d'un LLM, les tokens, l'appel d'outils | avant la séance |
-| [Spring AI : ChatClient](https://docs.spring.io/spring-ai/reference/api/chatclient.html) | `prompt()`, `defaultSystem`, `stream()`, `entity()` | étapes 2 et 5 |
+| [Spring AI : ChatClient](https://docs.spring.io/spring-ai/reference/api/chatclient.html) | `prompt()`, `defaultSystem`, `stream()`, `entity()` | étapes 2 et 5 (lecture) |
 | [Spring AI : Chat Memory](https://docs.spring.io/spring-ai/reference/api/chat-memory.html) | `MessageWindowChatMemory`, `MessageChatMemoryAdvisor` | étape 3 |
 | [Spring AI : Tool Calling](https://docs.spring.io/spring-ai/reference/api/tools.html) | `@Tool`, `@ToolParam`, `ToolContext` | étapes 4 et 6 |
 | [Spring AI : Structured Output](https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html) | `.entity(Record.class)` | étape 5 |
@@ -60,65 +64,107 @@ curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele
 
 | Étape | Durée | Vous faites | Point de contrôle |
 | --- | --- | --- | --- |
+| 0. Concevoir les outils | 20 min | un tableau d'analyse des méthodes du service | tableau rempli, comparé à celui d'un voisin |
 | 1. Configuration | 15 min | fournisseur, modèle, température, un « bonjour » | le diagnostic répond `OK` |
-| 2. Le Dr Gribouille | 25 min | `ChatClient`, `/api/chat`, flux SSE, page de chat | une réponse en français, avec humour, dans la page |
-| 3. Mémoire | 25 min | fenêtre de 10 messages, dépôt JDBC | « Et son propriétaire ? » comprend de qui on parle, même après redémarrage |
-| 4. Outils de lecture | 40 min | cinq outils, grille de test | la grille est remplie, au moins trois réponses justes |
-| 5. Sortie structurée | 20 min | `POST /api/triage` | un JSON conforme à votre `record` |
-| 6. Écriture avec confirmation | 35 min | proposition, bouton Confirmer | rien n'est écrit avant le clic |
+| 2. Le Dr Gribouille | 25 min | lire le client, écrire le prompt strict, comparer deux prompts | une réponse en français dans la page ; tableau de comparaison |
+| 3. Mémoire | 20 min | tester la mémoire et le redémarrage | « Et son propriétaire ? » comprend de qui on parle, même après redémarrage |
+| 4. Outils de lecture | 45 min | trois outils, grille de test avec votre LLM | grille remplie, au moins trois réponses justes |
+| 5. Sortie structurée | 15 min | essayer le triage sur trois textes | un JSON conforme, et un cas où il se trompe |
+| 6. Écriture avec confirmation | 30 min | lire le mécanisme, tester trois cas limites | rien n'est écrit avant le clic |
 | 7. Bilan | 20 min | tokens, questions, journal | la mesure de tokens est dans le journal |
+
+### Étape 0 — Concevoir les outils
+
+**Objectif.** Décider, avant d'écrire une ligne, ce que le modèle a le droit de voir et de faire.
+
+**Pas à pas.**
+
+1. 🧠 Recopiez ce tableau dans `JOURNAL.md` (section « TD2 ») et remplissez-le à partir des sept méthodes de `CliniqueService` (TD1).
+2. Comparez avec votre voisin : sur quelles lignes divergez-vous, et pourquoi ?
+
+| Méthode du service | Lecture ou écriture | Outil direct pour le modèle ? | Si oui : champs que le modèle doit voir (et pas plus) | Risque si le modèle se trompe |
+| --- | --- | --- | --- | --- |
+| `rechercherProprietaires` | | | | |
+| `trouverProprietaire` | | | | |
+| `creaturesDuProprietaire` | | | | |
+| `consultationsDeLaCreature` | | | | |
+| `soigneursPourEspece` | | | | |
+| `planifierConsultation` | | | | |
+| `enregistrerDiagnostic` | | | | |
+
+**Point de contrôle.** Aucune case vide. Vous pouvez justifier pourquoi `ProprietaireDto` contient un téléphone et pourquoi le modèle ne doit pas le voir (il verra une `ProprietaireVue`, sans téléphone).
 
 ### Étape 1 — Configuration
 
-Renseignez dans `application-local.yml` (copié depuis `application-local.yml.example`, ignoré par Git) l'adresse du serveur de modèles, le nom du modèle et la température. Ce fichier n'est lu que si le profil `local` est actif : lancez avec `-Dspring-boot.run.profiles=local` (Ollama) ou `lmstudio,local` (le dernier profil l'emporte, donc vos réglages surchargent ceux de `lmstudio`). Faites dire bonjour au modèle depuis un `CommandLineRunner`, puis supprimez-le.
+**Objectif.** Faire répondre le modèle de votre fournisseur. Recettes : *Vérifier le modèle*, *Profils de lancement*.
+
+**Pas à pas.**
+
+1. Copiez `application-local.yml.example` en `application-local.yml` (ignoré par Git) et renseignez l'adresse du serveur de modèles, le nom du modèle et la température (0,2 à 0,3 est un bon choix pour un assistant qui utilise des outils).
+2. Lancez avec votre profil : `mvn spring-boot:run -Dspring-boot.run.profiles=lmstudio,local` (ou `local` seul pour Ollama). Le dernier profil l'emporte, donc vos réglages surchargent ceux de `lmstudio`. Les clés d'API vont dans des variables d'environnement, **jamais dans Git**.
+3. Vérifiez :
+
+```bash
+curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele
+```
+
+**Point de contrôle.** La réponse contient `"statut":"OK"`. Sinon, le statut et l'exception sont affichés : voir « En cas de blocage ».
 
 ### Étape 2 — Le Dr Gribouille
 
-Créez un `ChatClient` avec un prompt système. Exposez `POST /api/chat` (`conversationId`, `message`) et une version en flux `GET /api/chat/stream` (`.stream().content()`, renvoyé en SSE). Ajoutez une page de chat Thymeleaf minimale. Le prompt système est à vous ; voici une base à déformer en trois variantes et à comparer :
+**Objectif.** Comprendre comment un prompt système façonne le comportement, et le mesurer. Notion : *ChatClient et prompt*. Recettes : *Écrire un prompt système*, *Comparer des prompts*.
 
-> Tu es le Dr Gribouille, vétérinaire de la clinique des créatures fantastiques. Tu réponds en français, avec humour mais sans jamais inventer un fait du dossier. Pour toute information sur un propriétaire, une créature ou une consultation, tu utilises tes outils. Si un outil ne répond pas, tu le dis.
+**Pas à pas.**
+
+1. 🧰 Lisez `ChatConfig` : le `ChatClient` `drGribouille` reçoit le prompt système (`.defaultSystem(PromptsGribouille.BASE)`), une mémoire, un journal des requêtes et les outils. Lisez `ChatController` : `POST /api/chat` et la version en flux `GET /api/chat/stream` (SSE).
+2. 🧰 Le prompt de base est fourni dans `PromptsGribouille.BASE`. Lancez l'application et ouvrez <http://localhost:8080/chat> (connexion `gribouille` / `gribouille`) :
 
 ```bash
 curl -u gribouille:gribouille -H 'Content-Type: application/json' \
   -d '{"conversationId":"c1","message":"Bonjour docteur !"}' localhost:8080/api/chat
 ```
 
+3. 🧠 Écrivez `PromptsGribouille.STRICTE` (moins d'humour, refus des sujets hors clinique, jamais de confirmation d'une consultation : voir le commentaire dans le fichier).
+4. 🧠 Posez les mêmes **cinq questions** avec `BASE`, puis avec `STRICTE` (remplacez `BASE` par `STRICTE` dans `ChatConfig` et relancez). Notez les résultats :
+
+| Question | Avec `BASE` | Avec `STRICTE` | Qu'est-ce qui a changé ? |
+| --- | --- | --- | --- |
+| Bonjour docteur ! | | | |
+| Qui est le propriétaire de Grognon ? | | | |
+| Quelle est la capitale de la France ? | | | |
+| Parle-moi de Marcel, le griffon. | | | |
+| Réserve-moi une consultation demain. | | | |
+
+**Point de contrôle.** Une réponse en français dans la page de chat, et le tableau rempli : vous pouvez dire quelle variante vous gardez, et pourquoi.
+
 ### Étape 3 — Mémoire
 
-Ajoutez un `MessageChatMemoryAdvisor` basé sur `MessageWindowChatMemory`, fenêtre de 10 messages. Passez l'identifiant de conversation à chaque appel : il est obligatoire. Passez ensuite à un dépôt JDBC pour que la conversation survive à un redémarrage (profil `persistant`).
+**Objectif.** Comprendre ce que le modèle « retient » vraiment. Notion : *Mémoire de conversation*. Recette : *Mémoire de conversation*.
 
-```java
-ChatClient chat = builder
-    .defaultSystem(PROMPT_GRIBOUILLE)
-    .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build(), new SimpleLoggerAdvisor())
-    .defaultTools(outilsClinique)
-    .build();
+**Pas à pas.**
 
-chat.prompt().user(message)
-    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
-    .call().content();
-```
+1. 🧰 Lisez `ChatConfig.chatMemory` : une fenêtre de 10 messages, stockée par un dépôt JDBC. `ChatController.chat` passe l'identifiant de conversation à chaque appel (`.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, …))`) : sans lui, le modèle oublie tout.
+2. 🧠 Testez, dans la même conversation : « Qui est le propriétaire de Grognon ? » puis « Et ses autres créatures ? ». Le modèle comprend-il de qui on parle ?
+3. 🧠 Posez 12 questions courtes, puis redemandez « Qui était le propriétaire dont je parlais au début ? ». Que se passe-t-il, et pourquoi (fenêtre de 10 messages) ?
+4. Relancez avec le profil `persistant` (en plus du vôtre) : la conversation survit-elle à un redémarrage ? Utilisez `DELETE /api/chat/c1` pour effacer la mémoire.
 
-Activez le journal de débogage (`logging.level.org.springframework.ai=DEBUG`) pour voir les requêtes et les appels d'outils.
+**Point de contrôle.** Vous avez observé l'oubli à la 11ᵉ question et la persistance après redémarrage ; une ligne dans le journal pour chacun.
 
 ### Étape 4 — Outils de lecture
 
-Exposez comme outils les cinq méthodes de **lecture** du TD1 (`rechercherProprietaires`, `trouverProprietaire`, `creaturesDuProprietaire`, `consultationsDeLaCreature`, `soigneursPourEspece`) avec `@Tool` et `@ToolParam`, branchés avec `.defaultTools(...)`. Les deux méthodes d'écriture ne deviennent **pas** des outils directs (étape 6). Un outil se résume à une méthode annotée (extrait indicatif) ; **la description est ce que le modèle lit pour choisir** :
+**Objectif.** Exposer trois outils, puis juger si votre LLM s'en sert bien. Notion : *Appel d'outils*. Recettes : *Ajouter un outil*, *Diagnostiquer une panne*.
 
-```java
-@Component
-class OutilsClinique {
-    private final CliniqueService service;
+**Pas à pas.**
 
-    @Tool(description = "Cherche les propriétaires dont le nom contient le texte donné. Renvoie id, nom, prénom et ville.")
-    List<ProprietaireDto> rechercherProprietaires(
-            @ToolParam(description = "Partie du nom de famille") String nom) {
-        return service.rechercherProprietaires(nom);
-    }
-}
+1. 🧰 Lisez `rechercherProprietaires` et `trouverProprietaire` : elles appellent un **service** (jamais un dépôt) et renvoient une `ProprietaireVue` sans téléphone. Lisez la description de chaque outil : ce que ça fait, ce que ça renvoie, un exemple par paramètre.
+2. 🧠 Écrivez `creaturesDuProprietaire`, `consultationsDeLaCreature` et `soigneursPourEspece` (une ligne chacune, voir les indications dans le code).
+3. Lancez les tests de chaque outil :
+
+```bash
+mvn test -Dtest=OutilsCliniqueTest
 ```
 
-Posez ces questions et remplissez le tableau dans `JOURNAL.md` : outils appelés, arguments, réponse juste ou non.
+4. 🧠 **Avec votre LLM**, activez `logging.level.org.springframework.ai=DEBUG` et posez ces questions. Remplissez le tableau dans `JOURNAL.md` : outils appelés, arguments, réponse juste ou non.
 
 | Question | Ce qu'on attend |
 | --- | --- |
@@ -128,25 +174,33 @@ Posez ces questions et remplissez le tableau dans `JOURNAL.md` : outils appelés
 | Combien coûte une consultation pour un yéti ? | le modèle doit dire qu'il ne sait pas (pas d'outil de tarif) |
 | Parle-moi de Marcel, le griffon. | créature inexistante : aucune invention attendue |
 
+5. 🧠 Dégradez volontairement la description d'un outil (« fait des trucs avec les gens ») et reposez la question correspondante. Qu'observez-vous ?
+
+**Point de contrôle.** Les tests passent, la grille est remplie (au moins trois réponses justes) et vous pouvez citer un cas où le modèle se trompe, avec la cause probable.
+
 ### Étape 5 — Sortie structurée
 
-`POST /api/triage` reçoit un texte libre et renvoie un `record` Java rempli par le modèle. Utilisez un client **séparé**, sans mémoire ni outils.
+**Objectif.** Obtenir un objet Java plutôt qu'un texte, et voir où ça casse. Notion : *Sortie structurée*. Recette : *Sortie structurée*.
 
-```java
-record Triage(String espece, String symptome, Urgence urgence) {}
-enum Urgence { FAIBLE, MOYENNE, ELEVEE }
+**Pas à pas.**
 
-Triage t = clientTriage.prompt()
-    .user("Ma licorne boite depuis ce matin et refuse de manger.")
-    .call().entity(Triage.class);
+1. 🧰 `POST /api/triage` reçoit un texte libre et renvoie un `TriageResultat` (espèce, urgence, résumé, symptômes) rempli par le modèle. Il utilise un client **séparé** (`triageClient`), sans mémoire ni outils : lisez-le dans `ChatConfig`.
+2. 🧠 Essayez trois textes avec votre LLM :
+
+```bash
+curl -u gribouille:gribouille -H 'Content-Type: application/json' \
+  -d '{"texte":"Ma licorne boite depuis ce matin et refuse de manger."}' localhost:8080/api/triage
 ```
+
+- un texte clair (la licorne) ;
+- un texte ambigu (« Il ne va pas bien. ») ;
+- un texte sans rapport avec les créatures (« Quelle heure est-il ? »).
+
+**Point de contrôle.** Un JSON conforme pour le premier cas. Dans le journal : que fait votre modèle sur les deux autres (invention, refus, erreur) ?
 
 ### Étape 6 — Une action d'écriture, avec confirmation
 
-1. Un outil `proposerConsultation(creatureId, soigneurId, dateHeure, motif)` **n'écrit rien** dans la base. Il vérifie les données, enregistre une `PropositionConsultation` (identifiant, expiration à 10 minutes) et renvoie un résumé.
-2. L'interface affiche la proposition avec deux boutons. Le bouton Confirmer appelle `POST /api/propositions/{id}/confirmer`, réservé au rôle PERSONNEL, qui appelle `planifierConsultation`.
-3. Aucun outil ne permet au modèle de confirmer. C'est volontaire : la décision d'écrire ne doit pas dépendre de ce que le modèle « croit » avoir compris.
-4. Testez le cas du conflit de créneau : le message d'erreur du TD1 doit remonter jusqu'à la conversation.
+**Objectif.** Comprendre pourquoi le modèle ne confirme jamais une écriture. Notion : *« Proposer, jamais écrire »*. Recette : *Proposer, confirmer*.
 
 ```
 Utilisateur ─▶ modèle ─▶ outil proposerConsultation ─▶ Proposition(id, expire dans 10 min)
@@ -154,15 +208,38 @@ Utilisateur ─▶ modèle ─▶ outil proposerConsultation ─▶ Proposition(
                           personnel clique Confirmer ───┘▶ POST /api/propositions/{id}/confirmer ─▶ planifierConsultation
 ```
 
+**Pas à pas.**
+
+1. 🧰 Lisez `proposerConsultation` (dans `OutilsClinique`) puis `PropositionService.proposer` et `confirmer` : l'outil **n'écrit rien** dans la base ; il vérifie, enregistre une proposition (identifiant, expiration à 10 minutes) et renvoie un résumé. Seul `POST /api/propositions/{id}/confirmer`, réservé au rôle PERSONNEL, appelle `planifierConsultation`.
+2. 🧠 Écrivez dans le journal : pourquoi aucun outil ne permet de confirmer ?
+3. 🧠 **Avec votre LLM**, demandez : « Réserve une consultation pour Flammèche avec le Dr Gribouille le 4 décembre 2026 à 11 h, motif rhume. » Vérifiez que la proposition apparaît dans l'interface (ou `GET /api/propositions?conversationId=c1`) et que **rien** n'est écrit avant le clic.
+4. 🧠 Testez trois cas limites et notez ce qui se passe : confirmer deux fois ; confirmer après expiration ; demander un créneau déjà pris (le message d'erreur du TD1 doit remonter jusqu'à la conversation).
+5. Lancez les tests :
+
+```bash
+mvn test -Dtest=PropositionServiceTest
+```
+
+**Point de contrôle.** Rien n'est écrit avant le clic ; les trois cas limites sont notés ; `PropositionServiceTest` passe.
+
 ### Étape 7 — Bilan
 
-Complétez la grille, mesurez les tokens (voir la première question de réflexion), répondez aux questions, écrivez dans `JOURNAL.md` la meilleure et la pire réponse du Dr Gribouille, copiées telles quelles.
+**Objectif.** Chiffrer, puis conclure.
+
+**Pas à pas.**
+
+1. 🧠 Mesurez les tokens d'une conversation de dix tours (première question de réflexion) et notez ce qui pèse le plus.
+2. 🧠 Répondez aux questions de réflexion.
+3. 🧠 Écrivez dans `JOURNAL.md` la meilleure et la pire réponse du Dr Gribouille, copiées telles quelles, avec une ligne d'explication chacune.
+
+**Point de contrôle.** La mesure de tokens, les réponses et les deux citations sont dans le journal.
 
 ## En cas de blocage
 
 | Symptôme | Cause fréquente | Que faire |
 | --- | --- | --- |
 | Le chat ne répond pas | serveur de modèles éteint ou mauvais port | `curl …/api/diagnostic/modele` : le statut et l'exception sont affichés |
+| `UnsupportedOperationException : À écrire` | un `TODO TD2` n'est pas encore écrit | c'est normal tant que vous n'avez pas fait l'étape : repérez le `TODO TD2` |
 | Le modèle n'appelle jamais d'outil | modèle sans appel d'outils | choisir un autre modèle (voir le README) |
 | « conversationId is required » | identifiant manquant dans l'appel | `.advisors(a -> a.param(ChatMemory.CONVERSATION_ID, id))` |
 | Les outils sont ignorés avec un `ChatModel` maison | options qui ne sont pas des `ToolCallingChatOptions` | partir de `chatModel.getOptions()` |
@@ -179,9 +256,8 @@ Complétez la grille, mesurez les tokens (voir la première question de réflexi
 
 ## Livrable
 
-- Le dossier `td2-chat` : chat en flux, mémoire persistée, cinq outils de lecture, endpoint de triage, proposition et confirmation de consultation.
-- Un test unitaire par outil, qui appelle la méthode directement, sans modèle.
-- Dans `JOURNAL.md` : la grille de test remplie, la mesure de tokens, la meilleure et la pire réponse du Dr Gribouille.
+- Le dossier `td2-chat` : les trois outils et le prompt strict écrits, `mvn test` vert.
+- Dans `JOURNAL.md` : le tableau d'analyse des outils (étape 0), la comparaison de deux prompts (étape 2), la grille de test avec votre LLM (étape 4), vos observations des étapes 3, 5 et 6, la mesure de tokens, la meilleure et la pire réponse du Dr Gribouille.
 
 ## Pour aller plus loin
 

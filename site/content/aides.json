@@ -5,8 +5,8 @@
    "recettes": [],
    "indices": [
     "Ouvrez le dossier `td1-clinique` (pas la racine du dépôt) dans votre IDE.",
-    "Si l'application ne démarre pas, lisez la **première** erreur du log.",
-    "Au premier lancement, une erreur du type *Table \"ESPECE\" not found* est **normale** : il n'y a pas encore d'entités. Lisez `data.sql` pour savoir quelles tables et colonnes il attend."
+    "Au premier lancement, l'application échoue sur une relation non mappée : c'est **normal**. Lisez la **première** erreur du log.",
+    "La clé étrangère est toujours portée par le côté « plusieurs » : la créature connaît son propriétaire, pas l'inverse."
    ]
   },
   "2": {
@@ -17,10 +17,10 @@
     "entites-et-donnees"
    ],
    "indices": [
-    "Une relation `@ManyToOne` porte la clé étrangère : c'est la créature qui connaît son propriétaire.",
-    "Dans `data.sql`, ne codez jamais un identifiant généré en dur : retrouvez-le par le nom avec un `SELECT id FROM … WHERE nom = …`.",
-    "`data.sql` s'exécute avant la création des tables ? Cherchez `defer-datasource-initialization` dans le tableau « En cas de blocage ».",
-    "Les noms doivent coller à `data.sql` : `dateNaissance` devient `date_naissance`, `@ManyToOne Espece espece` devient `espece_id`, et la table de jointure s'appelle `soigneur_espece`."
+    "`Creature` est écrite : c'est votre modèle pour `Consultation`.",
+    "Côté inverse : `@OneToMany(mappedBy = \"nom du champ dans l'autre classe\")`.",
+    "La table de jointure s'appelle `soigneur_espece` ; ses colonnes sont `soigneur_id` et `espece_id`.",
+    "`data.sql` s'exécute avant la création des tables ? Cherchez `defer-datasource-initialization` dans le tableau « En cas de blocage »."
    ]
   },
   "3": {
@@ -32,10 +32,10 @@
     "regle-metier-et-test"
    ],
    "indices": [
-    "Une méthode de dépôt dérivée du nom suffit pour la recherche : `findBy…ContainingIgnoreCase`.",
-    "La règle de chevauchement va dans le **service**, pas dans le contrôleur.",
-    "Deux consultations se chevauchent si `début1 < fin2 && début2 < fin1`.",
-    "Deux intervalles `[a1, a2[` et `[b1, b2[` se chevauchent si `a1 < b2 && b1 < a2` : comparez la nouvelle consultation (début, début + 30 min) à celles du même soigneur."
+    "Dépôts et lectures sont fournis : lisez-les d'abord.",
+    "Deux consultations de 30 min se chevauchent si leurs débuts sont distants de moins de 30 min : les bornes sont `dateHeure − 30 min` et `dateHeure + 30 min`, **exclues**.",
+    "`findByIdPourPlanification` prend le verrou : utilisez-la, pas `findById`, pour le soigneur.",
+    "Un message d'erreur doit nommer la ressource et dire quoi faire ou pourquoi : « Le soigneur 3 (Dr Gribouille) est déjà pris le 12/03 à 14h00 »."
    ]
   },
   "4": {
@@ -46,15 +46,17 @@
     "endpoint-rest"
    ],
    "indices": [
-    "Renvoyez des **DTO** (des `record`), pas les entités : cela évite `LazyInitializationException`.",
-    "Un `@RestControllerAdvice` traduit l'exception de conflit en 409 avec un message lisible."
+    "Un `record` DTO ne contient que ce que l'API doit montrer : comparez `CreatureDto` à l'entité `Creature`.",
+    "`ApiExceptionHandler` associe chaque exception à un code : 404, 400, 409.",
+    "Une requête sans corps valide n'atteint jamais le service : la validation la rejette avant (400)."
    ]
   },
   "5": {
    "notions": [],
    "recettes": [],
    "indices": [
-    "Une page Thymeleaf lit un modèle préparé par un contrôleur `@Controller` (pas `@RestController`)."
+    "Une page Thymeleaf lit un modèle préparé par un contrôleur `@Controller` (pas `@RestController`).",
+    "Les pages appellent `CliniqueService` directement, pas l'API."
    ]
   },
   "6": {
@@ -65,7 +67,8 @@
     "securiser-api"
    ],
    "indices": [
-    "403 sur un `POST` ? C'est CSRF : ignorez-le pour `/api/**`.",
+    "`hasAnyRole` / `hasRole` : le préfixe `ROLE_` est ajouté automatiquement.",
+    "Un anonyme est redirigé vers la page de connexion (302) ou reçoit 401 ; un utilisateur connecté sans le bon rôle reçoit 403.",
     "Testez avec `curl -u gribouille:gribouille …` avant de tester dans le navigateur."
    ]
   },
@@ -77,12 +80,27 @@
     "regle-metier-et-test"
    ],
    "indices": [
-    "Un test de service : créez une consultation, puis tentez-en une qui chevauche, et vérifiez l'exception **et son message**.",
-    "Un test `MockMvc` vérifie le code HTTP et un champ JSON."
+    "Un test de service : préparer une situation, provoquer le cas, vérifier l'exception **et son message**.",
+    "Un créneau à exactement 30 min d'un autre est accepté : les bornes sont exclues."
    ]
   }
  },
  "td2": {
+  "0": {
+   "notions": [
+    "appel-outils",
+    "confirmation-ecritures",
+    "couches-spring"
+   ],
+   "recettes": [
+    "ajouter-un-outil"
+   ],
+   "indices": [
+    "Une **lecture** peut devenir un outil direct ; une **écriture** ne le devient jamais (le modèle propose, un humain confirme).",
+    "Le modèle doit voir le **strict nécessaire** : un téléphone n'aide pas à répondre « qui est le propriétaire ».",
+    "Risque si le modèle se trompe : une lecture fausse induit en erreur ; une écriture fausse modifie les données."
+   ]
+  },
   "1": {
    "notions": [
     "profils-secrets",
@@ -109,9 +127,10 @@
     "comparer-prompts"
    ],
    "indices": [
-    "Un `ChatClient` se construit une fois, avec `defaultSystem(…)`.",
+    "`ChatConfig` est fourni : repérez `.defaultSystem(...)`, la mémoire et les outils.",
     "Le prompt système doit dire : le rôle, la langue, **quand utiliser les outils**, ce qu'il ne doit **jamais** inventer.",
-    "Pour le flux, `.stream().content()` renvoie un `Flux<String>` ; la méthode produit `text/event-stream`."
+    "Un bon prompt dit ce qu'il faut faire ET ce qu'il ne faut jamais faire.",
+    "Comparez sur les **mêmes** questions : une seule variable change à la fois."
    ]
   },
   "3": {
@@ -123,9 +142,9 @@
     "memoire-conversation"
    ],
    "indices": [
-    "Il faut un `ChatMemory` (fenêtre de 10 messages) et un conseiller de mémoire sur le client.",
-    "L'identifiant de conversation se passe **à chaque appel** dans `advisors(a -> a.param(…))`.",
-    "Pas de persistance après redémarrage ? Profil `persistant`."
+    "La fenêtre est de 10 messages : au-delà, les plus anciens sont oubliés.",
+    "L'identifiant de conversation est passé à chaque appel par `ChatController`.",
+    "Pas de persistance après redémarrage ? Ajoutez le profil `persistant`."
    ]
   },
   "4": {
@@ -139,6 +158,7 @@
    ],
    "indices": [
     "Un outil appelle un **service** du TD1 : jamais un dépôt.",
+    "`rechercherProprietaires` est votre modèle : copiez le motif.",
     "La description est ce que le modèle lit pour choisir : ce que ça fait, ce que ça renvoie, quand l'utiliser, un exemple par paramètre.",
     "Un outil jamais appelé ? Passez les logs `org.springframework.ai` en `DEBUG` et lisez la requête envoyée.",
     "La question « Combien coûte une consultation pour un yéti ? » **doit** se terminer par « je ne sais pas » : aucun outil de tarif n'existe encore."
@@ -152,9 +172,9 @@
     "sortie-structuree"
    ],
    "indices": [
-    "Un `record` pour la structure, une `enum` pour l'urgence.",
-    "Utilisez un client **séparé** : sans mémoire ni outils.",
-    "Deux `ChatClient` en bean : précisez lequel injecter."
+    "Un client **séparé** (`triageClient`) : sans mémoire ni outils.",
+    "Le modèle peut inventer une espèce ou une urgence : notez quand cela arrive.",
+    "Deux `ChatClient` en bean : `@Qualifier` précise lequel injecter."
    ]
   },
   "6": {

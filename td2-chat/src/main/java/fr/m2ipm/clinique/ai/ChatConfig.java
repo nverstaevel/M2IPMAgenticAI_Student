@@ -15,21 +15,27 @@ public class ChatConfig {
     /** Fenêtre glissante de 10 messages, stockée par le dépôt JDBC (autoconfiguré). */
     @Bean
     ChatMemory chatMemory(ChatMemoryRepository repository) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : chatMemory");
+        return MessageWindowChatMemory.builder().chatMemoryRepository(repository).maxMessages(10).build();
     }
 
     /** Client sans mémoire ni outils : le triage est un appel isolé, sans identifiant de conversation. */
     @Bean
     ChatClient triageClient(ChatClient.Builder builder) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : triageClient");
+        return builder
+                .defaultSystem("Tu es l'infirmier de tri de la clinique des créatures fantastiques. "
+                        + "Résume la demande et estime l'urgence.")
+                .build();
     }
 
     @Bean
     @org.springframework.context.annotation.Primary
     ChatClient drGribouille(ChatClient.Builder builder, ChatMemory memoire, OutilsClinique outils) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : drGribouille");
+        return builder
+                .defaultSystem(PromptsGribouille.BASE)   // pour comparer les variantes du prompt : remplacez BASE par STRICTE, relancez
+                .defaultAdvisors(
+                        MessageChatMemoryAdvisor.builder(memoire).build(),
+                        new SimpleLoggerAdvisor())
+                .defaultTools(outils)
+                .build();
     }
 }

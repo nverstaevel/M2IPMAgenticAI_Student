@@ -42,41 +42,68 @@ public class ChatController {
 
     @PostMapping("/chat")
     public ChatReponse chat(@Valid @RequestBody ChatRequest requete) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : chat");
+        LOG.info("Question [conversation {}] : {}", requete.conversationId(), requete.message());
+        long debut = System.nanoTime();
+        String reponse;
+        try {
+            reponse = chat.prompt()
+                    .user(requete.message())
+                    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, requete.conversationId()))
+                    .toolContext(Map.of("conversationId", requete.conversationId()))
+                    .call()
+                    .content();
+        } catch (RuntimeException e) {
+            // Fournisseur de modèle injoignable, clé refusée, modèle inconnu, surcharge (503)… : on le dit au client.
+            LOG.warn("Échec de l'appel au modèle après {} ms", (System.nanoTime() - debut) / 1_000_000, e);
+            Throwable racine = e;
+            while (racine.getCause() != null) {
+                racine = racine.getCause();
+            }
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_GATEWAY,
+                    "Le modèle n'a pas répondu : " + e.getClass().getSimpleName() + " — " + racine.getMessage());
+        }
+        LOG.info("Réponse du modèle en {} ms ({} caractères)", (System.nanoTime() - debut) / 1_000_000,
+                reponse == null ? 0 : reponse.length());
+        return new ChatReponse(reponse, propositions.enAttente(requete.conversationId()));
     }
 
     /** Réinitialise le contexte : efface la mémoire du modèle et les propositions en attente de cette conversation. */
     @DeleteMapping("/chat/{conversationId}")
     public org.springframework.http.ResponseEntity<Void> reinitialiser(@PathVariable String conversationId) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : reinitialiser");
+        memoire.clear(conversationId);
+        propositions.oublier(conversationId);
+        return org.springframework.http.ResponseEntity.noContent().build();
     }
 
     /** Même conversation en flux : Server-Sent Events, un fragment de texte par événement. */
     @GetMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<String> flux(@RequestParam String conversationId, @RequestParam String message) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : flux");
+        return chat.prompt()
+                .user(message)
+                .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+                .toolContext(Map.of("conversationId", conversationId))
+                .stream()
+                .content();
     }
 
     /** Texte libre en entrée, record Java en sortie : le modèle remplit la structure. */
     @PostMapping("/triage")
     public TriageResultat triage(@Valid @RequestBody TriageRequest requete) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : triage");
+        return triage.prompt()
+                .user(requete.texte())
+                .call()
+                .entity(TriageResultat.class);
     }
 
     @GetMapping("/propositions")
     public List<PropositionConsultation> propositions(@RequestParam String conversationId) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : propositions");
+        return propositions.enAttente(conversationId);
     }
 
     /** Réservé au rôle PERSONNEL (toute écriture POST sous /api l'exige). C'est ici, et nulle part côté modèle, qu'on écrit. */
     @PostMapping("/propositions/{id}/confirmer")
     public ConsultationDto confirmer(@PathVariable String id) {
-        // TODO TD2 : à écrire
-        throw new UnsupportedOperationException("À écrire : confirmer");
+        return propositions.confirmer(id);
     }
 }

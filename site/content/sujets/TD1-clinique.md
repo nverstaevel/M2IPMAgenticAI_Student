@@ -4,6 +4,8 @@
 
 Construire en 3 h l'application de base, sans IA : API REST, pages Thymeleaf, sécurité et tests. Son architecture en couches est imposée, parce que les TD suivants brancheront un modèle de langage sur ses services : ce que vous écrivez ici sera appelé par un modèle, qui lira vos messages d'erreur.
 
+Ce TD est surtout un TD de **conception**, pas de frappe. Vous modélisez les relations, vous écrivez la règle de gestion qui compte (le chevauchement de créneaux), et vous **prédisez** le comportement de l'API et de la sécurité avant de le vérifier. Le reste (DTO, contrôleurs, pages, sécurité, dépôts, tests) est fourni, lisible et testé : vous le lisez, vous l'essayez, vous l'expliquez.
+
 À la fin de la séance, vous saurez :
 
 1. **structurer** une application Spring Boot en couches (`domain`, `repository`, `service`, `controller`, `dto`) et dire ce que chaque couche a le droit de savoir ;
@@ -15,14 +17,16 @@ Construire en 3 h l'application de base, sans IA : API REST, pages Thymeleaf, s�
 
 **Vous avez réussi si** `mvn verify` est vert, si `curl -u visiteur:visiteur localhost:8080/api/proprietaires?nom=brume` renvoie Morgane Brumevent, et si la planification de deux consultations qui se chevauchent chez le même soigneur est refusée avec une phrase française claire.
 
-| Vous écrivez | Fourni dans le squelette |
+| 🧰 Fourni, prêt à l'emploi | 🧠 À vous |
 | --- | --- |
-| entités, repositories, `CliniqueService`, contrôleurs, DTO, gabarits de pages, configuration de sécurité, tests | `pom.xml` (versions fixées), configuration, `data.sql`, gabarits Thymeleaf de base, fichier `JOURNAL.md` vide |
+| `pom.xml`, configuration, `data.sql`, DTO, exceptions, **dépôts Spring Data**, contrôleurs REST et web, **gabarits Thymeleaf**, **configuration de sécurité**, **tests** (ils décrivent le comportement attendu), `Espece` et `Creature` (modèle de relation) | les **relations JPA** de `Proprietaire`, `Soigneur` et `Consultation` (3 `TODO`), la **règle de chevauchement** et le diagnostic dans `CliniqueService` (2 `TODO`), les **prédictions** de l'API et de la sécurité, un **test** de plus, le journal |
+
+Chaque étape suit la même forme : **Objectif**, **Pas à pas**, **Point de contrôle**. Ne passez pas à l'étape suivante tant que le point de contrôle n'est pas vert.
 
 ## Avant la séance
 
 - [ ] Java 21, Maven et un IDE installés (Git est recommandé, pas obligatoire). `java -version` et `mvn -version` répondent.
-- [ ] Le squelette (inspiré de Spring Petclinic) compile : `mvn -q compile` passe avant que vous écriviez quoi que ce soit. L'application ne démarre pas encore : il n'y a aucune entité, donc aucune table pour `data.sql` (c'est normal, voir l'étape 1).
+- [ ] Le squelette (inspiré de Spring Petclinic) compile : `mvn -q compile` passe avant que vous écriviez quoi que ce soit. L'application ne démarre pas encore : certaines relations ne sont pas mappées (c'est normal, voir l'étape 1). Les tests échouent aussi tant que vous n'avez pas écrit vos cinq `TODO TD1`.
 - [ ] À relire : entités JPA et `@OneToMany`, Spring Data, `@RestController`, Thymeleaf, Spring Security. Le support de CM1 contient un rappel Spring Boot avec cette même clinique (*Rappel Spring Boot*).
 
 ## Ressources
@@ -53,50 +57,44 @@ Le jeu de données du squelette est loufoque à dessein : un dragon enrhumé, un
 
 | Étape | Durée | Vous faites | Point de contrôle |
 | --- | --- | --- | --- |
-| 1. Mise en route | 15 min | ouvrir, compiler, lire `data.sql`, voir l'échec attendu au démarrage | vous savez dire quelles tables et colonnes `data.sql` attend |
-| 2. Entités et données | 35 min | cinq entités, relations, `data.sql` | un propriétaire retrouve ses créatures |
-| 3. Repositories et services | 30 min | Spring Data, `CliniqueService` | les sept signatures imposées existent et compilent |
-| 4. API REST | 35 min | DTO, validation, `@ControllerAdvice` | 200, 404, 400 et 409 sur les bons cas |
-| 5. Pages Thymeleaf | 30 min | recherche, fiche, formulaire | une consultation planifiée depuis le navigateur |
-| 6. Sécurité | 15 min | deux utilisateurs, rôles | `visiteur` reçoit 403 en écriture |
-| 7. Tests | 20 min | un test de service, un test `MockMvc` | `mvn verify` est vert |
+| 1. Lire le modèle | 25 min | lire `data.sql`, remplir le tableau de conception | tableau de relations rempli, erreur de démarrage expliquée |
+| 2. Écrire les relations | 25 min | 3 `TODO TD1` dans `domain` | l'application démarre ; un propriétaire retrouve ses créatures |
+| 3. La règle de gestion | 40 min | 2 `TODO TD1` dans `CliniqueService` | `CliniqueServiceTest` est vert |
+| 4. Lire l'API | 30 min | prédire puis vérifier les codes HTTP | tableau de prédictions : au moins 5 sur 6 justes |
+| 5. Lire les pages | 20 min | relier chaque page à la méthode de service qu'elle appelle | une consultation planifiée depuis le navigateur |
+| 6. Prédire la sécurité | 20 min | matrice rôle × requête | `ApiTest` est vert |
+| 7. Un test de plus | 20 min | un test de votre choix | `mvn verify` est vert |
 
-### Étape 1 — Mise en route
+### Étape 1 — Lire le modèle
 
-Ouvrez le squelette et lisez `src/main/resources/data.sql` et `application.properties`. Les tables ne sont pas écrites à la main : Hibernate les crée à partir de **vos entités** (`ddl-auto=create-drop`), puis exécute `data.sql`. Lancez quand même l'application (`CliniqueApplication`, ou `mvn spring-boot:run`) : elle échoue avec une erreur du type *Table "ESPECE" not found*. C'est le résultat attendu : sans entités, il n'y a rien à remplir. Retenez cette erreur, vous la reverrez si une entité ne correspond pas à `data.sql`.
+**Objectif.** Comprendre ce que `data.sql` attend, avant d'écrire la moindre relation.
 
-Point de contrôle : vous pouvez remplir ce tableau à partir de `data.sql` (il vous sert à l'étape 2).
+**Pas à pas.**
 
-| Table | Colonnes lues dans `data.sql` |
-| --- | --- |
-| `espece` | `nom`, `habitat` |
-| `proprietaire` | `nom`, `prenom`, `ville`, `telephone` |
-| `creature` | `nom`, `date_naissance`, `espece_id`, `proprietaire_id` |
-| `soigneur` | `nom` |
-| `soigneur_espece` | `soigneur_id`, `espece_id` (table de jointure) |
-| `consultation` | `date_heure`, `creature_id`, `soigneur_id`, `motif`, `diagnostic`, `traitement`, `tarif` |
+1. 🧰 Ouvrez le squelette, lisez `src/main/resources/data.sql` et `application.properties`. Les tables ne sont pas écrites à la main : Hibernate les crée à partir des entités (`ddl-auto=create-drop`), puis exécute `data.sql`.
+2. Lancez l'application (`CliniqueApplication`, ou `mvn spring-boot:run`). Elle échoue : notez dans votre journal la **première** ligne de l'erreur. C'est le résultat attendu, car trois relations ne sont pas encore mappées.
+3. 🧠 Remplissez ce tableau de conception dans `JOURNAL.md`. La dernière colonne est la plus importante : qui porte la clé étrangère ?
 
-### Étape 2 — Entités et données
+| Relation | Cardinalité (1-N, N-N…) | Obligatoire ? | Colonne ou table de jointure dans `data.sql` | Quelle entité porte la clé ? |
+| --- | --- | --- | --- | --- |
+| Créature → Espèce | | | `espece_id` | |
+| Créature → Propriétaire | | | | |
+| Consultation → Créature | | | | |
+| Consultation → Soigneur | | | | |
+| Soigneur ↔ Espèce | | | `soigneur_espece` | |
 
-Écrivez les cinq entités et leurs relations **pour que les noms collent à `data.sql`** (tableau de l'étape 1). Spring transforme `dateNaissance` en `date_naissance` et `@ManyToOne Espece espece` en colonne `espece_id`. La relation plusieurs-à-plusieurs entre soigneurs et espèces doit utiliser la table `soigneur_espece`. Un exemple de relation et de requête dérivée :
+**Point de contrôle.** Le tableau est rempli sans case vide, et vous pouvez dire à votre voisin pourquoi on n'écrit pas de colonne `creature_id` dans `Proprietaire`.
 
-```java
-@Entity
-public class Creature {
-    @Id @GeneratedValue private Long id;
-    private String nom;
-    private LocalDate dateNaissance;
-    @ManyToOne(optional = false) private Espece espece;
-    @ManyToOne(optional = false) private Proprietaire proprietaire;
-    // constructeur sans argument pour JPA, accesseurs
-}
+### Étape 2 — Écrire les relations
 
-public interface ProprietaireRepository extends JpaRepository<Proprietaire, Long> {
-    List<Proprietaire> findByNomContainingIgnoreCase(String nom);   // recherche partielle, insensible à la casse
-}
-```
+**Objectif.** Traduire le tableau en annotations JPA. Notion : *Entités JPA*. Recette : *Entités et données*.
 
-La table de jointure se déclare ainsi (à placer sur `Soigneur`) :
+**Pas à pas.**
+
+1. 🧰 `Creature` est écrite en entier : c'est votre modèle. Repérez `@ManyToOne(fetch = FetchType.LAZY, optional = false)` : « plusieurs créatures pour une espèce, l'espèce est obligatoire, on ne la charge que si on la lit ».
+2. 🧠 Dans `Consultation`, complétez les deux relations vers `Creature` et `Soigneur` sur le modèle de `Creature.espece`.
+3. 🧠 Dans `Proprietaire`, la liste `creatures` est le **côté inverse** : une annotation `@OneToMany` avec `mappedBy`, sans clé étrangère de ce côté. Cherchez dans `Creature` le nom du champ à citer.
+4. 🧠 Dans `Soigneur`, la relation plusieurs-à-plusieurs passe par la table `soigneur_espece` :
 
 ```java
 @ManyToMany
@@ -106,77 +104,114 @@ La table de jointure se déclare ainsi (à placer sur `Soigneur`) :
 private Set<Espece> especesSoignees = new HashSet<>();
 ```
 
-Point de contrôle : l'application démarre sans erreur et un propriétaire retrouve ses créatures : « Brumevent » possède Paillette et Rebelote.
+5. Relancez l'application.
 
-### Étape 3 — Repositories et services
+**Point de contrôle.** L'application démarre sans erreur. Dans les tests, `unProprietaireRetrouveSesCreatures` n'est pas encore vert (le service n'est pas fini), mais `data.sql` s'exécute : « Brumevent » possède Paillette et Rebelote.
 
-Créez les repositories Spring Data et la couche service. Les signatures ci-dessous sont **imposées** : les outils du TD2 les appelleront telles quelles.
+### Étape 3 — La règle de gestion
 
-| Méthode | Rôle | Lecture ou écriture |
-| --- | --- | --- |
-| `List<ProprietaireDto> rechercherProprietaires(String nom)` | recherche partielle, insensible à la casse | lecture |
-| `ProprietaireDto trouverProprietaire(Long id)` | une fiche | lecture |
-| `List<CreatureDto> creaturesDuProprietaire(Long proprietaireId)` | créatures d'un propriétaire | lecture |
-| `List<ConsultationDto> consultationsDeLaCreature(Long creatureId)` | historique, plus récent d'abord | lecture |
-| `List<SoigneurDto> soigneursPourEspece(String espece)` | soigneurs compétents | lecture |
-| `ConsultationDto planifierConsultation(Long creatureId, Long soigneurId, LocalDateTime dateHeure, String motif)` | crée une consultation | écriture |
-| `void enregistrerDiagnostic(Long consultationId, String diagnostic, String traitement)` | clôt une consultation | écriture |
+**Objectif.** Écrire la règle qui rend `CliniqueService` utile au modèle de langage.
 
-Deux règles de gestion sont obligatoires. Une consultation dure 30 minutes. Un soigneur ne peut pas avoir deux consultations qui se chevauchent : `planifierConsultation` lève alors une `ConflitDeCreneauException`.
+Les dépôts et les cinq méthodes de lecture sont fournis. Les signatures des sept méthodes sont **imposées** : les outils du TD2 les appelleront telles quelles.
 
-Pour détecter un chevauchement, rappelez-vous que deux intervalles `[début1, fin1[` et `[début2, fin2[` se chevauchent si `début1 < fin2 && début2 < fin1`. Comparez la nouvelle consultation (début, début + 30 minutes) aux consultations du même soigneur. Annotez la méthode d'écriture avec `@Transactional`.
+| Méthode | Rôle | Lecture ou écriture | Écrite ? |
+| --- | --- | --- | --- |
+| `rechercherProprietaires(nom)` | recherche partielle, insensible à la casse | lecture | 🧰 fournie |
+| `trouverProprietaire(id)` | une fiche | lecture | 🧰 fournie |
+| `creaturesDuProprietaire(proprietaireId)` | créatures d'un propriétaire | lecture | 🧰 fournie |
+| `consultationsDeLaCreature(creatureId)` | historique, plus récent d'abord | lecture | 🧰 fournie |
+| `soigneursPourEspece(espece)` | soigneurs compétents | lecture | 🧰 fournie |
+| `planifierConsultation(creatureId, soigneurId, dateHeure, motif)` | crée une consultation | écriture | 🧠 à vous |
+| `enregistrerDiagnostic(consultationId, diagnostic, traitement)` | clôt une consultation | écriture | 🧠 à vous |
 
-Tous les messages d'erreur doivent être lisibles par un humain **et** par un modèle, par exemple « Aucune créature d'identifiant 42 » ou « Le soigneur 3 est déjà pris le 12/03 à 14 h ». Ils seront relus par l'assistant au TD2.
+Deux règles de gestion : une consultation dure 30 minutes ; un soigneur ne peut pas avoir deux consultations qui se chevauchent (`ConflitDeCreneauException`). Un diagnostic ne s'écrit qu'une fois.
 
-### Étape 4 — API REST
+**Pas à pas.**
 
-Exposez ces services en JSON avec des DTO (des `record` Java), jamais les entités. Validez les entrées avec Bean Validation. Traduisez les erreurs en 404, 400 et 409 avec un `@ControllerAdvice`.
-
-```java
-@RestControllerAdvice
-class ApiExceptionHandler {
-    @ExceptionHandler(ConflitDeCreneauException.class)
-    ProblemDetail conflit(ConflitDeCreneauException e) {
-        ProblemDetail p = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());   // detail = phrase lisible
-        p.setTitle("Conflit de créneau");
-        return p;
-    }
-}
-```
-
-Premiers essais :
+1. 🧰 Lisez `rechercherProprietaires` et `creaturesDuProprietaire` : le motif est toujours le même (vérifier que la ressource existe, appeler le dépôt, convertir en DTO).
+2. 🧰 Lisez `ConsultationRepository.existsBySoigneurIdAndDateHeureGreaterThanAndDateHeureLessThan` : elle répond « le soigneur a-t-il une consultation qui **commence** strictement entre ces deux bornes ? ». Lisez aussi `SoigneurRepository.findByIdPourPlanification` : le **verrou** sert à sérialiser deux demandes simultanées.
+3. 🧠 Sur papier, avec l'exemple 14 h 00 déjà pris, cherchez les bornes pour refuser 14 h 10, 13 h 40, 13 h 30 (accepté ?) et 14 h 30 (accepté ?). Deux intervalles `[a1, a2[` et `[b1, b2[` se chevauchent si `a1 < b2 && b1 < a2`.
+4. 🧠 Écrivez `planifierConsultation` en suivant les cinq temps du commentaire. Le message du conflit doit être compris par un humain **et** par un modèle : « Le soigneur 3 (Dr Gribouille) est déjà pris le 12/03 à 14h00 : une consultation dure 30 minutes. »
+5. 🧠 Écrivez `enregistrerDiagnostic` (trois lignes, voir le commentaire).
+6. Lancez le test du service :
 
 ```bash
-curl -u visiteur:visiteur 'localhost:8080/api/proprietaires?nom=brume'     # 200, Morgane Brumevent
-curl -u visiteur:visiteur localhost:8080/api/creatures/9999                 # 404, "Aucune créature d'identifiant 9999"
+mvn test -Dtest=CliniqueServiceTest
 ```
 
-### Étape 5 — Pages Thymeleaf
+**Point de contrôle.** `CliniqueServiceTest` est vert. Question de conception, à écrire dans le journal : pourquoi cette règle est-elle dans le **service** et pas dans le contrôleur ? Que se passerait-il sans le verrou si deux requêtes arrivaient en même temps ?
 
-Une page de recherche de propriétaires, une fiche propriétaire avec ses créatures et leurs consultations, un formulaire de nouvelle consultation. Les pages appellent la couche service, pas l'API REST.
+### Étape 4 — Lire l'API
 
-### Étape 6 — Sécurité
+**Objectif.** Savoir dire, avant de lancer une requête, quel code HTTP et quel message vous obtiendrez. Notion : *API REST et validation*. Recette : *Endpoint REST*.
 
-Connexion par formulaire avec deux utilisateurs en mémoire : `gribouille` (rôle PERSONNEL, lecture et écriture) et `visiteur` (rôle LECTURE). Les écritures REST exigent PERSONNEL. Pour le TD, mot de passe = identifiant, en clair (`{noop}`) : jamais ailleurs.
+**Pas à pas.**
 
-```java
-@Bean
-SecurityFilterChain chaine(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests(a -> a
-            .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("PERSONNEL", "LECTURE")
-            .requestMatchers("/api/**").hasRole("PERSONNEL")        // POST, PUT, DELETE
-            .anyRequest().authenticated())
-        .formLogin(Customizer.withDefaults())
-        .httpBasic(Customizer.withDefaults());
-    return http.build();
-}
+1. 🧰 Lisez `ApiController` (les endpoints), les DTO (des `record` : jamais d'entités) et `ApiExceptionHandler` (qui traduit chaque exception en code HTTP). `PlanificationRequest` porte la validation.
+2. 🧠 **Avant d'essayer**, recopiez le tableau dans votre journal et prédisez la colonne « Code attendu ».
+
+| Requête (`-u gribouille:gribouille`) | Code attendu | Observé |
+| --- | --- | --- |
+| `GET /api/proprietaires?nom=brume` | | |
+| `GET /api/creatures/9999` | | |
+| `POST /api/consultations` avec `{}` | | |
+| `POST /api/consultations` sur un créneau libre | | |
+| le même `POST`, une deuxième fois | | |
+| `POST /api/consultations` avec `"dateHeure":"demain"` | | |
+
+3. Vérifiez en lançant l'application :
+
+```bash
+curl -u gribouille:gribouille 'localhost:8080/api/proprietaires?nom=brume'
+curl -u gribouille:gribouille localhost:8080/api/creatures/9999
+curl -u gribouille:gribouille -H 'Content-Type: application/json' \
+  -d '{"creatureId":1,"soigneurId":1,"dateHeure":"2027-03-12T14:00:00","motif":"toux"}' localhost:8080/api/consultations
 ```
 
-Si vos appels REST d'écriture sont refusés par la protection CSRF, ignorez-la pour `/api/**` (jamais pour les pages).
+**Point de contrôle.** Au moins 5 prédictions justes sur 6. Pour chaque erreur de prédiction, une ligne dans le journal : qu'aviez-vous mal compris ?
 
-### Étape 7 — Tests
+### Étape 5 — Lire les pages
 
-Un test de service avec la base de test, et un test `MockMvc` d'un endpoint. Ajoutez vos premières lignes à `JOURNAL.md`.
+**Objectif.** Relier ce que l'utilisateur voit à la couche service.
+
+**Pas à pas.**
+
+1. 🧰 Lancez l'application et ouvrez <http://localhost:8080> (connexion `gribouille` / `gribouille`). Cherchez « brume », ouvrez la fiche, planifiez une consultation.
+2. 🧠 Ouvrez `WebController` : pour chacune des trois pages, notez dans le journal **quelle méthode de `CliniqueService`** elle appelle. Elles n'appellent pas l'API REST.
+3. 🧠 Planifiez deux fois la même consultation : quel message voit l'utilisateur ? D'où vient-il ?
+
+**Point de contrôle.** Une consultation planifiée depuis le navigateur apparaît sur la fiche du propriétaire ; la seconde demande affiche le message du conflit.
+
+### Étape 6 — Prédire la sécurité
+
+**Objectif.** Savoir qui a le droit de faire quoi. Notion : *Sécurité basique*. Recette : *Sécuriser l'API*.
+
+**Pas à pas.**
+
+1. 🧰 Lisez `SecurityConfig` : deux utilisateurs en mémoire (`gribouille`, rôle PERSONNEL ; `visiteur`, rôle LECTURE), mot de passe = identifiant en clair (`{noop}`, **jamais ailleurs que dans un TD**), CSRF ignoré pour `/api/**` seulement.
+2. 🧠 Remplissez la matrice **avant** de tester (pour l'anonyme, deux réponses sont possibles : redirection vers la page de connexion, ou 401), puis vérifiez avec `curl` (sans `-u` pour l'anonyme, `-u visiteur:visiteur` pour le visiteur) :
+
+| Requête | anonyme | `visiteur` | `gribouille` |
+| --- | --- | --- | --- |
+| `GET /api/proprietaires` | | | |
+| `POST /api/consultations` | | | |
+
+3. Lancez `ApiTest` : il vérifie ces cas.
+
+```bash
+mvn test -Dtest=ApiTest
+```
+
+**Point de contrôle.** `ApiTest` est vert et votre matrice est juste. Question de réflexion : pourquoi le CSRF est-il ignoré pour l'API mais pas pour les pages ?
+
+### Étape 7 — Un test de plus
+
+**Objectif.** Exprimer une règle de gestion sous forme de test. Recette : *Règle métier et test*.
+
+**Pas à pas.**
+
+1. 🧰 Lisez dans `CliniqueServiceTest` le test de chevauchement : il suit « préparer, agir, vérifier l'exception **et son message** ».
+2. 🧠 Écrivez **un** test de plus, au choix : un second diagnostic est refusé ; deux soigneurs différents peuvent prendre le même créneau ; une consultation à exactement 30 minutes d'une autre est acceptée.
 
 ```java
 @Test
@@ -188,11 +223,21 @@ void deuxConsultationsQuiSeChevauchentSontRefusees() {
 }
 ```
 
+3. Lancez tout et complétez `JOURNAL.md` :
+
+```bash
+mvn verify
+```
+
+**Point de contrôle.** `mvn verify` est vert, avec votre test en plus.
+
 ## En cas de blocage
 
 | Symptôme | Cause fréquente | Que faire |
 | --- | --- | --- |
-| `Table "ESPECE" not found` (ou une autre table) au démarrage | pas encore d'entité, ou noms qui ne correspondent pas à `data.sql` | comparer vos entités au tableau de l'étape 1 (noms de tables et de colonnes) |
+| Erreur au démarrage sur une association (`Consultation.creature`, `Soigneur.especesSoignees`…) | relation pas encore mappée | c'est l'étape 2 : relire le tableau de l'étape 1 |
+| `Table "SOIGNEUR_ESPECE" not found` ou une colonne introuvable | nom de table ou de colonne qui ne correspond pas à `data.sql` | comparer l'annotation `@JoinTable` au tableau de l'étape 1 |
+| `UnsupportedOperationException : À écrire` | un `TODO TD1` n'est pas encore écrit | c'est normal tant que vous n'avez pas fait l'étape : repérez le `TODO TD1` correspondant |
 | `data.sql` s'exécute avant la création des tables | initialisation différée absente | `spring.jpa.defer-datasource-initialization=true` |
 | Clés étrangères qui ne correspondent pas | identifiants générés écrits en dur | retrouver par le nom : `(SELECT id FROM espece WHERE nom = 'Dragon')` (voir l'annexe) |
 | `LazyInitializationException` | entité exposée hors de la transaction | renvoyer des DTO, construits dans le service |
@@ -207,8 +252,8 @@ void deuxConsultationsQuiSeChevauchentSontRefusees() {
 
 ## Livrable
 
-- Le dossier `td1-clinique` : l'application démarre, les pages et l'API fonctionnent, les tests passent.
-- Les premières entrées de `JOURNAL.md`.
+- Le dossier `td1-clinique` : l'application démarre, les pages et l'API fonctionnent, `mvn verify` est vert, avec votre test en plus.
+- Dans `JOURNAL.md` : le tableau de conception (étape 1), les prédictions de l'API (étape 4) et de la sécurité (étape 6), les réponses aux deux questions de conception.
 
 ## Pour aller plus loin
 
