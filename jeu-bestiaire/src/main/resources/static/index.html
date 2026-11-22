@@ -200,7 +200,7 @@ function fiche(){
   const f=$('fiche'),p=donnees&&donnees.patients.find(x=>x.id===selection);
   const sig=p?[p.id,p.pv,p.signeDistinctif,donnees.pharmacie.map(m=>m.medicament).join(',')].join('|'):'';
   if(sig===sigFiche){ // rien de changé : on met seulement à jour les stocks, sans fermer la liste ni perdre le choix
-    if(p){const s=f.querySelector('select');if(s)donnees.pharmacie.forEach((m,i)=>{if(s.options[i])s.options[i].textContent=m.medicament+' ('+m.stock+')'})}
+    if(p){const s=f.querySelector('select');if(s)donnees.pharmacie.forEach((m,i)=>{const o=s.options[i],txt=m.medicament+' ('+m.stock+')';if(o&&o.textContent!==txt)o.textContent=txt})}
     return}
   sigFiche=sig;
   if(!p){f.innerHTML='<div class="vide">Clique sur une créature de la salle d\'attente.</div>';return}
