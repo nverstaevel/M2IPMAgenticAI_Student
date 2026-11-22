@@ -24,20 +24,20 @@ public class JeuController {
     }
 
     @PostMapping("/nouvelle-partie")
-    public Jeu.Etat nouvelle(@RequestParam(required = false) Long graine) { return parties.nouvelle(graine).etat(); }
+    public Jeu.Etat nouvelle(@RequestParam(name = "graine", required = false) Long graine) { return parties.nouvelle(graine).etat(); }
 
     // ---- jeu « à la main » : réservé à l'humain qui joue depuis la page ; un agent, lui, n'a que les outils MCP ----
 
     @PostMapping("/examiner")
-    public Jeu.Compte examiner(@RequestParam String patient) { return parties.jeu().examiner(patient); }
+    public Jeu.Compte examiner(@RequestParam("patient") String patient) { return parties.jeu().examiner(patient); }
 
     @PostMapping("/soigner")
-    public Jeu.Compte soigner(@RequestParam String patient, @RequestParam String medicament) {
+    public Jeu.Compte soigner(@RequestParam("patient") String patient, @RequestParam("medicament") String medicament) {
         return parties.jeu().soigner(patient, medicament);
     }
 
     @PostMapping("/commander")
-    public Jeu.Compte commander(@RequestParam String medicament, @RequestParam(defaultValue = "1") int quantite) {
+    public Jeu.Compte commander(@RequestParam("medicament") String medicament, @RequestParam(name = "quantite", defaultValue = "1") int quantite) {
         return parties.jeu().commander(medicament, quantite);
     }
 

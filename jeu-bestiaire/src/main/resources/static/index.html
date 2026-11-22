@@ -166,7 +166,7 @@ function nuit(){const n=$('nuit');n.classList.add('on');setTimeout(()=>n.classLi
 function maj(d){
   const e=d.etat;donnees=d;
   if(!premiere&&(e.jour<jourPrec||d.journal.length<nbJournal)){ // nouvelle partie
-    pats.forEach(o=>o.el.remove());pats.clear();attente.clear();nbJournal=0;selection=null;$('fin').classList.remove('on');fiche()}
+    pats.forEach(o=>o.el.remove());pats.clear();attente.clear();nbJournal=0;selection=null;sigFiche=null;$('fin').classList.remove('on');fiche()}
   // journal : événements nouveaux
   const neufs=d.journal.slice(nbJournal);
   if(!premiere){neufs.forEach(rejouer)}
@@ -195,8 +195,14 @@ function maj(d){
   premiere=false;fiche();
 }
 function choisir(id){selection=id;[...pats].forEach(([k,o])=>o.el.classList.toggle('sel',k===id));fiche()}
+let sigFiche=null;
 function fiche(){
   const f=$('fiche'),p=donnees&&donnees.patients.find(x=>x.id===selection);
+  const sig=p?[p.id,p.pv,p.signeDistinctif,donnees.pharmacie.map(m=>m.medicament).join(',')].join('|'):'';
+  if(sig===sigFiche){ // rien de changé : on met seulement à jour les stocks, sans fermer la liste ni perdre le choix
+    if(p){const s=f.querySelector('select');if(s)donnees.pharmacie.forEach((m,i)=>{if(s.options[i])s.options[i].textContent=m.medicament+' ('+m.stock+')'})}
+    return}
+  sigFiche=sig;
   if(!p){f.innerHTML='<div class="vide">Clique sur une créature de la salle d\'attente.</div>';return}
   f.innerHTML='<b></b> <span></span><div class="sy"></div><div class="note"></div><div class="act"></div>';
   f.querySelector('b').textContent=(ESP[p.espece]||'')+' '+p.nom+' ('+p.id+')';
@@ -209,10 +215,15 @@ function fiche(){
   const c=document.createElement('button');c.textContent='💉 Soigner (1⚡)';c.onclick=()=>agir('soigner',{patient:p.id,medicament:s.value});a.appendChild(c);
 }
 async function agir(action,params){
-  const r=await fetch('/api/'+action+'?'+new URLSearchParams(params),{method:'POST'});const c=await r.json();
-  if(!c.ok)toast('⚠️ '+c.message);charger();
+  try{
+    const r=await fetch('/api/'+action+'?'+new URLSearchParams(params),{method:'POST'});
+    if(!r.ok){toast('⚠️ Erreur serveur ('+r.status+')');return}
+    const c=await r.json();
+    if(c.ok===false)toast('⚠️ '+c.message);
+  }catch(e){toast('⚠️ '+e.message)}
+  charger();
 }
-function nouvelle(){fetch('/api/nouvelle-partie',{method:'POST'}).then(charger)}
+function nouvelle(){fetch('/api/nouvelle-partie',{method:'POST'}).then(r=>{if(!r.ok)toast('⚠️ Erreur serveur ('+r.status+')')}).then(charger).catch(e=>toast('⚠️ '+e.message))}
 $('neuf').onclick=nouvelle;$('finj').onclick=()=>agir('fin-de-journee',{});
 function charger(){fetch('/api/partie').then(r=>r.json()).then(maj).catch(()=>{})}
 charger();setInterval(charger,1000);
