@@ -11,7 +11,9 @@
 
 **Vous avez réussi si** votre agent répond au scénario C1 et si, à partir du graphe seul, vous pouvez dire pourquoi il s'est arrêté, combien d'étapes et de tokens il a coûté, et quel outil a fourni chaque information. Le but n'est pas que ça marche toujours : c'est de comprendre pourquoi ça marche parfois.
 
-| Vous écrivez | Fourni dans le dossier de départ (ne pas modifier) |
+Ce TD est surtout un TD d'**analyse et de conception** : la boucle ReAct tient en une vingtaine de lignes, que vous écrivez à six endroits balisés, **avec le code de chaque endroit donné dans le sujet** (à lire, à poser, à expliquer). Le temps va à ce qui compte : dessiner la machine à états, **prédire** le comportement de l'agent avant de le lancer, lire les traces, classer les échecs.
+
+| Vous écrivez (6 `TODO TD4`) | 🧰 Fourni dans le dossier de départ (ne pas modifier) |
 | --- | --- |
 | le cœur de `AgentReactService.executer` aux endroits marqués `TODO TD4` : appel du modèle, réponse finale, exécution des outils, historique, puis les arrêts sur plafond d'étapes et sur boucle détectée | `Etape`, `ResultatAgent`, `MotifArret`, `TraceStore`, `AgentController`, le reste de `AgentReactService` (suivi du graphe, arrêts sur budget de tokens et sur erreur), et l'outillage de suivi : `Evenement`, `SuiviExecution`, `SuiviController`, `SuiviOutils`, `Jetons`, la page `/agents` |
 
@@ -21,7 +23,7 @@
 - [ ] Lancez l'application avec le profil de votre fournisseur, puis vérifiez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`. Sans modèle disponible, utilisez le profil `simule` : toutes les étapes de ce sujet restent faisables, avec des réponses déterministes.
 - [ ] Ouvrez `http://localhost:8080/agents` (gribouille/gribouille). La page est vide pour l'instant : c'est normal, elle se remplira dès que votre boucle tournera (étape 1).
 - [ ] Relisez dans le support de CM2 : *Penser, agir, observer*, *Quand s'arrêter*, *Lire une trace*.
-- [ ] Sur papier, avant la séance : dessinez les états de la boucle (appel du modèle, exécution d'outils, fin) et qui déclenche chaque transition. Vous gagnez 15 minutes en séance.
+- [ ] Sur papier, avant la séance : dessinez les états de la boucle (appel du modèle, exécution d'outils, fin) et qui déclenche chaque transition. Remplissez le tableau « Machine à états » de `JOURNAL.md` (voir ci-dessous). Vous gagnez 15 minutes en séance.
 
 ## Ressources
 
@@ -40,13 +42,13 @@ Chaque étape se termine par un **point de contrôle** : ne passez à la suivant
 
 | Étape | Durée | Vous faites | Point de contrôle |
 | --- | --- | --- | --- |
-| 1. Écrire la boucle | 40 min | le cœur de `AgentReactService.executer` : appel du modèle, réponse finale, exécution des outils, historique (le suivi du graphe est fourni) | « tarif d'une consultation pour un dragon » aboutit à une réponse chiffrée, et le graphe s'affiche sur `/agents` |
-| 2. Deux arrêts | 20 min | plafond d'étapes et boucle détectée | les deux tests correspondants passent avec le modèle simulé |
-| 3. Cinq exécutions | 30 min | C1 une fois, C2 trois fois, C3 une fois | cinq lignes dans le journal |
+| 1. Écrire la boucle | 30 min | les quatre morceaux de la boucle (code donné dans le sujet), puis un premier essai (le suivi du graphe est fourni) | « tarif d'une consultation pour un dragon » aboutit à une réponse chiffrée, et le graphe s'affiche sur `/agents` |
+| 2. Deux arrêts | 20 min | plafond d'étapes et boucle détectée (code donné), prédire puis tester | `AgentReactServiceTest` est vert |
+| 3. Cinq exécutions | 40 min | prédire, puis lancer C1 une fois, C2 trois fois, C3 une fois | tableau de prédiction rempli |
 | 4. Le framework | 15 min | refaire C2 avec `ChatClient` | cinq lignes de comparaison |
 | 5. Catalogue des échecs | 15 min | trois familles d'échec | chaque ligne cite une trace |
 
-Le socle représente environ 2 h. Le reste de la séance est pour les extensions (section « Extensions »). Le dessin des états de la boucle se fait avant la séance.
+Le socle représente environ 2 h 10. Le reste de la séance est pour les extensions (section « Extensions »). Le dessin des états de la boucle se fait avant la séance.
 
 ### Avant la séance — Comprendre la boucle
 
@@ -70,9 +72,20 @@ String reponseFinale = reponse.getResult().getOutput().getText();
 
 Cette boucle s'arrête quand le modèle ne demande plus d'outil. Rien ne garantit que ça arrive : c'est à vous d'ajouter les arrêts. Dessinez sur papier : quels sont les états (appel du modèle, exécution d'outils, fin) ? Quelles transitions ? Qui les déclenche ?
 
+Remplissez ce tableau dans `JOURNAL.md` (section « TD4 ») avant la séance :
+
+| État | Entrée dans cet état quand… | Sortie vers… | Qui décide ? (le modèle, votre code, l'outil) |
+| --- | --- | --- | --- |
+| Appel du modèle | | | |
+| Exécution des outils | | | |
+| Fin (réponse finale) | | | |
+| Fin (arrêt forcé) | | | |
+
 ### Étape 1 — Écrire la boucle
 
-La boucle complète doit faire ce qui suit. Le squelette fournit déjà les points 1, 2 (comptage), 3 et 4 (résultat) ; vous écrivez l'appel du modèle, la réponse finale, l'exécution des outils et l'historique, aux endroits marqués TODO TD4 (étape 1) :
+**Objectif.** Faire tourner la boucle penser, agir, observer, et voir le graphe se dessiner sur `/agents`. Notion : *Boucle ReAct*. Recettes : *Boucle ReAct*, *Tester avec le modèle simulé*.
+
+La boucle fait quatre choses. Le squelette fournit déjà les points 1, 2 (comptage), 3 et 4 (résultat) ; **vous posez quatre morceaux de code** dans `AgentReactService.executer` :
 
 1. demander dans le prompt système une phrase de raisonnement avant chaque appel d'outil (les API modernes n'exposent pas de « pensée » séparée : vous la sollicitez dans le texte, et vous la lirez avec esprit critique) ;
 2. compter les étapes (une étape = un appel au modèle suivi de l'exécution des outils demandés) ;
@@ -81,7 +94,19 @@ La boucle complète doit faire ce qui suit. Le squelette fournit déjà les poin
 
 Les outils d'écriture restent des propositions, comme au TD2 et au TD3 : l'agent ne crée rien tout seul.
 
-Premier essai, sans modèle réel si besoin :
+**Pas à pas.**
+
+1. 🧠 Repérez les quatre `TODO TD4 (étape 1)` dans `executer`, dans l'ordre où ils apparaissent. Pour chacun, **dites à voix haute** ce qu'il fait avant de le coder.
+2. 🧰 Voici le code de chacun (à poser, puis à expliquer en une phrase dans le journal) :
+
+| Où | Code | Ce que ça fait |
+| --- | --- | --- |
+| (a) appel du modèle | `ChatResponse reponse = SuiviOutils.reessayer(suivi, runId, idModele, () -> modele.call(promptTour));` | appelle le modèle ; le graphe montre les nouvelles tentatives |
+| (b) réponse finale | `if (!reponse.hasToolCalls()) { enregistrer(runId, etapes, new Etape(numero, texte, "", "", "", ms(debut), tokensEtape)); resultatFinal = new ResultatAgent(texte, MotifArret.REPONSE_FINALE, etapes, tokens); return cloturer(runId, idModele, resultatFinal, texte); }` | si le modèle ne demande aucun outil, la boucle s'arrête : c'est la sortie normale |
+| (c) exécution des outils | `ToolExecutionResult execution = gestionnaire.executeToolCalls(prompt, reponse);` | **le `ChatModel` n'exécute jamais les outils** : c'est le gestionnaire qui le fait |
+| (d) historique | `prompt = new Prompt(execution.conversationHistory(), options);` (en fin de tour) | le tour suivant reprend tout ce qui s'est dit, y compris les résultats d'outils |
+
+3. Lancez d'abord **sans modèle** (profil `simule`), puis avec **votre LLM** :
 
 ```bash
 curl -u gribouille:gribouille -H 'Content-Type: application/json' \
@@ -89,19 +114,56 @@ curl -u gribouille:gribouille -H 'Content-Type: application/json' \
   localhost:8080/api/agent
 ```
 
+4. Ouvrez <http://localhost:8080/agents> et regardez le graphe.
+
+**Point de contrôle.** Le tarif d'une consultation pour un dragon aboutit à une réponse chiffrée (80 €), le graphe affiche `Demande → Étape 1 → outil → Étape 2 → Réponse finale`, et vous pouvez expliquer chaque ligne (a) à (d).
+
 ### Étape 2 — Deux arrêts à écrire
 
-Vous écrivez `PLAFOND_ETAPES` et `BOUCLE_DETECTEE` (marqués TODO TD4, étape 2). `REPONSE_FINALE` vient de l'étape 1 ; `BUDGET_TOKENS` et `ERREUR` sont fournis dans le squelette : lisez-les, ils servent de modèle.
+**Objectif.** Garantir que l'agent s'arrête, quoi que fasse le modèle. Notion : *Arrêts de l'agent*. Recette : *Borner un agent*.
 
-| Motif | Signal à détecter | Test à écrire (modèle simulé) |
-| --- | --- | --- |
-| `REPONSE_FINALE` | la réponse du modèle ne contient aucun appel d'outil | une demande sans outil |
-| `PLAFOND_ETAPES` | `numero >= maxEtapes` | `maxEtapes = 1` sur une demande qui exige deux outils |
-| `BUDGET_TOKENS` | tokens cumulés ≥ budget | budget minuscule |
-| `BOUCLE_DETECTEE` | même outil, mêmes arguments que l'étape précédente | le modèle simulé répète `outil:consulterTarif:{…}` |
-| `ERREUR` | exception du modèle ou d'un outil | outil qui lève une exception |
+`REPONSE_FINALE` vient de l'étape 1 ; `BUDGET_TOKENS` et `ERREUR` sont fournis dans le squelette : lisez-les, ils servent de modèle.
 
-Le test de boucle détectée se pilote avec le modèle simulé : `outil:NOM:{json}` déclenche l'appel de l'outil NOM (voir le README du TD2).
+| Motif | Signal à détecter | Écrit ? | Test (modèle simulé) |
+| --- | --- | --- | --- |
+| `REPONSE_FINALE` | la réponse du modèle ne contient aucun appel d'outil | étape 1 | une demande sans outil |
+| `PLAFOND_ETAPES` | `numero >= maxEtapes` | 🧠 à vous | `maxEtapes = 1` sur une demande qui exige deux outils |
+| `BUDGET_TOKENS` | tokens cumulés ≥ budget | 🧰 fourni | budget minuscule |
+| `BOUCLE_DETECTEE` | même outil, mêmes arguments que l'étape précédente | 🧠 à vous | le modèle simulé répète `outil:consulterTarif:{…}` |
+| `ERREUR` | exception du modèle ou d'un outil | 🧰 fourni | outil qui lève une exception |
+
+**Pas à pas.**
+
+1. 🧠 **Prédisez avant de coder** : pour chaque ligne, qu'est-ce qui est le plus dangereux si l'arrêt manque (coût, boucle infinie, réponse fausse) ? Notez-le dans le journal.
+2. 🧰 Voici le code des deux arrêts :
+
+```java
+// BOUCLE_DETECTEE : à placer juste avant « appelPrecedent = signature; » (l'outil n'est pas exécuté)
+if (Objects.equals(signature, appelPrecedent)) {
+    String msg = "(non exécuté : même appel que l'étape précédente)";
+    enregistrer(runId, etapes, new Etape(numero, texte, noms, arguments, msg, ms(debut), tokensEtape));
+    suivi.maj(runId, idOutil, Evenement.ERREUR, null, msg, null, null);
+    resultatFinal = new ResultatAgent("Arrêt : l'agent répète le même appel (" + noms + ").",
+            MotifArret.BOUCLE_DETECTEE, etapes, tokens);
+    return cloturer(runId, idOutil, resultatFinal, resultatFinal.reponse());
+}
+
+// PLAFOND_ETAPES : à placer après le test du budget de tokens, même forme
+if (numero >= maxEtapes) {
+    resultatFinal = new ResultatAgent("Arrêt : plafond de " + maxEtapes + " étapes atteint.",
+            MotifArret.PLAFOND_ETAPES, etapes, tokens);
+    return cloturer(runId, idOutil, resultatFinal, resultatFinal.reponse());
+}
+```
+
+3. 🧠 Expliquez dans le journal : pourquoi la boucle détectée **n'exécute pas** l'outil, et pourquoi le plafond d'étapes ne remplace pas le budget de tokens.
+4. Lancez les tests (le modèle simulé, `outil:NOM:{json}`, pilote le comportement) :
+
+```bash
+mvn test -Dtest=AgentReactServiceTest
+```
+
+**Point de contrôle.** `AgentReactServiceTest` est vert pour les cinq motifs.
 
 ### Fourni — Le graphe de suivi
 
@@ -161,7 +223,15 @@ Lancez C1 une fois, C2 trois fois (pour voir la variance) et C3 une fois depuis 
 | C2, multi-étapes | Paillette a le sabot fêlé. Trouve un soigneur compétent, un médicament compatible en stock, chiffre le devis et propose un créneau jeudi. | choix des outils, ordre, cohérence des résultats |
 | C3, piégé | Prends rendez-vous pour Marcel le griffon demain à 3 h du matin. | créature inexistante, horaire absurde : refus, question ou invention ? |
 
-Pour chaque exécution, notez dans le journal : le nombre d'étapes, le motif d'arrêt, les tokens (somme des nœuds) et la qualité de la réponse (juste, partielle, fausse).
+**Avant de lancer chaque scénario**, prédisez dans le journal : le nombre d'étapes, les outils appelés et dans quel ordre, et si l'agent réussira. Lancez ensuite, avec **votre LLM**, puis notez : le nombre d'étapes, le motif d'arrêt, les tokens (somme des nœuds) et la qualité de la réponse (juste, partielle, fausse). Chaque écart entre prédiction et observation est une ligne de conclusion.
+
+| Scénario | Étapes prédites | Outils prédits | Étapes observées | Motif d'arrêt | Tokens | Qualité |
+| --- | --- | --- | --- | --- | --- | --- |
+| C1 | | | | | | |
+| C2 (essai 1) | | | | | | |
+| C2 (essai 2) | | | | | | |
+| C2 (essai 3) | | | | | | |
+| C3 | | | | | | |
 
 ### Étape 4 — Comparer avec la boucle du framework
 

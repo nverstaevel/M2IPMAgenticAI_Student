@@ -66,11 +66,22 @@ public class DossierPdfService {
             p.ligne("Patient : " + cas.creature() + " (" + cas.espece() + "), propriétaire : " + cas.proprietaire() + " (fictif)");
             p.ligne("Motif : " + cas.symptome());
             p.espace();
-            // TODO TD5 (étape 5) : un bloc par tour (sousTitre « Tour n », puis lignes : diagnostic, traitements,
-            // justification, verdict du gardien, objections, sources ; utilisez sure(...) pour les listes éventuellement nulles).
-            // TODO TD5 (étape 5) : section « Décision » : issue du duo (run.statut()), état de la validation humaine
-            // (run.validation(), et par qui / quand si run.validePar() n'est pas nul), et la mention qu'aucun traitement
-            // n'est appliqué tant qu'un agent humain n'a pas validé le dossier.
+            for (Tour t : run.tours()) {
+                p.sousTitre("Tour " + t.numero());
+                p.ligne("Vétérinaire — diagnostic : " + t.diagnostic().diagnostic());
+                p.ligne("Traitements proposés : " + String.join(" ; ", sure(t.diagnostic().traitements())));
+                p.ligne("Justification : " + t.diagnostic().justification());
+                p.ligne("Gardien — verdict : " + t.critique().verdict());
+                for (String o : sure(t.critique().objections())) p.ligne("  Objection : " + o);
+                for (String s : sure(t.critique().sources())) p.ligne("  Source : " + s);
+                p.espace();
+            }
+            p.sousTitre("Décision");
+            p.ligne("Issue du duo : " + run.statut());
+            p.ligne("État : " + run.validation()
+                    + (run.validePar() == null ? "" : " par " + run.validePar() + " le " + DATE.format(run.valideLe())));
+            p.ligne("Aucun traitement n'est appliqué tant que ce dossier n'est pas validé par un agent humain.");
+            p.espace();
             p.sousTitre("Annexe technique");
             p.ligne("Durée : " + run.dureeMs() + " ms ; tokens (estimation des sorties) : " + run.tokensEstimes());
             p.ligne("Modèle (réglage spring.ai.model.chat) : " + run.modele() + " ; profil de l'acteur : " + run.profil());

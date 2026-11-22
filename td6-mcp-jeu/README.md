@@ -2,11 +2,13 @@
 
 Point de départ du TD (sujet distribué en cours). Dossier autonome : importez-le seul dans votre IDE (JDK 21).
 
-## Fourni
-le corrigé du TD5, le jeu (`../jeu-bestiaire`, **à ne pas modifier**), le lanceur de partie (`JoueurService`, `JoueurController`), les dépendances du starter client MCP, `application-jeu.properties`, `scenarios/_modele.md`.
+## Fourni (prêt à l'emploi)
+le corrigé du TD5, le jeu (`../jeu-bestiaire`, **à ne pas modifier**), **`JeuMcp`** et le groupe d'outils `jeu` (`OutilsDisponibles`), **`AgentsJeu`** (les agents de l'équipe : diagnosticien, gardien, apothicaire, avec des prompts de départ minimaux), le lanceur de partie (`JoueurService`, `JoueurController`), les dépendances du starter client MCP, `application-jeu.properties`, `scenarios/_modele.md`.
 
 ## À écrire
-`JeuMcp` (accès aux outils MCP du jeu), le groupe d'outils `jeu` dans `OutilsDisponibles`, vos agents et vos scénarios `.md`, `ANALYSE.md`.
+- les trois prompts de rôle dans `AgentsJeu` (`PROMPT_DIAGNOSTICIEN`, `PROMPT_GARDIEN`, `PROMPT_APOTHICAIRE`, marqués `TODO TD6`) ;
+- vos scénarios `.md` (Gribouille seul, l'équipe, **votre architecture**) ;
+- `ANALYSE.md` : affirmation, mesure, limite.
 
 ## Lancer
 ```bash

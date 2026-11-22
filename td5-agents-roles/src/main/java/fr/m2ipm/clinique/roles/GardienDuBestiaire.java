@@ -33,8 +33,9 @@ public class GardienDuBestiaire {
     }
 
     private static ChatClient construire(ChatClient.Builder builder, OutilsBestiaire bestiaire) {
-        // TODO TD5 : à écrire
-        throw new UnsupportedOperationException("À écrire : construire");
+        return builder.clone().defaultSystem(SYSTEME).defaultToolCallbacks(fr.m2ipm.clinique.agent.SuiviOutils.envelopper(
+                org.springframework.ai.support.ToolCallbacks.from(bestiaire)))
+                .defaultAdvisors(fr.m2ipm.clinique.agent.ComptageJetons.advisor()).build();
     }
 
     public GardienDuBestiaire(ChatClient client) { this(client, null); }
@@ -48,13 +49,27 @@ public class GardienDuBestiaire {
     }
 
     public Critique examiner(String espece, Diagnostic d) {
-        // TODO TD5 : à écrire
-        throw new UnsupportedOperationException("À écrire : examiner");
+        return examiner(espece, d, null);
     }
 
     /** @param outils les seuls outils autorisés (scénario .md) ; null = l'outil Wikipédia par défaut du gardien. */
     public Critique examiner(String espece, Diagnostic d, List<ToolCallback> outils) {
-        // TODO TD5 : à écrire
-        throw new UnsupportedOperationException("À écrire : examiner");
+        ChatClient client = outils == null || base == null ? this.client
+                : base.clone().defaultSystem(SYSTEME).defaultToolCallbacks(outils.toArray(new ToolCallback[0]))
+                        .defaultAdvisors(fr.m2ipm.clinique.agent.ComptageJetons.advisor()).build();
+        String message = "Créature : " + d.creature() + " (" + espece + ")\n"
+                + "Diagnostic : " + d.diagnostic() + "\n"
+                + "Traitements proposés : " + String.join(" ; ", d.traitements()) + "\n"
+                + "Justification : " + d.justification();
+        if (structurant == null) {
+            return client.prompt().user(message).call().entity(Critique.class);
+        }
+        // Deux temps : voir VeterinaireAgent (outils et sortie structurée ne sont pas demandés dans le même appel).
+        String analyse = client.prompt()
+                .user(message + "\nRéponds en texte libre : ton verdict (APPROUVE, REJETE ou DOUTE), tes objections et les adresses Wikipédia lues, sans JSON.")
+                .call().content();
+        return structurant.prompt()
+                .system("Tu convertis l'avis d'un gardien en Critique structurée (verdict APPROUVE, REJETE ou DOUTE ; objections ; sources = adresses https://fr.wikipedia.org/wiki/... citées), sans rien ajouter.")
+                .user(analyse).call().entity(Critique.class);
     }
 }

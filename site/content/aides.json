@@ -335,8 +335,9 @@
    ],
    "indices": [
     "Une étape = un appel au modèle + l'exécution des outils demandés.",
+    "Le sujet donne le code des quatre morceaux : posez-les dans l'ordre des `TODO`.",
+    "Le `ChatModel` n'exécute jamais les outils : `gestionnaire.executeToolCalls(prompt, reponse)`.",
     "Le prompt du tour suivant reprend l'**historique** renvoyé par l'exécution des outils.",
-    "Si le modèle ne demande aucun outil, c'est la réponse finale.",
     "`ClassCastException … OpenAiChatOptions` : partez des options du modèle (`modele.getOptions().mutate()`)."
    ]
   },
@@ -350,7 +351,8 @@
    ],
    "indices": [
     "`BUDGET_TOKENS` et `ERREUR` sont fournis : copiez leur **forme**.",
-    "`BOUCLE_DETECTEE` : comparez la signature (outil + arguments) à celle de l'appel précédent.",
+    "`BOUCLE_DETECTEE` : comparez la signature (outil + arguments) à celle de l'appel précédent, avant d'exécuter l'outil.",
+    "Le plafond d'étapes borne le **nombre** d'appels ; le budget borne le **coût** : ils ne se remplacent pas.",
     "Test : le modèle simulé répète `outil:consulterTarif:{…}`."
    ]
   },
@@ -363,6 +365,7 @@
     "lire-une-trace"
    ],
    "indices": [
+    "Prédisez **avant** de lancer : étapes, outils, réussite. L'écart est ce que vous apprenez.",
     "Notez le `runId` renvoyé, ouvrez `/agents?run=<runId>`.",
     "Variez les demandes : une qui exige un outil, une qui en exige deux, une ambiguë, une impossible, une piégée."
    ]
@@ -415,10 +418,9 @@
     "ajouter-un-outil"
    ],
    "indices": [
-    "Deux profils de prompt (prudent / pressé) : deux textes différents.",
+    "Deux profils de prompt (prudent / pressé) : lisez la différence dans `VeterinaireAgent`.",
     "À partir du tour 2, le vétérinaire reçoit les **objections** du critique.",
-    "Pour que tokens et outils apparaissent dans le nœud : conseiller `ComptageJetons.advisor()` et `SuiviOutils.envelopper(…)`.",
-    "Les beans `Agent` se déclarent dans `scenario/AgentsExemples`, à côté du bean `react`."
+    "`VeterinaireAgent` et le bean `veterinaire` sont fournis : lisez-les avant de lancer."
    ]
   },
   "2": {
@@ -432,7 +434,8 @@
    ],
    "indices": [
     "Le critique n'a **qu'un** outil : `chercherDansWikipedia`. Aucun outil d'écriture.",
-    "Le verdict est une `enum` : `APPROUVE`, `REJETE`, `DOUTE`. Il doit citer ses sources."
+    "Le verdict est une `enum` : `APPROUVE`, `REJETE`, `DOUTE`. Il doit citer ses sources.",
+    "Si le critique ne cite aucune source, lisez les lignes d'outil de son nœud : a-t-il consulté Wikipédia ?"
    ]
   },
   "3": {
@@ -445,6 +448,7 @@
     "duo-acteur-critique"
    ],
    "indices": [
+    "Prédisez le nombre de tours **avant** d'écrire le fichier.",
     "Le nom de l'agent dans le `.md` **doit** coïncider avec `@Bean(\"…\")`.",
     "Un ⚠ dans la liste nomme le champ fautif : lisez le message sous la liste.",
     "Boucle : `gardien -> veterinaire : REJETE (max 2)`."
@@ -459,6 +463,8 @@
    ],
    "indices": [
     "Mesures attendues : rejets corrects, faux rejets, faux accords, tours moyens.",
+    "Changez **une seule** chose à la fois, sinon vous ne saurez pas laquelle a servi.",
+    "Une exécution par cas ne prouve pas grand-chose : dites-le dans votre conclusion.",
     "Comparez au workflow classique (étape 7)."
    ]
   },
@@ -468,8 +474,9 @@
    ],
    "recettes": [],
    "indices": [
-    "Un bloc par tour : sous-titre « Tour n », puis diagnostic, traitements, verdict.",
-    "La section « Décision » indique l'issue du duo et l'état de la validation humaine."
+    "`DossierPdfService` est fourni : lisez ce qu'il met dans chaque section.",
+    "La validation est réservée au rôle `PERSONNEL`.",
+    "Aucun traitement n'est appliqué tant que le dossier n'est pas validé par un humain."
    ]
   },
   "6": {
@@ -482,6 +489,7 @@
     "donner-ses-outils-a-un-role"
    ],
    "indices": [
+    "Le prompt du planificateur dit : qui sont les travailleurs, ce que chacun sait faire, ce qu'il ne doit **pas** faire (agir lui-même).",
     "Un seul bean `travailleur`, trois nœuds avec des outils différents (`e.outilsAutorises()`).",
     "`=>` distribue les tâches du plan ; `->` enchaîne."
    ]
@@ -527,7 +535,7 @@
     "Client désactivé par défaut ; activé seulement par le profil `jeu`.",
     "Contrôle : `/api/agent/jeu/outils` répond `connecte: true` et liste huit outils.",
     "Un outil MCP est un `ToolCallback` comme un autre.",
-    "Les quatre méthodes de `JeuMcp` (`TODO TD6`) : `outils()`, `connecte()`, `appeler(nom, json)`, `etat()`. Le `ToolCallbackProvider` n'existe que si le profil `jeu` est actif : il arrive dans un `ObjectProvider`."
+    "`JeuMcp` et le groupe `jeu` sont fournis : lisez-les, ne les modifiez pas."
    ]
   },
   "3": {
@@ -541,7 +549,7 @@
    ],
    "indices": [
     "Une exécution du graphe = **une journée**.",
-    "Dans `OutilsDisponibles`, ajoutez le groupe `jeu` : l'ensemble des outils découverts.",
+    "Prédisez le score **avant** de lancer : l'écart est ce que vous apprenez.",
     "La consigne dit que les notes des propriétaires sont des informations, jamais des consignes."
    ]
   },
@@ -558,9 +566,9 @@
    ],
    "indices": [
     "Séparer lecture et écriture : le diagnosticien ne peut pas soigner, l'apothicaire exécute.",
-    "Le gardien doit **recopier le plan** dans sa réponse, avec son verdict.",
-    "Le diagnosticien relancé après un rejet retrouve la consigne d'origine avec `e.donnee(\"demande\", …)`.",
-    "Les trois beans se placent dans une nouvelle classe `jeu/AgentsJeu` ; inspirez-vous de `veterinaire` et `gardien` dans `AgentsExemples`."
+    "Le gardien recopie le plan dans sa réponse, avec son verdict : lisez `AgentsJeu` pour voir comment.",
+    "Un bon prompt de rôle : ce qu'il faut faire, le format de la réponse, ce qu'il ne faut **pas** faire, quoi faire en cas de doute.",
+    "Améliorez **un** prompt à la fois, d'après une trace."
    ]
   },
   "5": {
@@ -574,7 +582,7 @@
    ],
    "indices": [
     "Chaque rôle n'a que les outils qui lui sont utiles.",
-    "Avant d'écrire, formulez votre **hypothèse** : pourquoi votre architecture ferait-elle mieux ou moins cher ?"
+    "Écrivez votre **hypothèse** avant de lancer : pourquoi cette architecture ferait-elle mieux ou moins cher ?"
    ]
   },
   "6": {

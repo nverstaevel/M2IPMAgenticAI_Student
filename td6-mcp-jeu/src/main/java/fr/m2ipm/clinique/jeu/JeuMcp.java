@@ -23,27 +23,26 @@ public class JeuMcp {
 
     /** Les outils publiés par le jeu (vide si le profil « jeu » n'est pas actif ou si le serveur est injoignable). */
     public ToolCallback[] outils() {
-        // TODO TD6 : à écrire
-        throw new UnsupportedOperationException("À écrire : outils");
+        return mcp.orderedStream().flatMap(p -> Arrays.stream(p.getToolCallbacks())).toArray(ToolCallback[]::new);
     }
 
-    public boolean connecte() {
-        // TODO TD6 : à écrire
-        throw new UnsupportedOperationException("À écrire : connecte");
-    }
+    public boolean connecte() { return outils().length > 0; }
 
     /** Appelle un outil du jeu hors de tout agent. Les arguments sont un objet JSON : {@code "{}"} si l'outil n'en a pas. */
     public String appeler(String outil, String argumentsJson) {
-        // TODO TD6 : à écrire
-        throw new UnsupportedOperationException("À écrire : appeler");
+        return Arrays.stream(outils()).filter(o -> o.getToolDefinition().name().equals(outil)).findFirst()
+                .orElseThrow(() -> new IllegalStateException("Outil du jeu introuvable : " + outil
+                        + " (profil « jeu » actif ? serveur démarré sur le port 8090 ?)"))
+                .call(argumentsJson);
     }
 
     /** Résumé de l'état de la partie, lu dans la réponse JSON de {@code etat_clinique}. */
     public record Etat(int jour, int pointsAction, int tresorerie, int gueris, int morts, boolean terminee, int score) {}
 
     public Etat etat() {
-        // TODO TD6 : à écrire
-        throw new UnsupportedOperationException("À écrire : etat");
+        String t = appeler("etat_clinique", "{}");
+        return new Etat(entier(t, "jour"), entier(t, "pointsAction"), entier(t, "tresorerie"), entier(t, "gueris"),
+                entier(t, "morts"), booleen(t, "terminee"), entier(t, "score"));
     }
 
     // La réponse d'un outil MCP est un JSON, parfois emballé dans une chaîne : on lit les champs sans dépendre de l'emballage.

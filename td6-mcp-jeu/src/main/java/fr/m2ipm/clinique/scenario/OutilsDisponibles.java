@@ -54,7 +54,7 @@ public class OutilsDisponibles {
     private Map<String, ToolCallback[]> catalogue() {
         Map<String, ToolCallback[]> tous = new LinkedHashMap<>(fixes);
         ToolCallback[] outilsJeu = jeu.get();
-        // TODO TD6 : si le jeu est connecté (outilsJeu non vide), ajouter ici le groupe « jeu » au catalogue.
+        if (outilsJeu.length > 0) { tous.put("jeu", outilsJeu); }
         return tous;
     }
 
