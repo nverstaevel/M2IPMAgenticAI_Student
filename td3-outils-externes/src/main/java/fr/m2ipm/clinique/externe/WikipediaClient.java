@@ -44,14 +44,36 @@ public class WikipediaClient {
      * @throws IllegalStateException si la page est une page d'homonymie ou si l'API est indisponible
      */
     public Optional<Resume> resume(String titre) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : resume");
+        String propre = titre == null ? "" : titre.trim().replace('/', ' ').replace(' ', '_');
+        if (propre.isEmpty()) {
+            return Optional.empty();
+        }
+        String corps;
+        try {
+            corps = client.get().uri("/page/summary/{titre}", propre).retrieve().body(String.class);
+        } catch (HttpClientErrorException.NotFound e) {
+            return Optional.empty();
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("Wikipédia est indisponible : " + e.getMessage(), e);
+        }
+        return analyser(corps);
     }
 
     /** Extrait titre et résumé de la réponse JSON ; public pour tester sur une réponse enregistrée. */
     @SuppressWarnings("unchecked")
     public Optional<Resume> analyser(String corps) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : analyser");
+        Map<String, Object> donnees = json.readValue(corps, Map.class);
+        if ("disambiguation".equals(donnees.get("type"))) {
+            throw new IllegalStateException("« " + donnees.get("title") + " » est une page d'homonymie : précisez le titre.");
+        }
+        Object extrait = donnees.get("extract");
+        if (extrait == null || extrait.toString().isBlank()) {
+            return Optional.empty();
+        }
+        String texte = extrait.toString();
+        if (texte.length() > LONGUEUR_MAX) {
+            texte = texte.substring(0, LONGUEUR_MAX) + "…";
+        }
+        return Optional.of(new Resume(String.valueOf(donnees.get("title")), texte));
     }
 }

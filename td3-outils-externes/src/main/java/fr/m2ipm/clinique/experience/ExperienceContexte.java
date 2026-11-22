@@ -111,8 +111,13 @@ public class ExperienceContexte {
 
     /** Fonction de mesure commune : chronomètre, jetons estimés, coût fictif, exactitude 0/1. */
     Mesure mesurer(Question q, String strategie, String position, String bruit, String prompt) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : mesurer");
+        long debut = System.nanoTime();
+        String reponse = modele.apply(prompt);
+        long ms = (System.nanoTime() - debut) / 1_000_000;
+        int in = jetons(prompt);
+        int out = jetons(reponse);
+        double cout = in * TARIF_ENTREE + out * TARIF_SORTIE;
+        return new Mesure(q.id(), strategie, position, bruit, in, out, ms, cout, contient(reponse, q.attendu()) ? 1 : 0);
     }
 
     private static String prompt(String contexte, Question q) {

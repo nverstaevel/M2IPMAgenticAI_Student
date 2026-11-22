@@ -2,20 +2,21 @@
 
 Point de départ du TD (sujet distribué en cours). Dossier autonome : importez-le seul dans votre IDE (JDK 21).
 
-## Fourni
-le corrigé du TD2, `TarifsExcelReader` (lecture du classeur Excel) et `GoogleAgendaAdapter` (client Google Agenda réel), `ExperienceContexte` (lit le CSV, écrit les mesures), les fichiers de données (`src/main/resources/donnees`, `experience`), les scripts.
+## Fourni (prêt à l'emploi)
+le corrigé du TD2, les clients des sources externes : `WikipediaClient`, `TarifsExcelReader` (classeur Excel), `CatalogueMedicaments` (requête SQL paramétrée), `AgendaPort` avec `AgendaSimule` (en mémoire) et `GoogleAgendaAdapter` (réel, facultatif) ; `ExperienceContexte` (stratégies A et B, mesures) et `ExperienceController` (lance l'expérience) ; les fichiers de données (`src/main/resources/donnees`, `experience`) et les scripts. L'outil `chercherDansWikipedia` est écrit en entier : c'est votre modèle.
 
 ## À écrire
-les outils de `OutilsExternes` (Wikipédia, tarifs et stock Excel, médicaments, agenda), `WikipediaClient`, `AgendaSimule` (l'interface `AgendaPort` est fournie), la fonction `mesurer` d'`ExperienceContexte`. Les endroits sont marqués `TODO TD3`.
+cinq outils de `OutilsExternes` : `consulterTarif`, `stockPharmacie`, `chercherMedicament`, `creneauxLibres`, `proposerEvenementAgenda`. Chacun est annoté de consignes dans le code (blocs « À VOUS »), aux endroits marqués `TODO TD3`. Le reste du TD est de l'analyse : tableau de conception (étape 0), lecture des chiffres, synthèse.
 
 ## Lancer
 ```bash
-mvn spring-boot:run          # ajoutez -Dspring-boot.run.profiles=simule pour travailler sans modèle
-mvn test
+mvn spring-boot:run                              # ajoutez -Dspring-boot.run.profiles=simule pour travailler sans modèle
+mvn test -Dtest=OutilsExternesTest               # les tests disent ce que vos outils doivent répondre
+curl -u gribouille:gribouille -X POST "localhost:8080/api/experience/lancer?tailleMax=5000"   # expérience (vrai modèle)
 ```
 
-## Agenda réel (extension)
-Par défaut `agenda.mode=simule` : l'agenda est `AgendaSimule`, en mémoire. Pour essayer Google Agenda, utilisez votre propre compte Google : créez un compte de service dans votre propre projet Google Cloud (gratuit) : activez l'API Google Calendar, créez le compte de service, puis générez une clé JSON (« Clés » → « Ajouter une clé »). Créez ensuite un agenda de test vide dans votre Google Agenda et partagez-le avec l'adresse du compte de service (`…@….iam.gserviceaccount.com`, droit « Apporter des modifications aux événements »), puis renseignez dans `application-local.yml` : `agenda.mode: google`, `agenda.google.calendar-id`, `agenda.google.credentials-file`. Le fichier de clés JSON ne va jamais dans Git.
+## Agenda réel (« Pour aller plus loin », facultatif)
+Par défaut `agenda.mode=simule`. La marche à suivre pour Google Agenda (compte de service personnel, agenda de test partagé, `agenda.mode: google`) est à la fin du sujet. La clé JSON ne va jamais dans Git.
 
 ## Remarques
 Les tests `OutilsExternesTest`, `WikipediaClientTest`, `ExperienceContexteTest` décrivent le comportement attendu.

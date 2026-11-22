@@ -187,6 +187,21 @@
   }
  },
  "td3": {
+  "0": {
+   "notions": [
+    "appel-outils",
+    "texte-tiers-injection",
+    "confirmation-ecritures"
+   ],
+   "recettes": [
+    "ajouter-un-outil"
+   ],
+   "indices": [
+    "Lecture ou écriture ? Un outil qui écrit ne fait que **proposer** : un humain confirme.",
+    "Si la source échoue, le modèle doit recevoir une **phrase** (« je n'ai pas trouvé… »), jamais une exception.",
+    "Colonne « Qui a écrit le texte ? » : Wikipedia est écrit par des inconnus ; le classeur et la base par la clinique."
+   ]
+  },
   "1": {
    "notions": [
     "appel-outils",
@@ -196,9 +211,8 @@
     "appeler-une-api-http"
    ],
    "indices": [
-    "Wikimedia exige un `User-Agent` identifiable : sans lui, 403.",
-    "Une page absente est un cas **normal** : renvoyez un message clair, ne levez pas d'exception.",
-    "Tronquez le résumé à 1 500 caractères.",
+    "`chercherDansWikipedia` est écrit en entier : repérez les quatre temps (appeler, formater, toujours renvoyer du texte, étiqueter la source).",
+    "Wikimedia exige un `User-Agent` identifiable (déjà fait dans `WikipediaClient`).",
     "Le texte reçu est écrit par un tiers : ne le traitez pas comme une consigne."
    ]
   },
@@ -210,9 +224,10 @@
     "lire-un-excel"
    ],
    "indices": [
-    "`TarifsExcelReader` est fourni : lisez ses méthodes publiques.",
-    "Comparez acte et espèce **sans tenir compte de la casse**.",
-    "Renvoyez une phrase, pas la feuille. Acte inconnu : « Aucun tarif … »."
+    "`TarifsExcelReader` est fourni : ses méthodes renvoient des `Optional`.",
+    "`Optional.map(...).orElse(...)` : le motif est dans l'outil Wikipedia.",
+    "Renvoyez une phrase, pas la feuille. Acte inconnu : « Aucun tarif … » et la liste des actes connus.",
+    "`String.format(Locale.FRANCE, \"%.2f €\", prix)` donne « 80,00 € »."
    ]
   },
   "3": {
@@ -224,7 +239,7 @@
     "sql-parametre"
    ],
    "indices": [
-    "La seconde base est déjà configurée : injectez-la avec son `@Qualifier`.",
+    "`CatalogueMedicaments.chercher(nom, espece)` est fourni, avec sa requête paramétrée.",
     "Le modèle donne des **valeurs** ; le SQL est dans votre code, avec des paramètres nommés.",
     "Testez avec la chaîne `'; DROP TABLE medicament; --` : la réponse doit être « Aucun médicament »."
    ]
@@ -239,12 +254,10 @@
     "proposer-confirmer"
    ],
    "indices": [
-    "`AgendaSimule` : une simple liste d'événements en mémoire.",
-    "Deux intervalles se chevauchent si `a1 < b2 && b1 < a2`.",
-    "Un créneau qui commence exactement à la fin d'un événement est libre.",
-    "L'outil de proposition **n'écrit rien** dans l'agenda.",
-    "L'agenda est choisi par la propriété `agenda.mode` (`simule` par défaut), pas par un profil Spring.",
-    "`AgendaSimule` démarre avec deux créneaux déjà occupés le 3 décembre 2026 (10 h et 14 h 30) : testez sur ce jour."
+    "`AgendaSimule` est fourni : il démarre avec deux créneaux occupés le 3 décembre 2026 (10 h et 14 h 30) ; testez sur ce jour.",
+    "`propositions.proposer(...)` enregistre la proposition ; l'outil **n'écrit rien** dans l'agenda.",
+    "Attrapez les `RuntimeException` de `proposer` et renvoyez leur message.",
+    "L'agenda est choisi par la propriété `agenda.mode` (`simule` par défaut)."
    ]
   },
   "5": {
@@ -257,9 +270,10 @@
     "mesurer-tokens"
    ],
    "indices": [
-    "Lisez `ExperienceContexte` : le CSV de questions et l'écriture des mesures sont déjà faits.",
-    "`mesurer` : chronométrez, lisez `Usage`, appliquez le barème, comparez la réponse à l'attendu.",
-    "20 lignes attendues : 10 questions × 2 stratégies."
+    "Tout le code de mesure est fourni : lancez `POST /api/experience/lancer?tailleMax=…` avec un vrai modèle.",
+    "Gardez un fichier par `tailleMax` : renommez `mesures.csv` après chaque lancement.",
+    "20 lignes attendues : 10 questions × 2 stratégies.",
+    "Les jetons sont estimés (1 pour 4 caractères) : c'est suffisant pour comparer A et B."
    ]
   },
   "6": {

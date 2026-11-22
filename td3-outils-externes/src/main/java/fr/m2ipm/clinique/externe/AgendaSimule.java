@@ -24,18 +24,24 @@ public class AgendaSimule implements AgendaPort {
 
     @Override
     public List<LocalTime> creneauxLibres(LocalDate jour) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : creneauxLibres");
+        List<LocalTime> libres = new ArrayList<>();
+        for (LocalTime h = LocalTime.of(9, 0); h.isBefore(LocalTime.of(18, 0)); h = h.plusMinutes(30)) {
+            if (!occupes.contains(jour.atTime(h))) {
+                libres.add(h);
+            }
+        }
+        return libres;
     }
 
     @Override
     public String creerEvenement(String titre, LocalDateTime debut, int dureeMinutes) {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : creerEvenement");
+        String id = "sim-" + (crees.size() + 1);
+        crees.add(new Evenement(id, titre, debut, dureeMinutes));
+        occupes.add(debut);
+        return id;
     }
 
     public List<Evenement> evenementsCrees() {
-        // TODO TD3 : à écrire
-        throw new UnsupportedOperationException("À écrire : evenementsCrees");
+        return List.copyOf(crees);
     }
 }

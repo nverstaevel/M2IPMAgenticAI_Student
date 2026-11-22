@@ -8,20 +8,24 @@ Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'
 
 1. **écrire un outil** qui interroge une source externe (HTTP, fichier, base, API) et ne renvoie que le strict nécessaire ;
 2. **isoler une dépendance externe** derrière une interface (`AgendaPort`) pour tester sans réseau, avec une version réelle et une version simulée ;
-3. **appliquer « proposer, jamais écrire »** à un système externe : la confirmation humaine du TD2 devant Google Agenda ;
+3. **appliquer « proposer, jamais écrire »** à un système externe : la confirmation humaine du TD2 devant un agenda ;
 4. **mesurer** l'effet de la taille du contexte (tokens, latence, coût, exactitude) et choisir entre « tout dans le prompt » et « outil de recherche » ;
 5. **repérer les textes écrits par un tiers** qui entrent dans le contexte du modèle : vous y reviendrez au TD6, quand l'agent lira des notes écrites par des tiers.
 
 **Vous avez réussi si** vos outils (Wikipedia, Excel, médicaments, agenda simulé) répondent correctement à la grille de questions, si `mesures.csv` contient 20 lignes (10 questions × 2 stratégies) et si vous pouvez dire, chiffres à l'appui, à partir de quelle taille la stratégie A n'est plus raisonnable.
 
-| Vous écrivez | Fourni dans le dossier de départ |
+Ce TD est surtout un TD de **conception**. La plomberie technique (appels HTTP, lecture du classeur, requête SQL, agenda en mémoire, chronomètre de l'expérience) est **déjà écrite et testée** dans le dossier de départ. Vous décidez ce que le modèle voit et ce qu'il peut faire.
+
+| 🧰 Fourni, prêt à l'emploi | 🧠 À vous |
 | --- | --- |
-| les outils de `OutilsExternes` (Wikipédia, tarifs et stock Excel, médicaments, agenda), `WikipediaClient`, `AgendaSimule`, la fonction `mesurer` d'`ExperienceContexte` | `TarifsExcelReader` (lecture du classeur), `AgendaPort` et `GoogleAgendaAdapter` (client Google Agenda réel), la seconde source de données (`CatalogueConfig`), `ExperienceContexte` (lit le CSV, écrit les mesures), les fichiers de données ci-dessous |
+| `WikipediaClient`, `TarifsExcelReader`, `CatalogueMedicaments` (requête SQL paramétrée), `AgendaPort`, `AgendaSimule` et `GoogleAgendaAdapter`, `ExperienceContexte` (stratégies A et B, mesures) et son lanceur `ExperienceController`, les fichiers de données, **l'outil `chercherDansWikipedia` en entier (votre modèle)** | l'**analyse** des sources (étape 0), les **5 autres outils** de `OutilsExternes` (court : 5 à 15 lignes chacun, avec des indications dans le code), la **lecture critique** de l'expérience, la **synthèse chiffrée** |
+
+Chaque étape suit la même forme : **Objectif**, **Pas à pas**, **Point de contrôle**. Ne passez pas à l'étape suivante tant que le point de contrôle n'est pas vert.
 
 ## Avant la séance
 
 - [ ] Partez du dossier de départ `td3-outils-externes` (il contient votre TD2 corrigé plus le code fourni) ou, pour garder votre propre TD2, copiez `td2-chat` en `td3-outils-externes` et ajoutez-y le code fourni. Travaillez dans la copie.
-- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues), et, pour l'extension Google Agenda seulement, un compte Google personnel (vous créerez votre propre compte de service, voir le `README` du dossier `td3-outils-externes`) : sa clé JSON ne va jamais dans Git.
+- [ ] Fichiers fournis : `tarifs-et-pharmacie.xlsx` (feuilles Tarifs et Pharmacie), le script de la base `catalogue-medicaments`, `grand-bestiaire.txt` (un gros corpus), `questions-reference.csv` (questions et réponses attendues).
 - [ ] Contrôlez le modèle : `curl -u gribouille:gribouille localhost:8080/api/diagnostic/modele` doit répondre `"statut":"OK"`.
 - [ ] Relisez dans le support de CM2 : *Ports et adaptateurs*, *Sources externes*, *Interroger plutôt que charger*.
 
@@ -33,7 +37,7 @@ Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'
 | [API REST de Wikimedia](https://www.mediawiki.org/wiki/API:REST_API) et [politique de User-Agent](https://foundation.wikimedia.org/wiki/Policy:User-Agent_policy) | l'URL du résumé d'une page et l'en-tête obligatoire | étape 1 |
 | [Apache POI : guide rapide du tableur](https://poi.apache.org/components/spreadsheet/quick-guide.html) | lire un classeur `.xlsx` | étape 2 |
 | [Spring Boot : configurer deux sources de données](https://docs.spring.io/spring-boot/how-to/data-access.html) | une seconde base avec son `@Qualifier` | étape 3 |
-| [API Google Calendar : démarrage Java](https://developers.google.com/calendar/api/quickstart/java) | le client et l'authentification | étape 4 |
+| [API Google Calendar : démarrage Java](https://developers.google.com/calendar/api/quickstart/java) | le client et l'authentification | « Pour aller plus loin » |
 | [Lost in the Middle](https://arxiv.org/abs/2307.03172) (Liu et al., 2023) | pourquoi la position d'un passage dans le contexte compte | étape 5, question 2 |
 | [Spring AI : Tool Calling](https://docs.spring.io/spring-ai/reference/api/tools.html) | `@Tool`, `@ToolParam`, descriptions | toute la séance |
 
@@ -41,94 +45,154 @@ Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'
 
 | Étape | Durée | Vous faites | Point de contrôle |
 | --- | --- | --- | --- |
-| 1. Wikipedia | 20 min | `chercherDansWikipedia(titre)` et `WikipediaClient` | « Parle-moi du phénix » cite la page ; une page absente donne un message clair |
-| 2. Excel | 10 min | `consulterTarif`, `stockPharmacie` (le lecteur du classeur est fourni) | le tarif d'une consultation pour un yeti est celui du classeur |
-| 3. Base externe | 15 min | `chercherMedicament(nom, espece)` (la seconde source de données est fournie) | les contre-indications s'affichent, jamais de SQL écrit par le modèle |
-| 4. Google Agenda | 25 min | `AgendaSimule` et deux outils (`AgendaPort` et l'adaptateur Google sont fournis) | créneaux libres avec l'agenda simulé ; proposition puis confirmation |
-| 5. Expérience sur le contexte | 35 min | `mesurer`, stratégies A et B sur les dix questions | `mesures.csv` rempli (20 lignes) |
+| 0. Concevoir avant de coder | 20 min | un tableau d'analyse des quatre sources dans `JOURNAL.md` | tableau rempli, relu par votre voisin |
+| 1. Wikipedia | 10 min | lire l'outil modèle, l'essayer | « Parle-moi du phénix » cite la page ; une page absente donne un message clair |
+| 2. Excel | 15 min | `consulterTarif`, `stockPharmacie` | `mvn test -Dtest=OutilsExternesTest` : les tests tarif et stock passent |
+| 3. Base externe | 15 min | `chercherMedicament(nom, espece)` | les contre-indications s'affichent ; le test d'injection SQL passe |
+| 4. Agenda | 20 min | `creneauxLibres`, `proposerEvenementAgenda` | créneaux libres le 2026-12-03 ; proposition puis confirmation |
+| 5. Expérience sur le contexte | 30 min | lancer l'expérience, lire `mesures.csv` | 20 lignes ; vous savez dire où la stratégie A casse |
 | 6. Synthèse | 20 min | tableau, conclusions, journal | cinq lignes de conclusion chiffrées |
 
-Le socle représente environ 2 h 05. Le reste de la séance est pour les extensions (section « Extensions »).
+Le socle représente environ 2 h 10. Le reste est pour la section « Pour aller plus loin ».
+
+### Étape 0 — Concevoir avant de coder
+
+**Objectif.** Décider, sur papier, ce que chaque source apporte au Dr Gribouille et ce qu'elle risque de lui faire dire.
+
+**Pas à pas.**
+
+1. Ouvrez `JOURNAL.md` et recopiez le tableau ci-dessous sous un titre « TD3 ».
+2. Remplissez-le **sans regarder le code**, avec ce que vous savez des sources : Wikipedia (texte libre, sur Internet), le classeur Excel (tarifs et stock), la base de médicaments (fiches avec contre-indications), l'agenda (créneaux).
+3. Comparez avec votre voisin : sur quelles lignes n'êtes-vous pas d'accord ?
+
+| Source | Question typique d'un propriétaire | Outil (nom) | Lecture ou écriture ? | Ce qu'il doit renvoyer (et pas plus) | Si la source échoue, il répond… | Qui a écrit le texte renvoyé ? |
+| --- | --- | --- | --- | --- | --- | --- |
+| Wikipedia | « Que mange un phénix ? » | `chercherDansWikipedia` | | | | |
+| Excel | « Combien coûte un vaccin pour un yéti ? » | | | | | |
+| Base de médicaments | « Le baume ignifuge est-il sûr pour mon dragon ? » | | | | | |
+| Agenda | « Avez-vous un créneau jeudi ? » | | | | | |
+
+**Point de contrôle.** Aucune case vide, et la colonne « Qui a écrit le texte renvoyé ? » distingue clairement ce que la clinique maîtrise de ce qui vient d'un tiers. Vous la compléterez à l'étape 6.
 
 ### Étape 1 — Wikipedia
 
-Complétez le squelette et exposez `chercherDansWikipedia(titre)`. Il renvoie le résumé de la page en français, tronqué à 1 500 caractères. Gérez les pages absentes et les pages d'homônymie par un message clair. Envoyez un en-tête `User-Agent` qui identifie votre application, comme l'exige Wikimedia.
+**Objectif.** Lire un outil complet pour en tirer le motif que vous recopierez cinq fois.
 
-```java
-@Tool(description = "Résumé d'une page Wikipedia en français. À utiliser pour le folklore d'une créature.")
-String chercherDansWikipedia(@ToolParam(description = "Titre exact de la page, ex. Phénix (mythologie)") String titre) {
-    return wikipedia.resume(titre)                        // GET https://fr.wikipedia.org/api/rest_v1/page/summary/{titre}
-                    .map(t -> t.length() > 1500 ? t.substring(0, 1500) : t)
-                    .orElse("Aucune page Wikipedia ne porte ce titre.");
-}
+**Pas à pas.**
+
+1. 🧰 Ouvrez `OutilsExternes.java` : `chercherDansWikipedia` est écrit. Repérez les quatre temps : appeler la source, mettre en forme, **toujours renvoyer du texte** (même en cas d'échec), **étiqueter** la source non fiable.
+2. 🧰 `WikipediaClient` est fourni : il envoie le `User-Agent` exigé par Wikimedia, tronque à 1 500 caractères et signale pages absentes et pages d'homonymie. Ne le modifiez pas.
+3. 🧠 Lisez la description de l'outil (`@Tool(description = …)`). Relevez dans votre journal : à quel moment le modèle doit-il l'appeler ? À quel moment ne le doit-il pas ?
+4. Lancez l'application avec le profil `simule` (`mvn spring-boot:run -Dspring-boot.run.profiles=simule`) et appelez l'outil sans modèle :
+
+```bash
+curl -u gribouille:gribouille -H 'Content-Type: application/json' \
+  -d '{"conversationId":"c1","message":"outil:chercherDansWikipedia:{\"titre\":\"Phénix (mythologie)\"}"}' localhost:8080/api/chat
 ```
+
+**Point de contrôle.** La réponse commence par « [Source externe non fiable : Wikipédia … ». Avec le titre `Zzzzzz`, vous obtenez « Aucune page Wikipédia trouvée ». Avec un vrai modèle (profil `lmstudio`, etc.), « Parle-moi du phénix » cite la page.
 
 ### Étape 2 — Excel
 
-Exposez `consulterTarif(acte, espece)` et `stockPharmacie(medicament)`. Lisez le classeur **une seule fois au démarrage**, pas à chaque appel. Renvoyez les lignes utiles, jamais la feuille entière.
+**Objectif.** Exposer deux outils à partir d'un lecteur de classeur déjà prêt. Recette : *Lire un Excel*.
 
-`TarifsExcelReader` est fourni : il lit le classeur une seule fois au démarrage. Vous exposez les deux outils à partir de ses méthodes.
+**Pas à pas.**
+
+1. 🧰 `TarifsExcelReader` lit le classeur **une seule fois au démarrage** : `tarif(acte, espece)` renvoie un `Optional<Double>`, `stock(medicament)` un `Optional<Integer>`, `unite(medicament)` un texte.
+2. 🧠 Dans `consulterTarif`, suivez les indications écrites dans le code (bloc « À VOUS 1 ») : mettez en forme le prix en euros avec une virgule, et, si l'acte est inconnu, **listez les actes connus** pour que le modèle puisse se corriger.
+3. 🧠 Dans `stockPharmacie` (« À VOUS 2 ») : renvoyez la quantité et l'unité, et ajoutez « (rupture) » quand le stock est à zéro.
+4. Lancez les deux tests concernés :
+
+```bash
+mvn test -Dtest=OutilsExternesTest#consulterTarifLitLeClasseurExcel+stockPharmacie
+```
+
+**Point de contrôle.** Les deux tests passent. Le tarif d'une consultation pour un dragon est bien 80,00 €. Question à vous poser : pourquoi renvoyer une phrase plutôt que la ligne brute du classeur ?
 
 ### Étape 3 — Base externe
 
-Configurez une seconde source de données, en lecture seule, avec son `@Qualifier`. Exposez `chercherMedicament(nom, espece)` : principe actif, contre-indications pour l'espèce. Les requêtes sont paramétrées dans votre code. N'exposez **jamais** un outil qui exécute du SQL écrit par le modèle.
+**Objectif.** Interroger une seconde base **sans jamais laisser le modèle écrire du SQL**. Recette : *SQL paramétré*.
 
-La seconde source de données (`CatalogueConfig`) est déjà configurée : vous écrivez l'outil, avec des requêtes paramétrées.
+**Pas à pas.**
 
-### Étape 4 — Google Agenda
+1. 🧰 `CatalogueMedicaments.chercher(nom, espece)` contient la requête : le modèle ne fournit que deux valeurs, liées comme paramètres. Lisez-la : elle est la raison pour laquelle l'injection SQL échoue.
+2. 🧠 Dans `chercherMedicament` (« À VOUS 3 »), construisez la réponse : une ligne par fiche, avec les **contre-indications bien visibles**. Liste vide : un message clair.
+3. Lancez les tests :
 
-L'agenda est caché derrière une interface `AgendaPort` qui a deux implémentations : `GoogleAgendaAdapter` (réel, fourni) et `AgendaSimule` (en mémoire). Les tests utilisent la seconde, parce qu'elle ne dépend ni du réseau ni d'un compte. Vous écrivez `AgendaSimule` et les deux outils ; l'essai avec l'agenda réel est une extension (voir « Extensions »).
-
-`AgendaSimule` démarre avec deux créneaux déjà occupés, le 3 décembre 2026 à 10 h et à 14 h 30 : utilisez ce jour pour vos tests.
-
-```java
-public interface AgendaPort {
-    List<LocalTime> creneauxLibres(LocalDate jour);                              // lecture : heures de début libres
-    String creerEvenement(String titre, LocalDateTime debut, int dureeMinutes);  // écriture : jamais appelée par un outil
-}
-// choix de l'implémentation par la propriété agenda.mode : simule (défaut) ou google (classe AgendaConfig)
+```bash
+mvn test -Dtest=OutilsExternesTest#chercherMedicamentInterrogeLaSecondeBase+chercherMedicamentResisteAUneInjectionSql
 ```
 
-| Outil | Comportement |
-| --- | --- |
-| `creneauxLibres(jour)` | Renvoie les créneaux de 30 minutes libres entre 9 h et 18 h, à partir des événements de l'agenda. |
-| `proposerEvenementAgenda(creatureId, dateHeure, motif)` | N'écrit rien. Enregistre une proposition, comme au TD2. |
+**Point de contrôle.** Les deux tests passent. Dans votre journal : si le modèle pouvait écrire du SQL, que pourrait-il faire à partir d'un message de propriétaire ?
 
-La confirmation réutilise le mécanisme du TD2. Elle crée un événement intitulé « Consultation — Flammèche (Dragon) » **sans invité** : aucun e-mail ne doit partir.
+### Étape 4 — Agenda
 
-Question de conception : une consultation existe maintenant dans la base et dans l'agenda. Laquelle fait foi ? Que se passe-t-il quand elles divergent ? Écrivez votre choix dans le journal.
+**Objectif.** Appliquer « proposer, jamais écrire » à un système externe. Recette : *Proposer, confirmer*.
+
+**Pas à pas.**
+
+1. 🧰 L'agenda est caché derrière `AgendaPort`. `AgendaSimule` (en mémoire) est fourni et choisi par défaut : les tests ne dépendent ni du réseau ni d'un compte. Il démarre avec deux créneaux occupés, le **3 décembre 2026 à 10 h et à 14 h 30**.
+2. 🧠 Dans `creneauxLibres` (« À VOUS 4 »), transformez la date, appelez l'agenda, formatez la liste. Une date illisible donne un message, pas une exception.
+3. 🧠 Dans `proposerEvenementAgenda` (« À VOUS 5 »), appelez `propositions.proposer(...)`. **Rien n'est créé dans l'agenda** à ce stade ; la confirmation par un membre du personnel (code fourni, comme au TD2) crée l'événement « Consultation — Flammèche (Dragon) » **sans invité**.
+4. Lancez les tests :
+
+```bash
+mvn test -Dtest=OutilsExternesTest
+```
+
+**Point de contrôle.** Tous les tests de `OutilsExternesTest` passent (7 sur 7). Question de conception, à écrire dans le journal : une consultation existe maintenant dans la base et dans l'agenda. Laquelle fait foi ? Que se passe-t-il quand elles divergent ?
 
 ### Étape 5 — Expérience sur le contexte
 
-Le corpus `grand-bestiaire.txt` est trop gros pour être lu en entier avec confort. Chacune des dix questions de `questions-reference.csv` a sa réponse dans un court passage caché quelque part. Comparez deux stratégies sur les dix questions (une troisième est facultative) :
+**Objectif.** Mesurer pourquoi on interroge une source plutôt que de la verser entière dans le prompt.
+
+Le corpus `grand-bestiaire.txt` est trop gros pour être lu en entier avec confort. Chacune des dix questions de `questions-reference.csv` a sa réponse dans un court passage caché quelque part. Deux stratégies sont comparées :
 
 | Stratégie | Principe |
 | --- | --- |
-| A. Tout dans le prompt | Le corpus entier est placé dans le message système. |
-| B. Outil de recherche | `chercherDansBestiaire(motsCles)` renvoie au plus 3 passages de 800 caractères. |
-| C. Similarité (facultatif) | Un magasin vectoriel en mémoire renvoie les 3 passages les plus proches. |
+| A. Tout dans le prompt | Le corpus (tronqué à `tailleMax` caractères) est placé dans le prompt. |
+| B. Recherche | `chercherDansBestiaire(motsCles)` renvoie au plus 3 passages de 800 caractères. |
 
-Pour chaque question et chaque stratégie, relevez dans `mesures.csv` : les tokens d'entrée et de sortie (lus dans les métadonnées de la réponse : `reponse.getMetadata().getUsage()`), la latence en millisecondes, le coût estimé avec le barème fictif fourni, et l'exactitude (1 si la réponse contient l'élément attendu, sinon 0). Le squelette `ExperienceContexte` lit le CSV de questions et écrit les mesures ; vous codez la fonction `mesurer`.
+**Pas à pas.**
 
-```csv
-question,strategie,tokens_entree,tokens_sortie,latence_ms,cout,exact
-Q1,A,48210,35,6120,0.0482,1
-Q1,B,1840,42,1310,0.0019,1
+1. 🧰 Tout le code de mesure est fourni (`ExperienceContexte` : chronomètre, jetons estimés à 1 pour 4 caractères, coût fictif, exactitude 0 ou 1). Lancez l'expérience avec un **vrai modèle** (profil `lmstudio`, `groq`, etc. ; pas `simule`) :
+
+```bash
+curl -u gribouille:gribouille -X POST "localhost:8080/api/experience/lancer?tailleMax=5000"
 ```
 
-Extension : faites varier deux paramètres avec la stratégie A : la position du passage utile (début, milieu, fin) et la quantité de texte parasite ajoutée (aucune, moitié, double).
+2. Ouvrez `mesures.csv` (à la racine du projet, séparateur `;`). Il contient 20 lignes : 10 questions × 2 stratégies.
+3. Relancez avec `tailleMax=20000`, puis `60000`. **Gardez chaque fichier** (renommez-le `mesures-5000.csv`, etc.).
+4. 🧠 Pour chaque lancement, calculez par stratégie : jetons moyens, latence moyenne, coût total, nombre de réponses exactes.
+
+```csv
+question;strategie;position;bruit;jetons_entree;jetons_sortie;latence_ms;cout_estime;exactitude
+Q1;A;-;-;1250;35;6120;0.002710;0
+Q1;B;-;-;460;42;1310;0.001172;1
+```
+
+**Point de contrôle.** Trois fichiers de 20 lignes. Vous savez répondre, chiffres à l'appui : à partir de quelle taille la stratégie A n'est plus raisonnable, et sur quel critère d'abord (erreur, coût, latence ou exactitude).
 
 ### Étape 6 — Synthèse
 
-Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie : tokens moyens, latence moyenne, coût, exactitude) et écrivez cinq lignes de conclusion, chacune avec un chiffre.
+**Objectif.** Transformer des chiffres en décisions.
+
+**Pas à pas.**
+
+1. 🧠 Dans `JOURNAL.md`, remplissez le tableau de synthèse (une ligne par stratégie et par `tailleMax` : jetons moyens, latence moyenne, coût, exactitude).
+2. 🧠 Écrivez **cinq lignes de conclusion**, chacune avec un chiffre. Modèle : « À 20 000 caractères, la stratégie A coûte trois fois plus que B pour une exactitude de 6/10 contre 9/10. »
+3. 🧠 Revenez au tableau de l'étape 0 : corrigez ce que l'expérience ou le code vous a appris, et complétez la dernière colonne.
+
+**Point de contrôle.** Cinq conclusions chiffrées, un tableau d'étape 0 corrigé. Rendez le dossier et le journal (voir « Livrable »).
 
 ## En cas de blocage
 
 | Symptôme | Cause fréquente | Que faire |
 | --- | --- | --- |
 | Wikipedia répond 403 | pas de `User-Agent` | ajouter un en-tête qui nomme votre application et un contact |
-| Erreur d'authentification Google | agenda non partagé avec votre compte de service | vérifier l'identifiant de l'agenda et le partage ; sinon, revenir à `agenda.mode=simule` |
-| Tokens à 0 dans les métadonnées | le fournisseur ne les annonce pas | estimer (1 token pour 4 caractères) et le noter dans le journal |
+| `UnsupportedOperationException : À écrire` | un outil n'est pas encore écrit | c'est normal tant que vous n'avez pas fait l'étape : repérez le `TODO TD3` correspondant |
+| Le test échoue sur un texte (« expected … to contain … ») | votre phrase ne contient pas le mot attendu | lisez le test : il dit ce que la réponse doit contenir (« 80,00 », « rupture », « illisible »…) |
+| Exactitude à 0 partout, quelle que soit la stratégie | profil `simule` : le modèle simulé ne lit pas le contexte | relancer avec un vrai modèle (`lmstudio`, `groq`…) |
 | « context length exceeded » en stratégie A | corpus plus grand que la fenêtre du modèle | c'est un résultat : notez la taille qui fait échouer |
 | Le modèle n'appelle pas l'outil | description d'outil trop vague | reformuler la description et les `@ToolParam` |
 
@@ -142,20 +206,20 @@ Remplissez le tableau de synthèse dans `JOURNAL.md` (une ligne par stratégie :
 
 ## Livrable
 
-- Le dossier `td3-outils-externes` : vos outils fonctionnels (Wikipedia, Excel, médicaments, agenda) derrière leurs interfaces, un test unitaire par outil (réponse Wikipedia enregistrée, agenda simulé).
-- `mesures.csv` et, dans `JOURNAL.md`, le tableau de synthèse de l'expérience avec cinq lignes de conclusion.
+- Le dossier `td3-outils-externes` : les six outils de `OutilsExternes` qui fonctionnent, `OutilsExternesTest` entièrement vert.
+- Dans `JOURNAL.md` : le tableau d'analyse (étape 0, corrigé), le tableau de synthèse de l'expérience et vos cinq lignes de conclusion chiffrées.
+- Les fichiers `mesures-*.csv` de l'étape 5.
 
 ## Extensions
 
 Si le socle est terminé avant la fin de la séance :
 
-- essayez `GoogleAgendaAdapter` : dans Google Agenda, créez un agenda vide dédié au TD, créez d'abord votre propre compte de service dans votre projet Google Cloud (marche à suivre dans le `README` du dossier), puis partagez l'agenda avec son adresse avec le droit « Apporter des modifications aux événements », puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de votre agenda) et `agenda.google.credentials-file` (chemin de la clé JSON de votre compte de service) dans `application-local.yml` ;
-- faites varier la position du passage utile (début, milieu, fin) et la quantité de texte parasite (aucune, moitié, double) avec la stratégie A, et notez les résultats dans le journal ;
-- implémentez la stratégie C (similarité) et comparez-la à B ;
-- écrivez vous-même `TarifsExcelReader` avec Apache POI avant de lire celui qui est fourni.
+- faites varier la position du passage utile (début, milieu, fin) et la quantité de texte parasite (aucune, moitié, double) avec la stratégie A (`ExperienceContexte.avecVariation` est fourni) et notez les résultats dans le journal ;
+- implémentez la stratégie C (similarité, magasin vectoriel en mémoire) et comparez-la à B.
 
 ## Pour aller plus loin
 
 - Mettez en cache les pages Wikipedia déjà lues.
 - Faites la stratégie C avec un vrai modèle d'embeddings et comparez-la à B.
 - Ajoutez un outil `comparerTarifs(espece1, espece2)` et observez si le modèle l'utilise à bon escient.
+- **Brancher le vrai Google Agenda** (facultatif, demande un compte Google personnel). `GoogleAgendaAdapter` est fourni. Dans Google Cloud (gratuit), créez un projet, activez l'API Google Calendar, créez un compte de service et générez une clé JSON (le fichier ne va jamais dans Git). Dans Google Agenda, créez un agenda de test vide et partagez-le avec l'adresse du compte de service (`…@….iam.gserviceaccount.com`) avec le droit « Apporter des modifications aux événements ». Puis renseignez `agenda.mode=google`, `agenda.google.calendar-id` (identifiant de l'agenda) et `agenda.google.credentials-file` (chemin de la clé) dans `application-local.yml`. Si Google répond par une erreur d'authentification, vérifiez le partage et l'identifiant ; en cas de doute, revenez à `agenda.mode=simule`.
