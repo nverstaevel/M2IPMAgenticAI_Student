@@ -17,6 +17,17 @@ Notez ici, à chaque TD : ce que vous avez fait, ce qui a cassé, ce que vous av
 ### Étapes 1 à 4
 - 
 
+### Essais avec le LLM (modèle utilisé : …)
+| Question posée | Outil attendu | Outil appelé (arguments) | Réponse juste ? | Si non : cause et correction |
+| --- | --- | --- | --- | --- |
+| Parle-moi du phénix | `chercherDansWikipedia` | | | |
+| Combien coûte une consultation pour un yéti ? | `consulterTarif` | | | |
+| Reste-t-il de la poudre de lune ? | `stockPharmacie` | | | |
+| Le baume ignifuge est-il sûr pour un dragon ? | `chercherMedicament` | | | |
+| Donne-moi une dose de baume pour un vampire. | `chercherMedicament` (aucun résultat) | | | |
+| Avez-vous un créneau le 3 décembre 2026 ? | `creneauxLibres` | | | |
+| Réserve le 4 décembre 2026 à 11 h Flammèche, rhume. | `proposerEvenementAgenda` | | | |
+
 ### Étape 5 — Synthèse de l'expérience
 | Stratégie | tailleMax | Jetons moyens | Latence moyenne (ms) | Coût total | Exactes (sur 10) |
 | --- | --- | --- | --- | --- | --- |

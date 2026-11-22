@@ -12,7 +12,7 @@ Sortir de la clinique. Le Dr Gribouille gagne des outils qui vont chercher de l'
 4. **mesurer** l'effet de la taille du contexte (tokens, latence, coût, exactitude) et choisir entre « tout dans le prompt » et « outil de recherche » ;
 5. **repérer les textes écrits par un tiers** qui entrent dans le contexte du modèle : vous y reviendrez au TD6, quand l'agent lira des notes écrites par des tiers.
 
-**Vous avez réussi si** vos outils (Wikipedia, Excel, médicaments, agenda simulé) répondent correctement à la grille de questions, si `mesures.csv` contient 20 lignes (10 questions × 2 stratégies) et si vous pouvez dire, chiffres à l'appui, à partir de quelle taille la stratégie A n'est plus raisonnable.
+**Vous avez réussi si** vos outils (Wikipedia, Excel, médicaments, agenda simulé) passent les tests **et** sont bien choisis et bien utilisés par votre LLM sur la grille de questions, si `mesures.csv` contient 20 lignes (10 questions × 2 stratégies) et si vous pouvez dire, chiffres à l'appui, à partir de quelle taille la stratégie A n'est plus raisonnable.
 
 Ce TD est surtout un TD de **conception**. La plomberie technique (appels HTTP, lecture du classeur, requête SQL, agenda en mémoire, chronomètre de l'expérience) est **déjà écrite et testée** dans le dossier de départ. Vous décidez ce que le modèle voit et ce qu'il peut faire.
 
@@ -47,13 +47,13 @@ Chaque étape suit la même forme : **Objectif**, **Pas à pas**, **Point de con
 | --- | --- | --- | --- |
 | 0. Concevoir avant de coder | 20 min | un tableau d'analyse des quatre sources dans `JOURNAL.md` | tableau rempli, relu par votre voisin |
 | 1. Wikipedia | 10 min | lire l'outil modèle, l'essayer | « Parle-moi du phénix » cite la page ; une page absente donne un message clair |
-| 2. Excel | 15 min | `consulterTarif`, `stockPharmacie` | `mvn test -Dtest=OutilsExternesTest` : les tests tarif et stock passent |
-| 3. Base externe | 15 min | `chercherMedicament(nom, espece)` | les contre-indications s'affichent ; le test d'injection SQL passe |
-| 4. Agenda | 20 min | `creneauxLibres`, `proposerEvenementAgenda` | créneaux libres le 2026-12-03 ; proposition puis confirmation |
+| 2. Excel | 20 min | `consulterTarif`, `stockPharmacie`, essai avec votre LLM | tests tarif et stock verts ; le LLM appelle l'outil |
+| 3. Base externe | 20 min | `chercherMedicament(nom, espece)`, essai avec votre LLM | tests verts ; le LLM n'invente pas de dose |
+| 4. Agenda | 30 min | `creneauxLibres`, `proposerEvenementAgenda`, essai avec votre LLM | 7 tests verts ; le LLM propose sans réserver |
 | 5. Expérience sur le contexte | 30 min | lancer l'expérience, lire `mesures.csv` | 20 lignes ; vous savez dire où la stratégie A casse |
 | 6. Synthèse | 20 min | tableau, conclusions, journal | cinq lignes de conclusion chiffrées |
 
-Le socle représente environ 2 h 10. Le reste est pour la section « Pour aller plus loin ».
+Le socle représente environ 2 h 30. Le reste est pour la section « Pour aller plus loin ».
 
 ### Étape 0 — Concevoir avant de coder
 
@@ -90,7 +90,7 @@ curl -u gribouille:gribouille -H 'Content-Type: application/json' \
   -d '{"conversationId":"c1","message":"outil:chercherDansWikipedia:{\"titre\":\"Phénix (mythologie)\"}"}' localhost:8080/api/chat
 ```
 
-**Point de contrôle.** La réponse commence par « [Source externe non fiable : Wikipédia … ». Avec le titre `Zzzzzz`, vous obtenez « Aucune page Wikipédia trouvée ». Avec un vrai modèle (profil `lmstudio`, etc.), « Parle-moi du phénix » cite la page.
+**Point de contrôle.** La réponse commence par « [Source externe non fiable : Wikipédia … ». Avec le titre `Zzzzzz`, vous obtenez « Aucune page Wikipédia trouvée ». **Avec votre LLM** (profil `lmstudio`, etc.), « Parle-moi du phénix » doit appeler l'outil et citer la page, sans traiter le texte reçu comme une consigne ; notez-le dans le tableau « Essais avec le LLM » de `JOURNAL.md`.
 
 ### Étape 2 — Excel
 
@@ -107,7 +107,19 @@ curl -u gribouille:gribouille -H 'Content-Type: application/json' \
 mvn test -Dtest=OutilsExternesTest#consulterTarifLitLeClasseurExcel+stockPharmacie
 ```
 
-**Point de contrôle.** Les deux tests passent. Le tarif d'une consultation pour un dragon est bien 80,00 €. Question à vous poser : pourquoi renvoyer une phrase plutôt que la ligne brute du classeur ?
+🧠 **Essayez avec votre LLM** (profil `lmstudio`, `groq`, etc., pas `simule`) : les tests passent, mais le modèle choisit-il vos outils ? Posez ces questions au chat, avec `logging.level.org.springframework.ai=DEBUG` pour voir les appels d'outils dans la console :
+
+- « Combien coûte une consultation pour un yéti ? » → doit appeler `consulterTarif`
+- « Reste-t-il de la poudre de lune ? » → doit appeler `stockPharmacie`
+
+```bash
+curl -u gribouille:gribouille -H 'Content-Type: application/json' \
+  -d '{"conversationId":"td3-t2","message":"Combien coûte une consultation pour un yéti ?"}' localhost:8080/api/chat
+```
+
+Notez dans le tableau « Essais avec le LLM » de `JOURNAL.md` : l'outil appelé, les arguments, et si la réponse est juste. Si le modèle n'appelle pas l'outil ou invente un prix, la cause est le plus souvent la description : reformulez-la et réessayez.
+
+**Point de contrôle.** Les deux tests passent **et** le LLM répond avec le bon tarif en appelant l'outil. Le tarif d'une consultation pour un dragon est bien 80,00 €. Question à vous poser : pourquoi renvoyer une phrase plutôt que la ligne brute du classeur ?
 
 ### Étape 3 — Base externe
 
@@ -122,6 +134,18 @@ mvn test -Dtest=OutilsExternesTest#consulterTarifLitLeClasseurExcel+stockPharmac
 ```bash
 mvn test -Dtest=OutilsExternesTest#chercherMedicamentInterrogeLaSecondeBase+chercherMedicamentResisteAUneInjectionSql
 ```
+
+🧠 **Essayez avec votre LLM** (profil `lmstudio`, `groq`, etc., pas `simule`) : les tests passent, mais le modèle choisit-il vos outils ? Posez ces questions au chat, avec `logging.level.org.springframework.ai=DEBUG` pour voir les appels d'outils dans la console :
+
+- « Le baume ignifuge est-il sûr pour un dragon ? » → doit appeler `chercherMedicament`
+- « Donne-moi une dose de baume pour un vampire. » → doit appeler chercherMedicament (réponse attendue : aucun médicament au catalogue, sans que le modèle invente une dose)
+
+```bash
+curl -u gribouille:gribouille -H 'Content-Type: application/json' \
+  -d '{"conversationId":"td3-t3","message":"Le baume ignifuge est-il sûr pour un dragon ?"}' localhost:8080/api/chat
+```
+
+Notez dans le tableau « Essais avec le LLM » de `JOURNAL.md` : l'outil appelé, les arguments, et si la réponse est juste. Le second cas teste ce que fait le modèle quand l'outil répond « rien » : inventer est un échec.
 
 **Point de contrôle.** Les deux tests passent. Dans votre journal : si le modèle pouvait écrire du SQL, que pourrait-il faire à partir d'un message de propriétaire ?
 
@@ -140,7 +164,19 @@ mvn test -Dtest=OutilsExternesTest#chercherMedicamentInterrogeLaSecondeBase+cher
 mvn test -Dtest=OutilsExternesTest
 ```
 
-**Point de contrôle.** Tous les tests de `OutilsExternesTest` passent (7 sur 7). Question de conception, à écrire dans le journal : une consultation existe maintenant dans la base et dans l'agenda. Laquelle fait foi ? Que se passe-t-il quand elles divergent ?
+🧠 **Essayez avec votre LLM** (profil `lmstudio`, `groq`, etc., pas `simule`) : les tests passent, mais le modèle choisit-il vos outils ? Posez ces questions au chat, avec `logging.level.org.springframework.ai=DEBUG` pour voir les appels d'outils dans la console :
+
+- « Avez-vous un créneau le 3 décembre 2026 ? » → doit appeler `creneauxLibres`
+- « Réserve le 4 décembre 2026 à 11 h une consultation pour Flammèche, motif rhume. » → doit appeler proposerEvenementAgenda (puis vérifiez que l'agenda n'a PAS été modifié et que la proposition attend confirmation)
+
+```bash
+curl -u gribouille:gribouille -H 'Content-Type: application/json' \
+  -d '{"conversationId":"td3-t4","message":"Avez-vous un créneau le 3 décembre 2026 ?"}' localhost:8080/api/chat
+```
+
+Notez dans le tableau « Essais avec le LLM » de `JOURNAL.md` : l'outil appelé, les arguments, et si la réponse est juste. Le modèle doit annoncer une **proposition**, jamais une réservation faite.
+
+**Point de contrôle.** Tous les tests de `OutilsExternesTest` passent (7 sur 7) et les essais avec le LLM sont notés dans le journal. Question de conception, à écrire dans le journal : une consultation existe maintenant dans la base et dans l'agenda. Laquelle fait foi ? Que se passe-t-il quand elles divergent ?
 
 ### Étape 5 — Expérience sur le contexte
 
@@ -194,7 +230,7 @@ Q1;B;-;-;460;42;1310;0.001172;1
 | Le test échoue sur un texte (« expected … to contain … ») | votre phrase ne contient pas le mot attendu | lisez le test : il dit ce que la réponse doit contenir (« 80,00 », « rupture », « illisible »…) |
 | Exactitude à 0 partout, quelle que soit la stratégie | profil `simule` : le modèle simulé ne lit pas le contexte | relancer avec un vrai modèle (`lmstudio`, `groq`…) |
 | « context length exceeded » en stratégie A | corpus plus grand que la fenêtre du modèle | c'est un résultat : notez la taille qui fait échouer |
-| Le modèle n'appelle pas l'outil | description d'outil trop vague | reformuler la description et les `@ToolParam` |
+| Le modèle n'appelle pas l'outil, ou l'appelle avec un argument inventé | description trop vague, ou modèle sans appel d'outils | reformuler la description, ajouter un exemple de valeur dans `@ToolParam` ; vérifier avec les logs `DEBUG` ; essayer un autre modèle |
 
 ## Questions de réflexion
 

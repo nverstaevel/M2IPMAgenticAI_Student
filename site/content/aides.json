@@ -227,7 +227,8 @@
     "`TarifsExcelReader` est fourni : ses méthodes renvoient des `Optional`.",
     "`Optional.map(...).orElse(...)` : le motif est dans l'outil Wikipedia.",
     "Renvoyez une phrase, pas la feuille. Acte inconnu : « Aucun tarif … » et la liste des actes connus.",
-    "`String.format(Locale.FRANCE, \"%.2f €\", prix)` donne « 80,00 € »."
+    "`String.format(Locale.FRANCE, \"%.2f €\", prix)` donne « 80,00 € ».",
+    "Avec le LLM : si l'outil n'est pas appelé, relisez sa description avant d'accuser le modèle."
    ]
   },
   "3": {
@@ -257,7 +258,8 @@
     "`AgendaSimule` est fourni : il démarre avec deux créneaux occupés le 3 décembre 2026 (10 h et 14 h 30) ; testez sur ce jour.",
     "`propositions.proposer(...)` enregistre la proposition ; l'outil **n'écrit rien** dans l'agenda.",
     "Attrapez les `RuntimeException` de `proposer` et renvoyez leur message.",
-    "L'agenda est choisi par la propriété `agenda.mode` (`simule` par défaut)."
+    "L'agenda est choisi par la propriété `agenda.mode` (`simule` par défaut).",
+    "Avec le LLM : « réserve » doit produire une **proposition** ; si l'agenda est modifié, c'est un défaut de conception, pas de modèle."
    ]
   },
   "5": {
