@@ -67,6 +67,10 @@ main{display:flex;flex-wrap:wrap;gap:14px;padding:14px;justify-content:center}
 #fiche .note{background:#fff;border:2px dashed var(--bois);border-radius:8px;padding:4px 8px;margin:6px 0;font-size:12.5px}
 #fiche .act{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 #fiche select{font:inherit;max-width:150px}
+#carnet{max-height:200px;overflow:auto;font-size:12.5px}#carnet .vide{color:#8b7355}
+.cn-esp{margin-bottom:6px}.cn-esp b{display:block;border-bottom:2px solid var(--bois);margin-bottom:2px;text-transform:capitalize}
+.cn-l{padding:1px 6px;border-left:4px solid #bbb;margin:2px 0;background:#fff}
+.cn-l.GUERISON{border-color:var(--vert)}.cn-l.TOXIQUE{border-color:var(--rouge)}.cn-l.REVIGORANT{border-color:var(--orange)}
 #journal{max-height:170px;overflow:auto;font-size:12.5px;margin:0;padding-left:16px;list-style:'• '}
 #toast{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:#fff;border:3px solid var(--bois);border-radius:12px;padding:6px 14px;font-weight:700;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20}
 #toast.on{opacity:1}
@@ -96,7 +100,7 @@ main{display:flex;flex-wrap:wrap;gap:14px;padding:14px;justify-content:center}
   <div class="cote">
     <div class="carte"><h3>🔎 Dossier du patient</h3><div id="fiche"><div class="vide">Clique sur une créature de la salle d'attente.</div></div></div>
     <div class="carte"><h3>💊 Pharmacie <small>(clic = commander 1)</small></h3><div id="etagere"></div></div>
-    <div class="carte"><h3>📒 Carnet de soins <small>(ce qui a été essayé)</small></h3><ul id="carnet"><li class="vide">Rien d'essayé pour l'instant.</li></ul></div>
+    <div class="carte"><h3>📒 Carnet de soins <small>(ce qui a été essayé)</small></h3><div id="carnet"><div class="vide">Rien d'essayé pour l'instant.</div></div></div>
     <div class="carte"><h3>📜 Journal</h3><ul id="journal"></ul></div>
   </div>
 </main>
@@ -190,10 +194,19 @@ function maj(d){
     +'<span class="ic">'+(IC[m.medicament]||'🧪')+'</span>'+m.medicament+'<span class="n">'+m.stock+(m.enCommande?' +'+m.enCommande+'🚚':'')+'</span></div>').join('');
   et.querySelectorAll('.flacon').forEach(f=>{f.onclick=()=>agir('commander',{medicament:f.dataset.n,quantite:1});
     if(vieux[f.dataset.n]!==undefined&&vieux[f.dataset.n]!==+f.dataset.s)anim(f,'flash',900)});
-  const EFF={GUERISON:'✅ guérit',TOXIQUE:'☠️ toxique pour',REVIGORANT:'💚 redonne des forces à',AUCUN_EFFET:'🤷 sans effet sur'};
-  const cn=$('carnet');cn.innerHTML=(d.carnet&&d.carnet.length?d.carnet:[null]).map(()=>'<li></li>').join('');
-  [...cn.children].forEach((li,i)=>{const o=d.carnet&&d.carnet[i];
-    li.textContent=o?o.medicament+' '+EFF[o.effet]+' '+o.espece+(o.maladie?' ('+o.maladie+')':'')+(o.fois>1?' ×'+o.fois:''):'Rien d\'essayé pour l\'instant.'});
+  const EFF={GUERISON:'✅ guérit',TOXIQUE:'☠️ toxique',REVIGORANT:'💚 redonne des forces',AUCUN_EFFET:'🤷 sans effet'};
+  const cn=$('carnet');
+  if(!d.carnet||!d.carnet.length){cn.innerHTML='<div class="vide">Rien d\'essayé pour l\'instant.</div>'}
+  else{
+    cn.innerHTML='';
+    [...new Set(d.carnet.map(o=>o.espece))].forEach(esp=>{
+      const bloc=document.createElement('div');bloc.className='cn-esp';
+      const h=document.createElement('b');h.textContent=(ESP[esp]||'👾')+' '+esp;bloc.appendChild(h);
+      d.carnet.filter(o=>o.espece===esp).forEach(o=>{
+        const l=document.createElement('div');l.className='cn-l '+o.effet;
+        l.textContent=o.medicament+' → '+EFF[o.effet]+(o.maladie?' ('+o.maladie+')':'')+(o.fois>1?' ×'+o.fois:'');
+        bloc.appendChild(l)});
+      cn.appendChild(bloc)})}
   $('journal').innerHTML=d.journal.slice().reverse().slice(0,40).map(l=>'<li></li>').join('');
   [...$('journal').children].forEach((li,i)=>li.textContent=d.journal.slice().reverse()[i]);
   if(e.terminee){$('fint').textContent=e.morts===0?'🎉 Bravo !':'Partie terminée';$('finp').textContent='Score '+e.score+' · '+e.gueris+' guéris · '+e.morts+' morts';$('fin').classList.add('on')}
