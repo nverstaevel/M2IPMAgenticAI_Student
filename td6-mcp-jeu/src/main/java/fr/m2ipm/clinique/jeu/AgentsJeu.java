@@ -154,7 +154,7 @@ public class AgentsJeu {
     private static Object lire(Entree e, String outil, String arguments) {
         ToolCallback cb = e.outils().stream().filter(o -> o.getToolDefinition().name().equals(outil)).findFirst()
                 .orElseThrow(() -> new IllegalStateException("Le scénario n'autorise pas l'outil « " + outil + " » pour ce nœud."));
-        Object o = cb.call(arguments);
+        Object o = cb.call(JeuMcp.adapter(cb, arguments));
         for (int i = 0; i < 4; i++) {
             if (o instanceof String s) {
                 try { o = JSON.readValue(s, Object.class); } catch (RuntimeException ex) { return o; }
