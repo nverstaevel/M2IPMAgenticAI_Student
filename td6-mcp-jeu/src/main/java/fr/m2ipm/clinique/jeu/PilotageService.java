@@ -113,6 +113,9 @@ public class PilotageService {
         });
     }
 
+    /** L'arrêt prend effet à la fin de la journée en cours : une journée d'agents ne s'interrompt pas en plein milieu. */
+    public void arreter() { arretDemande = true; }
+
     /**
      * Le kill switch : l'arrêt immédiat. Plus aucun outil du jeu n'est exécuté pour la journée en cours, le fil de la partie est
      * interrompu, et la fin de journée n'est PAS forcée. Un appel au modèle déjà parti se termine seul, sans suite.
