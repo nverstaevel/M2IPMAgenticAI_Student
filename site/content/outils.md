@@ -58,7 +58,7 @@ Les liens `/agents?run=<runId>` s'ouvrent directement sur une exécution : colle
 
 **Utilisation.**
 1. *Joueur* : règles fixes ou un scénario. *Graine* : même graine = mêmes patients, seul le joueur change (comparaison honnête).
-2. **Lancer la partie** ; **Arrêter après la journée en cours** pour interrompre proprement.
+2. **Lancer la partie** ; **Arrêter après la journée en cours** pour interrompre proprement ; **⛔ Couper tout** (kill switch) pour stopper l'agent immédiatement : plus aucun outil du jeu ne s'exécute et la fin de journée n'est pas forcée. Un appel au modèle déjà parti se termine seul, sans suite.
 3. Curseur **Vitesse** : pause entre deux actions du joueur à règles, ou entre deux journées pour un scénario. Modifiable pendant la partie.
 4. Section 3 : fil des actions du contrôleur (🔧 outil, ⚙️ règle, 🧑 demande…) ; chaque journée est un run, conservé dans la liste *Journées* et ouvrable dans `/agents` pour le graphe complet.
 5. Section 2 : indicateurs du jeu (jour, points d'action, trésorerie, guéris, morts, score) et bilan final.
@@ -70,6 +70,7 @@ Les liens `/agents?run=<runId>` s'ouvrent directement sur une exécution : colle
 | `POST /api/agent/jeu/pilotage/demarrer?scenario=…&graine=…&pauseMs=…` | Lance une partie |
 | `POST /api/agent/jeu/pilotage/pause?ms=…` | Règle la pause |
 | `POST /api/agent/jeu/pilotage/arreter` | Demande l'arrêt après la journée |
+| `POST /api/agent/jeu/pilotage/couper` | Kill switch : arrêt immédiat |
 | `GET /api/agent/jeu/outils` · `POST /api/agent/jeu/partie` | Outils exposés par le jeu · lancement d'une partie sans interface |
 
 ## Le jeu : `http://localhost:8090`

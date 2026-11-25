@@ -1,5 +1,6 @@
 package fr.m2ipm.clinique.jeu;
 
+import fr.m2ipm.clinique.agent.ArretUrgence;
 import fr.m2ipm.clinique.scenario.Orchestrateur;
 import fr.m2ipm.clinique.scenario.ScenarioDef;
 import fr.m2ipm.clinique.scenario.ScenarioLoader;
@@ -71,10 +72,21 @@ public class JoueurService {
             if (avant.terminee() || ecoute.arretDemande()) { break; }
             String runId = UUID.randomUUID().toString();
             ecoute.jourDemarre(avant.jour(), runId);
+            boolean arrete = false;
             try {
                 orchestrateur.executer(runId, def, saisie == null ? Map.of() : saisie);
             } catch (RuntimeException e) {
-                LOG.warn("Journée {} : le scénario a échoué ({}), la journée est terminée d'office.", avant.jour(), e.getMessage());
+                arrete = ArretUrgence.demande(runId);
+                if (!arrete) { LOG.warn("Journée {} : le scénario a échoué ({}), la journée est terminée d'office.", avant.jour(), e.getMessage()); }
+            }
+            if (arrete) {
+                // Arrêt d'urgence : on ne force PAS la fin de journée, le jeu reste dans l'état où l'agent l'a laissé.
+                Thread.interrupted();
+                JourJoue stop = new JourJoue(avant.jour(), runId, false, jeu.etat().score());
+                jours.add(stop);
+                ecoute.jourTermine(stop);
+                ArretUrgence.oublier(runId);
+                break;
             }
             JeuMcp.Etat apres = jeu.etat();
             boolean forcee = !apres.terminee() && apres.jour() == avant.jour();

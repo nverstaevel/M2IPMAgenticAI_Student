@@ -69,7 +69,7 @@ public final class SuiviOutils {
             try {
                 return appel.get();
             } catch (RuntimeException e) {
-                if (essai >= ESSAIS) {
+                if (essai >= ESSAIS || e instanceof ArretUrgence.Arret || ArretUrgence.demande(runId)) {
                     throw e;
                 }
                 echecs.append("Tentative ").append(essai).append(" échouée : ").append(e.getMessage()).append('\n');
@@ -128,6 +128,7 @@ public final class SuiviOutils {
             if (c == null) {
                 return appel.get();
             }
+            ArretUrgence.verifier(c.runId());   // le coupe-circuit : plus aucun outil ne s'exécute
             int numero = c.compteur().incrementAndGet();
             String id = c.parent() + "-o" + numero;
             if (numero > MAX_APPELS_OUTILS) {

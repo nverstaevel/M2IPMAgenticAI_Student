@@ -98,6 +98,14 @@ public class PilotageController {
         return Map.of("pauseMs", ms);
     }
 
+    /** Le kill switch : coupe tout de suite, sans attendre la fin de la journée. */
+    @PostMapping("/api/agent/jeu/pilotage/couper")
+    @ResponseBody
+    public Map<String, Object> couper() {
+        pilotage.couper();
+        return Map.of("coupe", true);
+    }
+
     @PostMapping("/api/agent/jeu/pilotage/arreter")
     @ResponseBody
     public Map<String, Object> arreter() {

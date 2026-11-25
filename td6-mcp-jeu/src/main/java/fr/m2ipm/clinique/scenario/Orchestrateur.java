@@ -1,5 +1,6 @@
 package fr.m2ipm.clinique.scenario;
 
+import fr.m2ipm.clinique.agent.ArretUrgence;
 import fr.m2ipm.clinique.agent.Evenement;
 import fr.m2ipm.clinique.agent.SuiviExecution;
 import fr.m2ipm.clinique.agent.SuiviOutils;
@@ -171,8 +172,10 @@ public class Orchestrateur {
         try {
             p.parcourir();
         } catch (RuntimeException e) {
-            suivi.noeud(runId, "fin", List.of(p.dernierExecute()), Evenement.FIN, "Erreur", Evenement.ERREUR, String.valueOf(e.getMessage()), null, null, null);
-            suivi.terminer(runId, "ERREUR");
+            boolean arret = ArretUrgence.demande(runId);
+            suivi.noeud(runId, "fin", List.of(p.dernierExecute()), Evenement.FIN, arret ? "Arrêt d'urgence" : "Erreur", Evenement.ERREUR,
+                    arret ? "Arrêt demandé par l'utilisateur" : String.valueOf(e.getMessage()), null, null, null);
+            suivi.terminer(runId, arret ? "ARRETE" : "ERREUR");
             throw e;
         }
     }
@@ -264,6 +267,7 @@ public class Orchestrateur {
         }
 
         private void executer(String n) {
+            ArretUrgence.verifier(runId);
             if (++total > MAX_EXECUTIONS) {
                 throw new ScenarioException("Plus de " + MAX_EXECUTIONS + " passages dans des agents : une boucle ne s'arrête pas (vérifiez les plafonds « (max N) »).");
             }

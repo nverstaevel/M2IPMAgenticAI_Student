@@ -1,5 +1,6 @@
 package fr.m2ipm.clinique.jeu;
 
+import fr.m2ipm.clinique.agent.ArretUrgence;
 import fr.m2ipm.clinique.scenario.Orchestrateur;
 import fr.m2ipm.clinique.scenario.ScenarioDef;
 import fr.m2ipm.clinique.scenario.ScenarioLoader;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,7 @@ public class PilotageService {
     private volatile long pauseMs = 1000;
     private volatile long debut;
     private volatile long fin;
+    private volatile Future<?> tache;
     private final List<JoueurService.JourJoue> jours = new CopyOnWriteArrayList<>();
 
     public PilotageService(JoueurService joueur, JoueurRegles regles, JeuMcp jeu, ScenarioLoader chargeur, Orchestrateur orchestrateur) {
@@ -86,15 +89,19 @@ public class PilotageService {
             public boolean arretDemande() { return arretDemande; }
             public long pauseMs() { return pauseMs; }
         };
-        executeur.submit(() -> {
+        tache = executeur.submit(() -> {
             try {
                 bilan = JoueurRegles.ID.equals(idScenario) ? regles.jouer(graineDemandee, ecoute)
                         : joueur.jouer(idScenario, graineDemandee, null, ecoute);
                 statut = arretDemande ? "ARRETEE" : "TERMINEE";
             } catch (RuntimeException e) {
-                LOG.warn("Partie « {} » en erreur : {}", idScenario, e.getMessage());
-                erreur = e.getClass().getSimpleName() + " : " + e.getMessage();
-                statut = "ERREUR";
+                if (arretDemande) {
+                    statut = "ARRETEE";   // coupée d'urgence : ce n'est pas une erreur
+                } else {
+                    LOG.warn("Partie « {} » en erreur : {}", idScenario, e.getMessage());
+                    erreur = e.getClass().getSimpleName() + " : " + e.getMessage();
+                    statut = "ERREUR";
+                }
             } finally {
                 fin = System.currentTimeMillis();
             }
@@ -103,6 +110,17 @@ public class PilotageService {
 
     /** L'arrêt prend effet à la fin de la journée en cours : une journée d'agents ne s'interrompt pas en plein milieu. */
     public void arreter() { arretDemande = true; }
+
+    /**
+     * Le kill switch : l'arrêt immédiat. Plus aucun outil du jeu n'est exécuté pour la journée en cours, le fil de la partie est
+     * interrompu, et la fin de journée n'est PAS forcée. Un appel au modèle déjà parti se termine seul, sans suite.
+     */
+    public void couper() {
+        arretDemande = true;
+        ArretUrgence.arreter(runIdEnCours);
+        Future<?> t = tache;
+        if (t != null) { t.cancel(true); }
+    }
 
     /** Pause entre deux actions, réglable en cours de partie (bornée de 0 à 10 s). */
     public void regler(long ms) { pauseMs = Math.max(0, Math.min(10_000, ms)); }

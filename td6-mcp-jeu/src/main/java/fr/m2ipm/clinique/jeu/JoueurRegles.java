@@ -1,5 +1,6 @@
 package fr.m2ipm.clinique.jeu;
 
+import fr.m2ipm.clinique.agent.ArretUrgence;
 import fr.m2ipm.clinique.agent.Evenement;
 import fr.m2ipm.clinique.agent.SuiviExecution;
 import java.util.ArrayList;
@@ -50,12 +51,23 @@ public class JoueurRegles {
             String runId = UUID.randomUUID().toString();
             suivi.demarrer(runId, "Règles (sans modèle) · jour " + avant.jour());
             ecoute.jourDemarre(avant.jour(), runId);
+            boolean arrete = false;
             try {
                 journee(runId, ecoute);
                 suivi.terminer(runId, "REPONSE_FINALE");
             } catch (RuntimeException e) {
-                suivi.noeud(runId, "erreur", List.of("debut"), Evenement.FIN, "Erreur", Evenement.ERREUR, String.valueOf(e.getMessage()), null, null, null);
-                suivi.terminer(runId, "ERREUR");
+                arrete = ArretUrgence.demande(runId);
+                suivi.noeud(runId, "erreur", List.of("debut"), Evenement.FIN, arrete ? "Arrêt d'urgence" : "Erreur", Evenement.ERREUR,
+                        arrete ? "Arrêt demandé par l'utilisateur" : String.valueOf(e.getMessage()), null, null, null);
+                suivi.terminer(runId, arrete ? "ARRETE" : "ERREUR");
+            }
+            if (arrete) {
+                Thread.interrupted();   // l'interruption a rempli son rôle : on peut de nouveau parler au jeu
+                JoueurService.JourJoue stop = new JoueurService.JourJoue(avant.jour(), runId, false, jeu.etat().score());
+                jours.add(stop);
+                ecoute.jourTermine(stop);
+                ArretUrgence.oublier(runId);
+                break;
             }
             JeuMcp.Etat apres = jeu.etat();
             boolean forcee = !apres.terminee() && apres.jour() == avant.jour();
@@ -149,6 +161,7 @@ public class JoueurRegles {
 
         /** Appelle un outil du jeu et publie un nœud (la règle appliquée dans « détail », la réponse dans « résultat »). */
         Object outil(String raison, String nom, String arguments) {
+            ArretUrgence.verifier(runId);
             String id = "o" + (++n);
             suivi.noeud(runId, id, List.of(dernier), Evenement.OUTIL, nom + " " + arguments, Evenement.EN_COURS, raison, null, null, null);
             dernier = id;
