@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: entete('Pilotage du jeu')}"></head>
+<body>
+<nav th:replace="~{fragments :: menu}"></nav>
+<style>
+  body { max-width: none; margin: .6rem 1rem; }
+  h1 { font-size: 1.25rem; margin: .4rem 0; }
+  #grille { display: grid; grid-template-columns: minmax(380px, 1fr) minmax(420px, 1fr); gap: 1rem; align-items: start; }
+  .carte { border: 1px solid #ccc; border-radius: 8px; padding: .6rem .8rem; margin-bottom: .8rem; background: #fff; }
+  .carte h2 { font-size: 1rem; margin: 0 0 .4rem; }
+  .ligne { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; margin: .3rem 0; }
+  select, input, button { font: inherit; padding: .25rem .5rem; }
+  button.primaire { background: #2f7d32; color: #fff; border: 0; border-radius: 6px; padding: .35rem .9rem; cursor: pointer; }
+  button.danger { background: #fff; border: 1px solid #c33; color: #c33; border-radius: 6px; cursor: pointer; }
+  button:disabled { opacity: .45; cursor: default; }
+  .puce { display: inline-block; padding: .05rem .55rem; border-radius: 1rem; font-size: .85rem; background: #eee; }
+  .puce.EN_COURS { background: #fff3cd; } .puce.TERMINEE { background: #d4edda; } .puce.ERREUR { background: #f8d7da; } .puce.ARRETEE { background: #e2e3e5; }
+  .indic { display: flex; gap: 1rem; flex-wrap: wrap; font-size: .95rem; }
+  .indic b { font-size: 1.1rem; }
+  #jours { display: flex; gap: .4rem; flex-wrap: wrap; }
+  #jours button { border: 1px solid #aaa; background: #fafafa; border-radius: 6px; cursor: pointer; }
+  #jours button.sel { background: #dbe8ff; border-color: #3b6fd4; }
+  #journal { max-height: 68vh; overflow: auto; }
+  .noeud { border-left: 5px solid #bbb; margin: .35rem 0; padding: .25rem .6rem; background: #fafafa; border-radius: 0 6px 6px 0; }
+  .noeud.OK { border-color: #2f7d32; } .noeud.EN_COURS { border-color: #e0a800; background: #fffbea; } .noeud.ERREUR { border-color: #c33; background: #fdf0f0; }
+  .noeud .titre { font-weight: 600; }
+  .noeud .meta { color: #666; font-size: .8rem; margin-left: .5rem; font-weight: 400; }
+  .noeud .bloc { margin: .2rem 0 0; font-size: .88rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .noeud .etiquette { font-size: .72rem; text-transform: uppercase; color: #777; letter-spacing: .04em; }
+  .noeud details summary { cursor: pointer; color: #555; font-size: .85rem; }
+  .avertissement { background: #fff3cd; border: 1px solid #e0a800; padding: .5rem; border-radius: 6px; }
+  #jeuFrame { width: 100%; height: 78vh; border: 1px solid #ccc; border-radius: 8px; }
+  .discret { color: #666; font-size: .85rem; }
+</style>
+
+<h1>Pilotage du jeu : lancer une partie et suivre l'agent en direct</h1>
+
+<div id="grille">
+  <div>
+    <div class="carte">
+      <h2>1. Lancer une partie</h2>
+      <div id="alerteJeu" class="avertissement" hidden></div>
+      <div class="ligne">
+        <label>Joueur <select id="joueur"></select></label>
+        <label>Graine <input id="graine" type="number" value="1" min="0" style="width:5rem"></label>
+      </div>
+      <div class="ligne">
+        <button id="lancer" class="primaire">▶ Lancer la partie</button>
+        <button id="arreter" class="danger" disabled>⏹ Arrêter après la journée en cours</button>
+        <span id="statut" class="puce">—</span>
+      </div>
+      <p class="discret" id="modele"></p>
+      <p class="discret">La graine fixe les patients : même graine = mêmes patients, seul le joueur change. « Règles fixes » n'utilise aucun modèle (référence à battre) ; un scénario fait jouer vos agents avec le modèle du profil actif.</p>
+      <p id="erreur" class="avertissement" hidden></p>
+    </div>
+
+    <div class="carte">
+      <h2>2. La partie</h2>
+      <div class="indic" id="indic">—</div>
+      <div class="ligne"><span class="discret">Journées :</span><div id="jours"></div></div>
+    </div>
+
+    <div class="carte">
+      <h2>3. Ce que fait le contrôleur <span id="runTitre" class="discret"></span></h2>
+      <div class="ligne"><label><input type="checkbox" id="suivre" checked> suivre la journée en cours</label>
+        <a id="lienAgents" href="/agents" target="_blank" class="discret">graphe complet dans /agents ↗</a></div>
+      <div id="journal"><p class="discret">Lancez une partie : chaque réflexion, chaque appel d'outil (avec ses arguments et sa réponse) s'affichera ici.</p></div>
+    </div>
+  </div>
+
+  <div class="carte">
+    <h2>Le jeu en direct <a id="lienJeu" href="#" target="_blank" class="discret">(ouvrir dans un onglet ↗)</a></h2>
+    <iframe id="jeuFrame" title="Le jeu"></iframe>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var ICONE = { UTILISATEUR: '🧑', MODELE: '🧠', OUTIL: '🔧', AGENT: '🤖', CRITIQUE: '🧐', TRAVAILLEUR: '👷', HUMAIN: '🙋', CODE: '⚙️', FIN: '🏁' };
+  var NOM_STATUT = { AUCUNE: 'aucune partie', EN_COURS: 'en cours', TERMINEE: 'terminée', ERREUR: 'erreur', ARRETEE: 'arrêtée' };
+  var courant = null;          // runId affiché
+  var noeuds = [];             // nœuds de la journée affichée, dans l'ordre d'apparition
+  var parId = {};
+  var flux = null, fini = false, essais = 0;
+  var dernierRunEnCours = null, partie = null;
+
+  function texte(el, t) { el.textContent = t == null ? '' : String(t); return el; }
+  function cree(tag, cls, t) { var e = document.createElement(tag); if (cls) { e.className = cls; } if (t != null) { e.textContent = t; } return e; }
+
+  // ---------------------------------------------------------------- options
+  function charger() {
+    fetch('/api/agent/jeu/pilotage/options').then(function (r) { return r.json(); }).then(function (o) {
+      var sel = $('joueur'); sel.textContent = '';
+      o.joueurs.forEach(function (j) {
+        var opt = cree('option', null, j.titre + (j.id === 'regles' ? '' : ' (' + j.id + ')') + (j.valide ? '' : ' ⚠ invalide'));
+        opt.value = j.id; opt.disabled = !j.valide; sel.appendChild(opt);
+      });
+      var def = o.joueurs.filter(function (j) { return j.valide && j.id !== 'regles'; })[0];
+      if (def) { sel.value = def.id; }
+      texte($('modele'), o.profils ? 'Profils actifs : ' + o.profils + ' (le modèle est celui du profil ; les règles fixes n\'en utilisent aucun).' : '');
+      var a = $('alerteJeu');
+      a.hidden = o.connecte;
+      if (!o.connecte) { a.textContent = 'Le jeu n\'est pas connecté : démarrez jeu-bestiaire (port 8090), puis relancez la clinique avec le profil « jeu ».'; }
+      $('jeuFrame').src = o.urlJeu; $('lienJeu').href = o.urlJeu;
+    });
+  }
+
+  // ---------------------------------------------------------------- partie
+  $('lancer').addEventListener('click', function () {
+    var q = new URLSearchParams({ scenario: $('joueur').value });
+    if ($('graine').value !== '') { q.set('graine', $('graine').value); }
+    fetch('/api/agent/jeu/pilotage/demarrer?' + q, { method: 'POST' }).then(function (r) {
+      if (!r.ok) { return r.json().then(function (j) { montrerErreur(j.message || j.error || ('Erreur ' + r.status)); }); }
+      montrerErreur(null); reinitialiser(); sonde();
+    }).catch(function (e) { montrerErreur(e.message); });
+  });
+  $('arreter').addEventListener('click', function () { fetch('/api/agent/jeu/pilotage/arreter', { method: 'POST' }).then(sonde); });
+  $('suivre').addEventListener('change', function () { if ($('suivre').checked && partie && partie.runIdEnCours) { ouvrir(partie.runIdEnCours); } });
+
+  function montrerErreur(m) { var e = $('erreur'); e.hidden = !m; texte(e, m || ''); }
+
+  function reinitialiser() { fermerFlux(); courant = null; noeuds = []; parId = {}; dernierRunEnCours = null; $('journal').textContent = ''; texte($('runTitre'), ''); }
+
+  function sonde() {
+    fetch('/api/agent/jeu/pilotage/etat').then(function (r) { return r.json(); }).then(function (e) {
+      partie = e.partie;
+      var s = partie.statut;
+      var p = $('statut'); p.className = 'puce ' + s; texte(p, NOM_STATUT[s] || s);
+      $('lancer').disabled = s === 'EN_COURS';
+      $('arreter').disabled = s !== 'EN_COURS' || partie.arretDemande;
+      if (partie.erreur) { montrerErreur(partie.erreur); }
+      indicateurs(e);
+      listeJours();
+      if (partie.runIdEnCours && partie.runIdEnCours !== dernierRunEnCours) {
+        dernierRunEnCours = partie.runIdEnCours;
+        if ($('suivre').checked) { ouvrir(partie.runIdEnCours); }
+      }
+    }).catch(function () { /* clinique en cours de redémarrage */ });
+  }
+
+  function indicateurs(e) {
+    var d = $('indic'); d.textContent = '';
+    var j = e.jeu;
+    if (!j) { d.textContent = 'Le jeu ne répond pas.'; return; }
+    [['Jour', j.jour + (j.terminee ? ' (terminée)' : '')], ['Points d\'action', j.pointsAction], ['Trésorerie', j.tresorerie],
+     ['Guéris', j.gueris], ['Morts', j.morts], ['Score', j.score]].forEach(function (x) {
+      var s = cree('span'); s.appendChild(cree('b', null, x[1])); s.appendChild(document.createTextNode(' ' + x[0])); d.appendChild(s);
+    });
+  }
+
+  function listeJours() {
+    var d = $('jours'); d.textContent = '';
+    (partie.jours || []).forEach(function (j) {
+      var b = cree('button', j.runId === courant ? 'sel' : '', 'Jour ' + j.jour + ' · score ' + j.scoreApres + (j.finForcee ? ' (fin forcée)' : ''));
+      b.addEventListener('click', function () { $('suivre').checked = false; ouvrir(j.runId); });
+      d.appendChild(b);
+    });
+    if (partie.statut === 'EN_COURS' && partie.jourEnCours != null) {
+      var b = cree('button', partie.runIdEnCours === courant ? 'sel' : '', 'Jour ' + partie.jourEnCours + ' · en cours…');
+      b.addEventListener('click', function () { $('suivre').checked = true; ouvrir(partie.runIdEnCours); });
+      d.appendChild(b);
+    }
+    if (partie.bilan) {
+      var bl = partie.bilan;
+      var r = cree('div', 'discret', 'Bilan : score ' + bl.score + ', ' + bl.gueris + ' guéris, ' + bl.morts + ' morts, trésorerie ' + bl.tresorerie
+        + ', ' + Math.round(bl.dureeMs / 1000) + ' s.');
+      d.appendChild(r);
+    }
+  }
+
+  // ---------------------------------------------------------------- le journal d'une journée (flux SSE)
+  function fermerFlux() { if (flux) { flux.close(); flux = null; } }
+
+  function ouvrir(runId) {
+    if (runId === courant && flux) { return; }
+    fermerFlux(); courant = runId; noeuds = []; parId = {}; fini = false; essais = 0;
+    $('journal').textContent = '';
+    $('lienAgents').href = '/agents?run=' + encodeURIComponent(runId);
+    if (partie) { listeJours(); }
+    suivreFlux(runId);
+  }
+
+  function suivreFlux(runId) {
+    var es = new EventSource('/api/agent/suivi/' + encodeURIComponent(runId) + '/flux');
+    flux = es;
+    es.addEventListener('evt', function (ev) { appliquer(JSON.parse(ev.data)); });
+    es.onerror = function () {
+      es.close(); if (flux === es) { flux = null; }
+      // Le run peut ne pas exister encore (le scénario démarre), ou le flux s'est fermé à la fin : on ne rejoue pas un run terminé.
+      if (!fini && courant === runId && essais++ < 20) { setTimeout(function () { if (courant === runId && !flux) { suivreFlux(runId); } }, 700); }
+    };
+  }
+
+  function appliquer(e) {
+    if (e.type === 'demarrage') { texte($('runTitre'), '· ' + (e.libelle || '')); return; }
+    if (e.type === 'fin') { fini = true; fermerFlux(); return; }
+    if (e.type !== 'noeud' || !e.id) { return; }
+    var n = parId[e.id];
+    if (!n) { n = { id: e.id }; parId[e.id] = n; noeuds.push(n); }
+    ['genre', 'libelle', 'statut', 'detail', 'resultat', 'dureeMs', 'tokens', 'tokensEntree', 'tokensSortie', 'appelsModele'].forEach(function (k) {
+      if (e[k] !== null && e[k] !== undefined) { n[k] = e[k]; }
+    });
+    dessiner();
+  }
+
+  function bloc(parent, etiquette, t) {
+    if (!t) { return; }
+    var d = cree('div', 'bloc'); d.appendChild(cree('div', 'etiquette', etiquette));
+    if (String(t).length > 400) {
+      var det = cree('details'); det.appendChild(cree('summary', null, String(t).slice(0, 140).replace(/\s+/g, ' ') + '…')); det.appendChild(cree('div', 'bloc', t)); d.appendChild(det);
+    } else { d.appendChild(cree('div', null, t)); }
+    parent.appendChild(d);
+  }
+
+  function dessiner() {
+    var z = $('journal');
+    var bas = z.scrollHeight - z.scrollTop - z.clientHeight < 60;
+    z.textContent = '';
+    noeuds.forEach(function (n) {
+      var c = cree('div', 'noeud ' + (n.statut || ''));
+      var t = cree('div', 'titre', (ICONE[n.genre] || '•') + ' ' + (n.libelle || n.id));
+      var meta = [];
+      if (n.statut === 'EN_COURS') { meta.push('en cours…'); }
+      if (n.dureeMs != null) { meta.push(n.dureeMs + ' ms'); }
+      if (n.tokens) { meta.push(n.tokens + ' tokens' + (n.appelsModele ? ' (' + n.appelsModele + ' appel(s) au modèle)' : '')); }
+      if (meta.length) { t.appendChild(cree('span', 'meta', meta.join(' · '))); }
+      c.appendChild(t);
+      bloc(c, n.genre === 'OUTIL' || n.genre === 'CODE' ? 'Pourquoi' : 'Consigne / réflexion', n.detail);
+      bloc(c, n.genre === 'MODELE' || n.genre === 'AGENT' ? 'Réponse' : 'Résultat', n.resultat);
+      z.appendChild(c);
+    });
+    if (bas && $('suivre').checked) { z.scrollTop = z.scrollHeight; }
+  }
+
+  charger(); sonde(); setInterval(sonde, 1000);
+})();
+</script>
+</body>
+</html>

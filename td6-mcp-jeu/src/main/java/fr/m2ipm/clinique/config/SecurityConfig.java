@@ -22,7 +22,7 @@ public class SecurityConfig {
     SecurityFilterChain filtres(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/api/agent/**", "/api/agent", "/agents", "/api/dossiers/**", "/dossiers/**").hasRole(PERSONNEL)
+                .requestMatchers("/api/agent/**", "/api/agent", "/agents", "/pilotage", "/api/dossiers/**", "/dossiers/**").hasRole(PERSONNEL)
                 .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole(PERSONNEL, LECTURE)
                 // Le chat et le triage ne modifient rien : ouverts au rôle LECTURE.
                 .requestMatchers(HttpMethod.POST, "/api/chat", "/api/triage").hasAnyRole(PERSONNEL, LECTURE)

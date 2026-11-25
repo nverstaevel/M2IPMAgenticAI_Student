@@ -29,6 +29,14 @@ public class JoueurService {
     public record Bilan(String scenario, Long graine, int score, int gueris, int morts, int tresorerie, List<JourJoue> jours,
                         long dureeMs) {}
 
+    /** Pour suivre une partie en direct (page /pilotage) : prévenu au début et à la fin de chaque journée, peut demander l'arrêt. */
+    public interface Ecoute {
+        Ecoute AUCUNE = new Ecoute() {};
+        default void jourDemarre(int jour, String runId) {}
+        default void jourTermine(JourJoue jour) {}
+        default boolean arretDemande() { return false; }
+    }
+
     private final JeuMcp jeu;
     private final ScenarioLoader chargeur;
     private final Orchestrateur orchestrateur;
@@ -44,6 +52,10 @@ public class JoueurService {
 
     /** @param graine graine du tirage des patients (même graine = mêmes patients : seul l'agent change) ; null = celle du serveur. */
     public Bilan jouer(String idScenario, Long graine, Map<String, String> saisie) {
+        return jouer(idScenario, graine, saisie, Ecoute.AUCUNE);
+    }
+
+    public Bilan jouer(String idScenario, Long graine, Map<String, String> saisie, Ecoute ecoute) {
         ScenarioDef def = chargeur.charger().stream().filter(s -> s.id().equals(idScenario)).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Scénario inconnu : " + idScenario));
         if (!jeu.connecte()) {
@@ -54,8 +66,9 @@ public class JoueurService {
         List<JourJoue> jours = new ArrayList<>();
         for (int i = 0; i < JOURNEES_MAX; i++) {
             JeuMcp.Etat avant = jeu.etat();
-            if (avant.terminee()) { break; }
+            if (avant.terminee() || ecoute.arretDemande()) { break; }
             String runId = UUID.randomUUID().toString();
+            ecoute.jourDemarre(avant.jour(), runId);
             try {
                 orchestrateur.executer(runId, def, saisie == null ? Map.of() : saisie);
             } catch (RuntimeException e) {
@@ -64,7 +77,9 @@ public class JoueurService {
             JeuMcp.Etat apres = jeu.etat();
             boolean forcee = !apres.terminee() && apres.jour() == avant.jour();
             if (forcee) { jeu.appeler("fin_de_journee", "{}"); }
-            jours.add(new JourJoue(avant.jour(), runId, forcee, jeu.etat().score()));
+            JourJoue joue = new JourJoue(avant.jour(), runId, forcee, jeu.etat().score());
+            jours.add(joue);
+            ecoute.jourTermine(joue);
         }
         JeuMcp.Etat fin = jeu.etat();
         return new Bilan(idScenario, graine, fin.score(), fin.gueris(), fin.morts(), fin.tresorerie(), jours,
