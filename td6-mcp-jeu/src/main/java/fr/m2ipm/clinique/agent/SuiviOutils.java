@@ -56,17 +56,25 @@ public final class SuiviOutils {
         int total();
     }
 
+    /** Nombre d'essais d'un appel au modèle : un modèle qui invente un nom d'outil (« consultar_pharmacie ») se corrige souvent au second ou troisième essai. */
+    static final int ESSAIS = 3;
+
     /**
-     * Un appel au modèle rejeté par le fournisseur (appel d'outil mal formé, surcharge passagère) est tenté une seconde fois ;
-     * la première erreur reste visible dans le détail du nœud. Un second échec est propagé.
+     * Un appel au modèle rejeté par le fournisseur (appel d'outil mal formé ou inventé, surcharge passagère) est retenté (au plus
+     * {@value #ESSAIS} essais au total) ; chaque échec reste visible dans le détail du nœud. Le dernier échec est propagé.
      */
     public static <T> T reessayer(SuiviExecution suivi, String runId, String id, java.util.function.Supplier<T> appel) {
-        try {
-            return appel.get();
-        } catch (RuntimeException premier) {
-            suivi.maj(runId, id, Evenement.EN_COURS, "Tentative 1 échouée : " + premier.getMessage() + "\nNouvelle tentative…",
-                    null, null, null);
-            return appel.get();
+        StringBuilder echecs = new StringBuilder();
+        for (int essai = 1; ; essai++) {
+            try {
+                return appel.get();
+            } catch (RuntimeException e) {
+                if (essai >= ESSAIS) {
+                    throw e;
+                }
+                echecs.append("Tentative ").append(essai).append(" échouée : ").append(e.getMessage()).append('\n');
+                suivi.maj(runId, id, Evenement.EN_COURS, echecs + "Nouvelle tentative…", null, null, null);
+            }
         }
     }
 
