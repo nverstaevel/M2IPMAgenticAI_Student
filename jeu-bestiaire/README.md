@@ -6,7 +6,7 @@ Application Spring Boot **fournie** : à ne pas modifier. Elle simule une cliniq
 mvn spring-boot:run        # http://localhost:8090 (tableau de bord), MCP sur http://localhost:8090/mcp
 ```
 
-- 5 jours, 3 arrivées par jour, 5 points d'action par jour (examiner et soigner coûtent 1 point).
+- 5 jours, 3 arrivées par jour, 8 points d'action par jour (examiner et soigner coûtent 1 point).
 - Même graine, mêmes patients : `POST /api/nouvelle-partie?graine=42`.
 - Score = 100 × guérisons + trésorerie + 2 × réputation − 150 × morts.
 - Explorer sans écrire de code : `npx @modelcontextprotocol/inspector` (transport Streamable HTTP, URL `http://localhost:8090/mcp`).

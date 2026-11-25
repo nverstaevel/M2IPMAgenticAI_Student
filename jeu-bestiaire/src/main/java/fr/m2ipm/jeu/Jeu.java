@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class Jeu {
 
-    public static final int POINTS_PAR_JOUR = 5;
+    public static final int POINTS_PAR_JOUR = 8;
     static final int PV_ARRIVEE = 70;
     static final int PERTE_QUOTIDIENNE = 15;
     static final int PRIX_EXAMEN = 5;
@@ -125,6 +125,7 @@ public class Jeu {
         points--;
         tresorerie -= PRIX_EXAMEN;
         p.examine = true;
+        noter(p, "(examen)", "EXAMEN", p.maladie.signeDistinctif());
         return ok(p.nom + " examiné : " + p.maladie.signeDistinctif() + ".");
     }
 

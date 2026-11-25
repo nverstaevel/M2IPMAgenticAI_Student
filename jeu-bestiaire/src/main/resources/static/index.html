@@ -186,7 +186,7 @@ function maj(d){
   // HUD
   $('jour').textContent=e.jour;$('jours').textContent=e.joursTotal;$('treso').textContent=e.tresorerie;
   $('rep').style.width=e.reputation+'%';$('gueris').textContent=e.gueris;$('morts').textContent=e.morts;$('score').textContent=e.score;
-  $('pips').innerHTML=[...Array(5)].map((_,i)=>'<span class="'+(i<e.pointsAction?'on':'')+'"></span>').join('');
+  $('pips').innerHTML=[...Array(8)].map((_,i)=>'<span class="'+(i<e.pointsAction?'on':'')+'"></span>').join('');
   $('finj').disabled=e.terminee;
   // pharmacie
   const et=$('etagere'),vieux={};et.querySelectorAll('.flacon').forEach(f=>vieux[f.dataset.n]=+f.dataset.s);
@@ -194,7 +194,7 @@ function maj(d){
     +'<span class="ic">'+(IC[m.medicament]||'🧪')+'</span>'+m.medicament+'<span class="n">'+m.stock+(m.enCommande?' +'+m.enCommande+'🚚':'')+'</span></div>').join('');
   et.querySelectorAll('.flacon').forEach(f=>{f.onclick=()=>agir('commander',{medicament:f.dataset.n,quantite:1});
     if(vieux[f.dataset.n]!==undefined&&vieux[f.dataset.n]!==+f.dataset.s)anim(f,'flash',900)});
-  const EFF={GUERISON:'✅ guérit',TOXIQUE:'☠️ toxique',REVIGORANT:'💚 redonne des forces',AUCUN_EFFET:'🤷 sans effet'};
+  const EFF={GUERISON:'✅ guérit',TOXIQUE:'☠️ toxique',REVIGORANT:'💚 redonne des forces',AUCUN_EFFET:'🤷 sans effet',EXAMEN:'🔍 signe observé'};
   const cn=$('carnet');
   if(!d.carnet||!d.carnet.length){cn.innerHTML='<div class="vide">Rien d\'essayé pour l\'instant.</div>'}
   else{
@@ -204,7 +204,7 @@ function maj(d){
       const h=document.createElement('b');h.textContent=(ESP[esp]||'👾')+' '+esp;bloc.appendChild(h);
       d.carnet.filter(o=>o.espece===esp).forEach(o=>{
         const l=document.createElement('div');l.className='cn-l '+o.effet;
-        l.textContent=o.medicament+' → '+EFF[o.effet]+(o.maladie?' ('+o.maladie+')':'')+(o.fois>1?' ×'+o.fois:'');
+        l.textContent=(o.effet==='EXAMEN'?'':o.medicament+' → ')+EFF[o.effet]+(o.maladie?' ('+o.maladie+')':'')+(o.fois>1?' ×'+o.fois:'');
         bloc.appendChild(l)});
       cn.appendChild(bloc)})}
   $('journal').innerHTML=d.journal.slice().reverse().slice(0,40).map(l=>'<li></li>').join('');

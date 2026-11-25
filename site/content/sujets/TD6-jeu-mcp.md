@@ -42,7 +42,7 @@ Chaque étape suit la même forme : **Objectif**, **Pas à pas**, **Point de con
 
 ## Bienvenue à la Clinique du bestiaire
 
-Un dragonnet qui tousse de la fumée jaune sur la moquette, un loup-garou qui se gratte en jurant que ce ne sont pas des puces, une licorne qui boude, un vampire qui voulait un rendez-vous *avant* le coucher du soleil : la salle d'attente est pleine, et le seul praticien disponible est un chatbot en blouse. Vous avez **5 jours**, **5 points d'action par jour**, une pharmacie de onze flacons et un score qui ne pardonne pas les décès.
+Un dragonnet qui tousse de la fumée jaune sur la moquette, un loup-garou qui se gratte en jurant que ce ne sont pas des puces, une licorne qui boude, un vampire qui voulait un rendez-vous *avant* le coucher du soleil : la salle d'attente est pleine, et le seul praticien disponible est un chatbot en blouse. Vous avez **5 jours**, **8 points d'action par jour**, une pharmacie de onze flacons et un score qui ne pardonne pas les décès.
 
 Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La page ci-dessous, c'est ce que *vous* voyez ; ce que l'agent verra, ce sont neuf outils MCP. Les deux décrivent la même clinique.
 
@@ -54,7 +54,7 @@ Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La pa
 
 | N° | Où | Ce que vous y lisez |
 | --- | --- | --- |
-| 1 | En-tête | **Jour 1/5** et cinq pastilles jaunes : les points d'action du jour. Examiner et soigner en consomment un chacun ; observer, lire et commander sont gratuits. Plus de pastille ? Il ne reste qu'à terminer la journée. |
+| 1 | En-tête | **Jour 1/5** et huit pastilles jaunes : les points d'action du jour. Examiner et soigner en consomment un chacun ; observer, lire et commander sont gratuits. Plus de pastille ? Il ne reste qu'à terminer la journée. |
 | 2 | En-tête | 🪙 la trésorerie (500 au départ), ❤️ la réputation (jauge sur 100, 50 au départ), ✅ les guéris, 💀 les morts. |
 | 3 | En-tête, à droite | Le **score** : 100 × guérisons + trésorerie + 2 × réputation − 150 × morts. C'est le chiffre que vous comparerez à l'étape 6. |
 | 4 | En-tête | 🌙 **Fin de journée** (sans retour en arrière : le monde avance) et 🔄 **Nouvelle partie** (même graine, mêmes patients). |
@@ -63,7 +63,7 @@ Avant de confier la blouse à Gribouille, **jouez vous-même** (étape 1). La pa
 | 7 | À droite, en haut | Le **dossier du patient** (voir plus bas). |
 | 8 | À droite, au milieu | La **pharmacie** : un clic sur un flacon en commande un exemplaire. Le badge indique le stock (rouge s'il en reste un ou aucun), « +1 🚚 » une commande en route ; le survol affiche le prix et la description. |
 | 9 | À droite, en bas | Le **journal** : toutes les actions de la partie, la plus récente en premier. |
-| 10 | À droite, sous la pharmacie | Le **carnet de soins** : la mémoire de la clinique. Chaque soin donné y inscrit son effet (✅ guérit, ☠️ toxique, 💚 redonne des forces, 🤷 sans effet), groupé par espèce. Il ne contient que ce que vous avez **essayé** : un agent le lit avec l'outil `carnet_soins`. |
+| 10 | À droite, sous la pharmacie | Le **carnet de soins** : la mémoire de la clinique. Chaque soin donné y inscrit son effet (✅ guérit, ☠️ toxique, 💚 redonne des forces, 🤷 sans effet) et chaque examen le signe relevé (🔍), groupés par espèce. Il ne contient que ce que vous avez **essayé ou examiné** : un agent le lit avec l'outil `carnet_soins`. |
 
 La page se rafraîchit toute seule chaque seconde : gardez-la ouverte pendant les étapes 3 à 6, vous regarderez votre agent soigner en direct, avec le même suspense qu'un match de football.
 
@@ -91,7 +91,7 @@ Un conseil de confrère : la note du propriétaire (« Il a avalé quelque chose
 
 ![La pharmacie : stock bas en rouge, camion de livraison](img/jeu/jeu-pharmacie.png)
 
-**La fin de journée.** L'écran s'assombrit : chaque malade non soigné perd 15 PV, les commandes arrivent, trois nouveaux patients entrent et les points d'action reviennent à 5. Le lendemain, la salle d'attente est plus pleine, et les comptes à rebours plus courts.
+**La fin de journée.** L'écran s'assombrit : chaque malade non soigné perd 15 PV, les commandes arrivent, trois nouveaux patients entrent et les points d'action reviennent à 8. Le lendemain, la salle d'attente est plus pleine, et les comptes à rebours plus courts.
 
 ![La nuit tombe sur la clinique : un loup-garou entre par la porte](img/jeu/jeu-nuit.png)
 
@@ -141,7 +141,7 @@ Si le temps manque, les étapes 1 à 4 sont indispensables. Terminez 5 et 6 chez
 3. Dans un second terminal : `npx @modelcontextprotocol/inspector`, choisissez le transport **Streamable HTTP**, URL `http://localhost:8090/mcp`, puis **List Tools**. Refaites une journée avec les outils MCP, comme le fera l'agent : `etat_clinique`, `lister_patients`, `fiche_espece` (par exemple `vampire`), `examiner_patient` (`P01`), `soigner`, puis `fin_de_journee`.
 4. 🧠 Jouez les cinq jours. Notez votre score (`POST /api/nouvelle-partie` pour recommencer) : c'est la **référence humaine**.
 
-Règles à retenir : 5 points d'action par jour (examiner et soigner en coûtent un), deux maladies par espèce aux symptômes communs (l'examen révèle le signe distinctif), des médicaments toxiques pour certaines espèces, des patients qui perdent 15 PV par jour. Le score est `100 × guérisons + trésorerie + 2 × réputation − 150 × morts`.
+Règles à retenir : 8 points d'action par jour (examiner et soigner en coûtent un), deux maladies par espèce aux symptômes communs (l'examen révèle le signe distinctif), des médicaments toxiques pour certaines espèces, des patients qui perdent 15 PV par jour. Le score est `100 × guérisons + trésorerie + 2 × réputation − 150 × morts`.
 
 **Point de contrôle.** Après vos actions, la page du jeu les affiche, et votre score de référence est noté dans le journal.
 

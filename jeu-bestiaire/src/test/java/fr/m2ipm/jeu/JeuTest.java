@@ -121,4 +121,14 @@ class JeuTest {
         assertThat(o.effet()).isEqualTo("GUERISON");
         assertThat(o.fois()).isEqualTo(1);
     }
+
+    @Test
+    void lExamenEstNoteAuCarnet() {
+        Jeu j = new Jeu(7, 5, 3);
+        var p = j.patients().get(0);
+        j.examiner(p.id());
+        assertThat(j.carnet()).hasSize(1);
+        assertThat(j.carnet().get(0).effet()).isEqualTo("EXAMEN");
+        assertThat(j.carnet().get(0).espece()).isEqualTo(p.espece());
+    }
 }
