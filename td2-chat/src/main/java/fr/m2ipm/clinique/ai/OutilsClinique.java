@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
  * la proposition d'écriture aussi (proposerConsultation, avec PropositionService) : lisez-la attentivement.
  * Vous écrivez les trois autres lectures. La description (@Tool) est ce que le modèle lit pour choisir : relisez-les.
  * Il n'existe volontairement aucun outil qui confirme ou crée une consultation.
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 3 zones marquées « TODO » (TD2). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
  */
 @Component
 public class OutilsClinique {

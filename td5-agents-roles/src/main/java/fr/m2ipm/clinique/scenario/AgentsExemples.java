@@ -19,6 +19,8 @@ import org.springframework.context.annotation.Configuration;
  *   <li>un client ChatClient construit avec {@code ComptageJetons.advisor()} voit ses appels et ses tokens comptés dans le graphe ;</li>
  *   <li>les outils reçus apparaissent comme nœuds enfants de l'agent, sans rien faire.</li>
  * </ul>
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 1 zone marquée « TODO » (TD5). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
  */
 @Configuration
 public class AgentsExemples {

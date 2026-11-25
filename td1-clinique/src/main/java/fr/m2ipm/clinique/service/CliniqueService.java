@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Couche service de la clinique. Les signatures publiques sont imposées par le sujet :
  * les TD suivants les exposeront au modèle de langage sous forme d'outils.
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 2 zones marquées « TODO » (TD1). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
  */
 @Service
 @Transactional(readOnly = true)

@@ -296,6 +296,93 @@ def securite_roles():
     b += N(20, 150, "401 = je ne sais pas qui vous êtes   ·   403 = je sais qui vous êtes, mais vous n'avez pas le droit", "start", "t s")
     return svg(170, b, "Rôles et accès aux URL", "L'identité (qui ?) et le droit (quoi ?) sont deux questions distinctes : 401 et 403.")
 
+
+# ----------------------------------------------------------------------------- cartes du code (générées depuis les dossiers de départ)
+import pathlib, re as _re
+_ROOT = pathlib.Path(__file__).resolve().parent.parent
+_GH = "https://github.com/nverstaevel/M2IPMAgenticAI_Student/blob/main/"
+_DOSSIERS = ["td1-clinique", "td2-chat", "td3-outils-externes", "td4-agent-react", "td5-agents-roles", "td6-mcp-jeu"]
+_PAQUETS = [("controller", "Contrôleurs · HTTP"), ("service", "Services · règles métier"), ("repository", "Repositories · accès aux données"),
+            ("domain", "Entités JPA"), ("dto", "DTO"), ("config", "Configuration · sécurité"), ("ai", "Modèle de langage · outils internes"),
+            ("externe", "Sources externes"), ("experience", "Mesures"), ("agent", "Agent et suivi"), ("scenario", "Moteur de scénarios"),
+            ("roles", "Agents à rôles"), ("jeu", "Jeu et MCP"), ("ressources", "Ressources (pages, scénarios, profils)"), ("tests", "Tests")]
+# Ce que l'étudiant crée (fichiers qui n'existent pas dans le dossier de départ).
+_A_CREER = {
+    "td1": [("tests", "un test de plus dans CliniqueServiceTest (étape 7)"), ("journal", "JOURNAL.md")],
+    "td2": [("journal", "JOURNAL.md")], "td3": [("journal", "JOURNAL.md")], "td4": [("journal", "JOURNAL.md")],
+    "td5": [("ressources", "scenarios/duo-veterinaire-gardien.md"), ("ressources", "scenarios/superviseur-clinique.md"), ("journal", "JOURNAL.md")],
+    "td6": [("ressources", "scenarios/jeu-gribouille-seul.md"), ("ressources", "scenarios/jeu-equipe.md"), ("ressources", "scenarios/jeu-<votre-architecture>.md"),
+            ("journal", "JOURNAL.md (+ ANALYSE.md)")],
+}
+
+def _fichiers(dossier):
+    base = _ROOT / dossier
+    res = {}
+    for p in sorted(base.rglob("*")):
+        if not p.is_file() or "target" in p.parts or p.suffix not in (".java", ".html", ".md", ".properties", ".yml", ".sql", ".csv", ".json"):
+            continue
+        rel = p.relative_to(base).as_posix()
+        if not rel.startswith("src/"): continue
+        res[rel] = p
+    return res
+
+def _classer(rel):
+    if rel.startswith("src/test/"): return "tests"
+    if rel.startswith("src/main/resources/"): return "ressources"
+    m = _re.match(r"src/main/java/fr/m2ipm/[^/]+/([^/]+)/", rel)
+    return m.group(1) if m else "ressources"
+
+def _carte(i):
+    td = f"td{i}"; dossier = _DOSSIERS[i - 1]
+    cour = _fichiers(dossier)
+    prec = _fichiers(_DOSSIERS[i - 2]) if i > 1 else {}
+    groupes = {}; repris = {}
+    for rel, p in cour.items():
+        g = _classer(rel)
+        texte = p.read_text(encoding="utf-8", errors="ignore")
+        nom = rel.rsplit("/", 1)[-1].removesuffix(".java")
+        if rel.startswith("src/main/resources/"): nom = rel.removeprefix("src/main/resources/")
+        todos = _re.findall(r"TODO TD\d", texte)
+        if todos:
+            m = _re.search(r"TODO TD\d\s*(?:\([^)]*\))?\s*:?\s*(.*)", texte)
+            groupes.setdefault(g, []).append(("todo", nom, rel, len(todos), (m.group(1).strip().rstrip("*/ ") if m else "")[:140]))
+        elif rel in prec:
+            repris[g] = repris.get(g, 0) + 1
+        else:
+            groupes.setdefault(g, []).append(("neuf", nom, rel, 0, ""))
+    for g, nom in _A_CREER[td]:
+        groupes.setdefault(g, []).append(("creer", nom, "", 0, ""))
+    nb_todo = sum(c[3] for l in groupes.values() for c in l if c[0] == "todo")
+    nb_fichiers = sum(1 for l in groupes.values() for c in l if c[0] == "todo")
+    lignes = ""
+    ordre = [(k, t) for k, t in _PAQUETS if k in groupes or k in repris] + [("journal", "Votre journal")] * (1 if "journal" in groupes else 0)
+    seuls = [(k, tt) for k, tt in ordre if not groupes.get(k) and repris.get(k)]
+    ordre = [(k, tt) for k, tt in ordre if groupes.get(k)]
+    for cle, titre in ordre:
+        chips = ""
+        for kind, nom, rel, n, indice in groupes.get(cle, []):
+            lib = e(nom)
+            if kind == "todo":
+                chips += f'<a class="cc todo" href="{_GH}{dossier}/{rel}" title="{e(indice)}">✍ {lib}<b>{n} TODO</b></a>'
+            elif kind == "creer":
+                chips += f'<span class="cc creer">＋ {lib}</span>'
+            else:
+                chips += f'<a class="cc neuf" href="{_GH}{dossier}/{rel}">{lib}</a>'
+        if repris.get(cle):
+            chips += f'<span class="cc repris">+ {repris[cle]} fichier{"s" if repris[cle] > 1 else ""} repris du TD précédent</span>'
+        lignes += f'<div class="cc-l"><div class="cc-p">{e(titre)}</div><div class="cc-c">{chips}</div></div>'
+    if seuls:
+        resume = " · ".join(f"{tt.split(' · ')[0]} ({repris[k]})" for k, tt in seuls)
+        lignes += f'<div class="cc-l"><div class="cc-p">Repris des TD précédents</div><div class="cc-c"><span class="cc repris">{e(resume)}</span></div></div>'
+    leg = ('<p class="cc-leg"><span class="cc todo">✍ à compléter</span> <span class="cc creer">＋ à créer</span> '
+           '<span class="cc neuf">fourni, à lire</span> <span class="cc repris">repris du TD précédent</span></p>')
+    cap = (f"{nb_todo} zone{'s' if nb_todo > 1 else ''} à compléter dans {nb_fichiers} fichier{'s' if nb_fichiers > 1 else ''} (marqueurs « TODO TD{i} »), "
+           "plus les fichiers à créer. Cliquez sur un fichier pour l'ouvrir sur GitHub ; survolez-le pour lire la consigne du TODO. Tout le reste est fourni et testé.")
+    return f'<figure class="fig carte-code">{leg}{lignes}<figcaption>{e(cap)}</figcaption></figure>'
+
+for _i in range(1, 7):
+    FIG[f"carte_td{_i}"] = (lambda i: (lambda: _carte(i)))(_i)
+
 def render(name):
     f = FIG.get(name)
     return f() if f else f"<p>[figure inconnue : {e(name)}]</p>"

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * 🧠 À COMPLÉTER dans ce fichier : 2 zones marquées « TODO » (TD1). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
+ */
 @Entity
 public class Consultation {
     /** Durée fixe d'une consultation, en minutes. */

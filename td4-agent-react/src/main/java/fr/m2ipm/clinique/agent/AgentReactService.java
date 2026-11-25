@@ -28,6 +28,8 @@ import org.springframework.stereotype.Service;
 /**
  * Boucle ReAct écrite à la main : le ChatModel est appelé directement et ne lance jamais les outils
  * (en Spring AI 2.0 le modèle ne lance plus les outils, c'est le ToolCallingAdvisor) ; c'est cette classe qui exécute les outils, compte, trace et décide de s'arrêter.
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 6 zones marquées « TODO » (TD4). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
  */
 @Service
 public class AgentReactService {

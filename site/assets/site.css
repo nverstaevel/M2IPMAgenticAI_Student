@@ -107,3 +107,11 @@ a.card.pick{text-decoration:none;color:inherit;display:block}a.card.pick:hover{b
 .prose img,.sujet img{max-width:100%;height:auto;border-radius:10px;border:1px solid var(--line);display:block;margin:.6em auto}
 .prose td img,.sujet td img{margin:0}
 .prose table:has(img),.sujet table:has(img){table-layout:fixed;width:100%}.prose table:has(img) img,.sujet table:has(img) img{width:100%;max-width:100%;height:auto}
+
+.carte-code .cc-leg{margin:0 0 .6em;font-size:13px}.cc-l{display:grid;grid-template-columns:11.5rem 1fr;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.cc-p{font-size:13px;color:var(--mut);font-weight:600;padding-top:3px}.cc-c{display:flex;flex-wrap:wrap;gap:5px}
+.cc{display:inline-block;font:12.5px ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;padding:2px 9px;border-radius:7px;border:1px solid var(--line);background:var(--card);color:var(--fg);text-decoration:none}
+.cc.neuf:hover,.cc.todo:hover{filter:brightness(.95)}
+.cc.todo{background:var(--acc2);border-color:var(--acc2);color:#fff;font-weight:700}[data-theme=dark] .cc.todo{color:#14171f}.cc.todo b{margin-left:7px;padding:0 6px;border-radius:99px;background:rgba(255,255,255,.28);font-size:11px}
+.cc.creer{border-style:dashed;border-color:var(--acc);color:var(--acc);background:var(--accbg)}.cc.repris{border-style:dotted;color:var(--mut);background:transparent;font-family:inherit}
+@media(max-width:700px){.cc-l{grid-template-columns:1fr}}

@@ -1,6 +1,10 @@
 package fr.m2ipm.clinique.ai;
 
-/** Prompts système du Dr Gribouille. Le TD demande d'en comparer trois variantes. */
+/**
+ * Prompts système du Dr Gribouille. Le TD demande d'en comparer trois variantes.
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 1 zone marquée « TODO » (TD2). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
+ */
 public final class PromptsGribouille {
 
     public static final String BASE = """

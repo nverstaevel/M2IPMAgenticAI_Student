@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
  * Ici, vous ne faites pas de plomberie : les clients (Wikipédia, Excel, base, agenda) sont fournis et testés.
  * Vous décidez ce que le modèle voit : quoi renvoyer, comment le dire, que répondre en cas d'échec.
  * Le premier outil est écrit en entier : il sert de modèle pour les cinq autres.
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 5 zones marquées « TODO » (TD3). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
  */
 @Component
 public class OutilsExternes {

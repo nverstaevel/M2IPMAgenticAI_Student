@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 🧠 À COMPLÉTER dans ce fichier : 1 zone marquée « TODO » (TD1). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
+ */
 @Entity
 public class Proprietaire {
     @Id

@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
  * (« diagnosticien : outils lister_patients, fiche_espece… »). Séparer lecture et écriture, c'est toute l'architecture :
  * le diagnosticien ne peut pas soigner, le gardien ne peut que vérifier, l'apothicaire exécute.
  * Le joueur solo, lui, est l'agent « react » du TD4 avec tous les outils du jeu.
+ *
+ * 🧠 À COMPLÉTER dans ce fichier : 3 zones marquées « TODO » (TD6). Tout le reste est fourni et testé : lisez-le, ne le modifiez pas.
  */
 @Configuration
 public class AgentsJeu {

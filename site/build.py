@@ -105,7 +105,7 @@ def scan_todos():
 TODOS = scan_todos()
 
 # ----------------------------------------------------------------------------- gabarit
-NAV = [("index.html", "Accueil"), ("notions/index.html", "Notions"), ("recettes/index.html", "Recettes"), ("architectures/index.html", "Architectures"), ("cours/index.html", "Cours"), ("code.html", "Code"),
+NAV = [("index.html", "Accueil"), ("notions/index.html", "Notions"), ("recettes/index.html", "Recettes"), ("architectures/index.html", "Architectures"), ("cours/index.html", "Cours"), ("code.html", "Code"), ("outils.html", "Outils"),
        ("depannage.html", "Dépannage"), ("ressources.html", "Ressources"), ("commun.html", "Infos")]
 
 def page(rel, titre, corps, side="", extra_head="", td_ctx=None):
@@ -159,6 +159,7 @@ def build_td(td):
     num, theme, dossier, fichier, livrable = TDS[td]
     meta_txt = (CONTENT / "sujets" / fichier).read_text(encoding="utf-8")
     body_md = re.sub(r"^# .*\n", "", meta_txt, count=1)
+    body_md = body_md.replace("## Avant la séance", "**Où vous allez coder** (carte générée depuis le dossier de départ) :\n\n{{fig:carte_" + td + "}}\n\n## Avant la séance", 1)
     h, tokens = md_render(body_md)
     root = "../"
     # cases à cocher
@@ -482,6 +483,13 @@ def build_commun():
     page("commun.html", "Informations communes", f'<h1>Informations communes</h1><article class="sujet">{h}</article>', side=toc_html(tokens))
     add_search("Informations communes (organisation, outils, Git, sécurité)", "commun.html", t, "Infos")
 
+def build_outils():
+    t = (CONTENT / "outils.md").read_text(encoding="utf-8")
+    h, tokens = md_render(t)
+    h = h.replace('src="img/', 'src="td/img/')
+    page("outils.html", "Outils", f'<h1>Outils : voir ce que font vos agents</h1><article class="sujet">{h}</article>', side=toc_html(tokens))
+    add_search("Outils : /agents, /pilotage, /chat, jeu, MCP, API de suivi", "outils.html", t, "Outils")
+
 def build_code():
     lignes = []
     for td, (num, theme, dossier, fichier, _) in TDS.items():
@@ -543,7 +551,7 @@ def main():
         HtmlFormatter(style="default").get_style_defs(".codehilite") + "\n" +
         HtmlFormatter(style="monokai").get_style_defs('[data-theme="dark"] .codehilite'), encoding="utf-8")
     totaux = {td: build_td(td) for td in TDS}
-    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_cours(); build_commun(); build_code(); build_index(totaux)
+    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_cours(); build_commun(); build_code(); build_outils(); build_index(totaux)
     add_search("Accueil", "index.html", "accueil parcours TD CM progression", "Accueil")
     (OUT / "assets" / "search-index.json").write_text(json.dumps(SEARCH, ensure_ascii=False), encoding="utf-8")
     (OUT / ".nojekyll").write_text("")
