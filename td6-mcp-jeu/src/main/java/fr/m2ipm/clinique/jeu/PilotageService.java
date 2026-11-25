@@ -31,7 +31,8 @@ public class PilotageService {
     private final JeuMcp jeu;
     private final ScenarioLoader chargeur;
     private final Orchestrateur orchestrateur;
-    private final ExecutorService executeur = Executors.newSingleThreadExecutor(r -> {
+    // Un fil par partie : une partie coupée d'urgence peut rester bloquée dans un appel au modèle, elle ne doit pas retenir la suivante.
+    private final ExecutorService executeur = Executors.newCachedThreadPool(r -> {
         Thread t = new Thread(r, "pilotage-jeu");
         t.setDaemon(true);
         return t;
@@ -49,6 +50,9 @@ public class PilotageService {
     private volatile long debut;
     private volatile long fin;
     private volatile Future<?> tache;
+    private volatile boolean coupee;
+    /** Numéro de la partie en cours : une partie plus ancienne (coupée, mais pas encore sortie de son appel au modèle) n'écrit plus rien. */
+    private volatile int generation;
     private final List<JoueurService.JourJoue> jours = new CopyOnWriteArrayList<>();
 
     public PilotageService(JoueurService joueur, JoueurRegles regles, JeuMcp jeu, ScenarioLoader chargeur, Orchestrateur orchestrateur) {
@@ -62,7 +66,7 @@ public class PilotageService {
     /** @throws IllegalStateException partie déjà en cours ou jeu non connecté ; IllegalArgumentException scénario inconnu ou invalide */
     public synchronized void demarrer(String idScenario, Long graineDemandee, Long pause) {
         if (pause != null) { regler(pause); }
-        if ("EN_COURS".equals(statut)) { throw new IllegalStateException("Une partie est déjà en cours : attendez sa fin ou arrêtez-la."); }
+        if ("EN_COURS".equals(statut) && !coupee) { throw new IllegalStateException("Une partie est déjà en cours : attendez sa fin ou arrêtez-la."); }
         if (!jeu.connecte()) {
             throw new IllegalStateException("Le jeu n'est pas connecté : démarrez jeu-bestiaire (port 8090) puis relancez la clinique avec le profil « jeu ».");
         }
@@ -80,36 +84,34 @@ public class PilotageService {
         jourEnCours = null;
         runIdEnCours = null;
         arretDemande = false;
+        coupee = false;
+        final int gen = ++generation;
         debut = System.currentTimeMillis();
         fin = 0;
         statut = "EN_COURS";
         JoueurService.Ecoute ecoute = new JoueurService.Ecoute() {
-            public void jourDemarre(int jour, String runId) { jourEnCours = jour; runIdEnCours = runId; }
-            public void jourTermine(JoueurService.JourJoue j) { jours.add(j); }
-            public boolean arretDemande() { return arretDemande; }
+            public void jourDemarre(int jour, String runId) { if (gen == generation) { jourEnCours = jour; runIdEnCours = runId; } }
+            public void jourTermine(JoueurService.JourJoue j) { if (gen == generation) { jours.add(j); } }
+            public boolean arretDemande() { return gen != generation || arretDemande; }
             public long pauseMs() { return pauseMs; }
         };
         tache = executeur.submit(() -> {
+            JoueurService.Bilan resultat = null;
+            String message = null;
             try {
-                bilan = JoueurRegles.ID.equals(idScenario) ? regles.jouer(graineDemandee, ecoute)
+                resultat = JoueurRegles.ID.equals(idScenario) ? regles.jouer(graineDemandee, ecoute)
                         : joueur.jouer(idScenario, graineDemandee, null, ecoute);
-                statut = arretDemande ? "ARRETEE" : "TERMINEE";
             } catch (RuntimeException e) {
-                if (arretDemande) {
-                    statut = "ARRETEE";   // coupée d'urgence : ce n'est pas une erreur
-                } else {
-                    LOG.warn("Partie « {} » en erreur : {}", idScenario, e.getMessage());
-                    erreur = e.getClass().getSimpleName() + " : " + e.getMessage();
-                    statut = "ERREUR";
-                }
-            } finally {
-                fin = System.currentTimeMillis();
+                message = e.getClass().getSimpleName() + " : " + e.getMessage();
+                if (gen == generation && !arretDemande) { LOG.warn("Partie « {} » en erreur : {}", idScenario, e.getMessage()); }
             }
+            if (gen != generation) { return; }   // une autre partie a été lancée depuis : celle-ci n'écrit plus rien
+            if (resultat != null) { bilan = resultat; }
+            if (message != null && !arretDemande) { erreur = message; statut = "ERREUR"; }
+            else { statut = arretDemande ? "ARRETEE" : "TERMINEE"; }
+            fin = System.currentTimeMillis();
         });
     }
-
-    /** L'arrêt prend effet à la fin de la journée en cours : une journée d'agents ne s'interrompt pas en plein milieu. */
-    public void arreter() { arretDemande = true; }
 
     /**
      * Le kill switch : l'arrêt immédiat. Plus aucun outil du jeu n'est exécuté pour la journée en cours, le fil de la partie est
@@ -117,6 +119,9 @@ public class PilotageService {
      */
     public void couper() {
         arretDemande = true;
+        coupee = true;
+        statut = "ARRETEE";   // tout de suite : on peut relancer une partie sans attendre que l'appel au modèle en vol revienne
+        fin = System.currentTimeMillis();
         ArretUrgence.arreter(runIdEnCours);
         Future<?> t = tache;
         if (t != null) { t.cancel(true); }
