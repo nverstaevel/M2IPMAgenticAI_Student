@@ -50,6 +50,11 @@
         <button id="arreter" class="danger" disabled>⏹ Arrêter après la journée en cours</button>
         <span id="statut" class="puce">—</span>
       </div>
+      <div class="ligne">
+        <label>Vitesse : pause entre deux actions <input id="pause" type="range" min="0" max="3000" step="100" value="1000" style="width:12rem"></label>
+        <b id="pauseTxt">1,0 s</b>
+      </div>
+      <p class="discret">Réglable pendant la partie. Elle s'applique à chaque action du joueur à règles et, pour les agents, entre deux journées (un modèle réel est déjà lent ; en profil « simule » il va très vite).</p>
       <p class="discret" id="modele"></p>
       <p class="discret">La graine fixe les patients : même graine = mêmes patients, seul le joueur change. « Règles fixes » n'utilise aucun modèle (référence à battre) ; un scénario fait jouer vos agents avec le modèle du profil actif.</p>
       <p id="erreur" class="avertissement" hidden></p>
@@ -112,11 +117,16 @@
   $('lancer').addEventListener('click', function () {
     var q = new URLSearchParams({ scenario: $('joueur').value });
     if ($('graine').value !== '') { q.set('graine', $('graine').value); }
+    q.set('pauseMs', $('pause').value);
     fetch('/api/agent/jeu/pilotage/demarrer?' + q, { method: 'POST' }).then(function (r) {
       if (!r.ok) { return r.json().then(function (j) { montrerErreur(j.message || j.error || ('Erreur ' + r.status)); }); }
       montrerErreur(null); reinitialiser(); sonde();
     }).catch(function (e) { montrerErreur(e.message); });
   });
+  function affichePause() { $('pauseTxt').textContent = ($('pause').value / 1000).toFixed(1).replace('.', ',') + ' s'; }
+  $('pause').addEventListener('input', affichePause);
+  $('pause').addEventListener('change', function () { fetch('/api/agent/jeu/pilotage/pause?ms=' + $('pause').value, { method: 'POST' }); });
+  affichePause();
   $('arreter').addEventListener('click', function () { fetch('/api/agent/jeu/pilotage/arreter', { method: 'POST' }).then(sonde); });
   $('suivre').addEventListener('change', function () { if ($('suivre').checked && partie && partie.runIdEnCours) { ouvrir(partie.runIdEnCours); } });
 

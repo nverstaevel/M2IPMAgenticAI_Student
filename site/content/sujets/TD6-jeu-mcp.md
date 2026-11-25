@@ -193,7 +193,7 @@ agent.budget-tokens=200000          # une partie fait beaucoup d'appels : budget
 entrée -> gribouille -> fin
 ```
 
-3. Une exécution du graphe = **une journée**. Lancez une partie complète avec votre LLM, depuis la **page de pilotage** : <http://localhost:8080/pilotage> (connexion `gribouille` / `gribouille`). Choisissez le joueur `jeu-gribouille-seul` et la graine 1, puis **Lancer la partie**. À droite, le jeu s'anime en direct ; à gauche, le journal du contrôleur affiche, pour chaque journée, les réflexions de l'agent et chacun de ses appels d'outils (arguments, réponse, durée, tokens). Un bandeau jaune vous prévient si le jeu n'est pas connecté. Le choix « Règles fixes (sans modèle) » fait jouer un joueur sans LLM : c'est la référence à battre. Même chose en ligne de commande :
+3. Une exécution du graphe = **une journée**. Lancez une partie complète avec votre LLM, depuis la **page de pilotage** : <http://localhost:8080/pilotage> (connexion `gribouille` / `gribouille`). Choisissez le joueur `jeu-gribouille-seul` et la graine 1, puis **Lancer la partie**. À droite, le jeu s'anime en direct ; à gauche, le journal du contrôleur affiche, pour chaque journée, les réflexions de l'agent et chacun de ses appels d'outils (arguments, réponse, durée, tokens). Le curseur **Vitesse** règle la pause entre deux actions (utile pour suivre le joueur à règles, qui joue très vite). Un bandeau jaune vous prévient si le jeu n'est pas connecté. Le choix « Règles fixes (sans modèle) » fait jouer un joueur sans LLM : c'est la référence à battre. Même chose en ligne de commande :
 
 ```bash
 curl -u gribouille:gribouille -X POST "http://localhost:8080/api/agent/jeu/partie?scenario=jeu-gribouille-seul&graine=1"

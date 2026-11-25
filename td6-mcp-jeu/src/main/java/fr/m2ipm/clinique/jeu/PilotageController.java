@@ -78,15 +78,24 @@ public class PilotageController {
     @PostMapping("/api/agent/jeu/pilotage/demarrer")
     @ResponseBody
     public Map<String, Object> demarrer(@RequestParam("scenario") String scenario,
-                                        @RequestParam(name = "graine", required = false) Long graine) {
+                                        @RequestParam(name = "graine", required = false) Long graine,
+                                        @RequestParam(name = "pauseMs", required = false) Long pauseMs) {
         try {
-            pilotage.demarrer(scenario, graine);
+            pilotage.demarrer(scenario, graine, pauseMs);
         } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
         } catch (IllegalStateException ex) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
         }
         return Map.of("demarree", true);
+    }
+
+    /** Règle la pause entre deux actions (ms), y compris pendant une partie. */
+    @PostMapping("/api/agent/jeu/pilotage/pause")
+    @ResponseBody
+    public Map<String, Object> pause(@RequestParam("ms") long ms) {
+        pilotage.regler(ms);
+        return Map.of("pauseMs", ms);
     }
 
     @PostMapping("/api/agent/jeu/pilotage/arreter")

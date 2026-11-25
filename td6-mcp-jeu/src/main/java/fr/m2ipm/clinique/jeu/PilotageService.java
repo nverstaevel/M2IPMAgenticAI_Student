@@ -22,7 +22,7 @@ public class PilotageService {
 
     public record Instantane(String statut, String scenario, Long graine, Integer jourEnCours, String runIdEnCours,
                              List<JoueurService.JourJoue> jours, JoueurService.Bilan bilan, String erreur, boolean arretDemande,
-                             long debut, long fin) {}
+                             long pauseMs, long debut, long fin) {}
 
     private final JoueurService joueur;
     private final JoueurRegles regles;
@@ -43,6 +43,7 @@ public class PilotageService {
     private volatile JoueurService.Bilan bilan;
     private volatile String erreur;
     private volatile boolean arretDemande;
+    private volatile long pauseMs = 1000;
     private volatile long debut;
     private volatile long fin;
     private final List<JoueurService.JourJoue> jours = new CopyOnWriteArrayList<>();
@@ -56,7 +57,8 @@ public class PilotageService {
     }
 
     /** @throws IllegalStateException partie déjà en cours ou jeu non connecté ; IllegalArgumentException scénario inconnu ou invalide */
-    public synchronized void demarrer(String idScenario, Long graineDemandee) {
+    public synchronized void demarrer(String idScenario, Long graineDemandee, Long pause) {
+        if (pause != null) { regler(pause); }
         if ("EN_COURS".equals(statut)) { throw new IllegalStateException("Une partie est déjà en cours : attendez sa fin ou arrêtez-la."); }
         if (!jeu.connecte()) {
             throw new IllegalStateException("Le jeu n'est pas connecté : démarrez jeu-bestiaire (port 8090) puis relancez la clinique avec le profil « jeu ».");
@@ -82,6 +84,7 @@ public class PilotageService {
             public void jourDemarre(int jour, String runId) { jourEnCours = jour; runIdEnCours = runId; }
             public void jourTermine(JoueurService.JourJoue j) { jours.add(j); }
             public boolean arretDemande() { return arretDemande; }
+            public long pauseMs() { return pauseMs; }
         };
         executeur.submit(() -> {
             try {
@@ -101,7 +104,10 @@ public class PilotageService {
     /** L'arrêt prend effet à la fin de la journée en cours : une journée d'agents ne s'interrompt pas en plein milieu. */
     public void arreter() { arretDemande = true; }
 
+    /** Pause entre deux actions, réglable en cours de partie (bornée de 0 à 10 s). */
+    public void regler(long ms) { pauseMs = Math.max(0, Math.min(10_000, ms)); }
+
     public Instantane instantane() {
-        return new Instantane(statut, scenario, graine, jourEnCours, runIdEnCours, List.copyOf(jours), bilan, erreur, arretDemande, debut, fin);
+        return new Instantane(statut, scenario, graine, jourEnCours, runIdEnCours, List.copyOf(jours), bilan, erreur, arretDemande, pauseMs, debut, fin);
     }
 }

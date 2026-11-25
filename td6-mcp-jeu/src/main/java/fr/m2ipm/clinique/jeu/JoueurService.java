@@ -35,6 +35,8 @@ public class JoueurService {
         default void jourDemarre(int jour, String runId) {}
         default void jourTermine(JourJoue jour) {}
         default boolean arretDemande() { return false; }
+        /** Pause voulue entre deux actions (en ms) pour pouvoir suivre la partie à l'œil ; relue à chaque pause, donc réglable en cours de partie. */
+        default long pauseMs() { return 0; }
     }
 
     private final JeuMcp jeu;
@@ -80,9 +82,20 @@ public class JoueurService {
             JourJoue joue = new JourJoue(avant.jour(), runId, forcee, jeu.etat().score());
             jours.add(joue);
             ecoute.jourTermine(joue);
+            pause(3 * ecoute.pauseMs());
         }
         JeuMcp.Etat fin = jeu.etat();
         return new Bilan(idScenario, graine, fin.score(), fin.gueris(), fin.morts(), fin.tresorerie(), jours,
                 System.currentTimeMillis() - debut);
+    }
+
+    /** Attend {@code ms} millisecondes (rendu de la main au thread si on l'interrompt). */
+    static void pause(long ms) {
+        if (ms <= 0) { return; }
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

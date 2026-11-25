@@ -51,7 +51,7 @@ public class JoueurRegles {
             suivi.demarrer(runId, "Règles (sans modèle) · jour " + avant.jour());
             ecoute.jourDemarre(avant.jour(), runId);
             try {
-                journee(runId);
+                journee(runId, ecoute);
                 suivi.terminer(runId, "REPONSE_FINALE");
             } catch (RuntimeException e) {
                 suivi.noeud(runId, "erreur", List.of("debut"), Evenement.FIN, "Erreur", Evenement.ERREUR, String.valueOf(e.getMessage()), null, null, null);
@@ -63,6 +63,7 @@ public class JoueurRegles {
             JoueurService.JourJoue joue = new JoueurService.JourJoue(avant.jour(), runId, forcee, jeu.etat().score());
             jours.add(joue);
             ecoute.jourTermine(joue);
+            JoueurService.pause(3 * ecoute.pauseMs());
         }
         JeuMcp.Etat fin = jeu.etat();
         return new JoueurService.Bilan(ID, graine, fin.score(), fin.gueris(), fin.morts(), fin.tresorerie(), jours,
@@ -71,8 +72,8 @@ public class JoueurRegles {
 
     // ------------------------------------------------------------------ une journée
 
-    private void journee(String runId) {
-        Journee j = new Journee(runId);
+    private void journee(String runId, JoueurService.Ecoute ecoute) {
+        Journee j = new Journee(runId, ecoute);
         suivi.noeud(runId, "debut", List.of(), Evenement.UTILISATEUR, "Joueur à règles (sans modèle)",
                 Evenement.OK, "Règles : les plus fragiles d'abord ; examiner, lire la fiche, soigner avec le bon remède ; "
                         + "commander si la pharmacie est vide ; terminer la journée.", null, null, null);
@@ -140,16 +141,18 @@ public class JoueurRegles {
     /** Une journée en cours : numérote les nœuds et les enchaîne. */
     private final class Journee {
         final String runId;
+        final JoueurService.Ecoute ecoute;
         String dernier = "debut";
         int n;
 
-        Journee(String runId) { this.runId = runId; }
+        Journee(String runId, JoueurService.Ecoute ecoute) { this.runId = runId; this.ecoute = ecoute; }
 
         /** Appelle un outil du jeu et publie un nœud (la règle appliquée dans « détail », la réponse dans « résultat »). */
         Object outil(String raison, String nom, String arguments) {
             String id = "o" + (++n);
             suivi.noeud(runId, id, List.of(dernier), Evenement.OUTIL, nom + " " + arguments, Evenement.EN_COURS, raison, null, null, null);
             dernier = id;
+            JoueurService.pause(ecoute.pauseMs());   // le nœud « en cours » est visible avant la réponse
             long debut = System.currentTimeMillis();
             Object reponse;
             try {
@@ -161,6 +164,7 @@ public class JoueurRegles {
             boolean refus = reponse instanceof Map<?, ?> m && Boolean.FALSE.equals(m.get("ok"));
             String texte = reponse instanceof Map<?, ?> m && m.get("message") != null ? String.valueOf(m.get("message")) : json.writeValueAsString(reponse);
             suivi.maj(runId, id, refus ? Evenement.ERREUR : Evenement.OK, null, texte, System.currentTimeMillis() - debut, null);
+            JoueurService.pause(ecoute.pauseMs());
             return reponse;
         }
 
@@ -168,6 +172,7 @@ public class JoueurRegles {
             String id = "o" + (++n);
             suivi.noeud(runId, id, List.of(dernier), Evenement.CODE, titre, Evenement.OK, detail, null, null, null);
             dernier = id;
+            JoueurService.pause(ecoute.pauseMs());
         }
     }
 
