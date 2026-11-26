@@ -129,7 +129,7 @@ def page(rel, titre, corps, side="", extra_head="", td_ctx=None):
 <div id="search" hidden><div class="box"><input id="q" type="search" placeholder="Rechercher : outil, mémoire, MCP, 403…" autocomplete="off"><ul id="res"></ul><p class="hint">Échap pour fermer</p></div></div>
 <div class="layout{' with-side' if side else ''}">{f'<aside class="side">{side}</aside>' if side else ''}<main id="contenu">{corps}</main></div>
 <footer>Cours « IA agentiques avec Spring AI » · M2 MIAGE IPM · Université Toulouse Capitole ·
-<a href="{GITHUB}">dépôt étudiant</a> · Version du {datetime.date.today().strftime('%d/%m/%Y')}<br><small>Statistiques de visite anonymes (GoatCounter), sans cookie ni donnée personnelle.</small></footer>
+<a href="{GITHUB}">dépôt étudiant</a> · <a href="{root}credits.html">Crédits et usage de l'IA</a> · Version du {datetime.date.today().strftime('%d/%m/%Y')}<br><small>Statistiques de visite anonymes (GoatCounter), sans cookie ni donnée personnelle.</small></footer>
 <script data-goatcounter="https://nverstae.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <script src="{root}assets/site.js" defer></script></body></html>"""
     p = OUT / rel; p.parent.mkdir(parents=True, exist_ok=True); p.write_text(doc, encoding="utf-8")
@@ -483,6 +483,12 @@ def build_commun():
     page("commun.html", "Informations communes", f'<h1>Informations communes</h1><article class="sujet">{h}</article>', side=toc_html(tokens))
     add_search("Informations communes (organisation, outils, Git, sécurité)", "commun.html", t, "Infos")
 
+def build_credits():
+    t = (CONTENT / "credits.md").read_text(encoding="utf-8")
+    h, tokens = md_render(t)
+    page("credits.html", "Crédits", f'<h1>Crédits et usage de l\'IA</h1><article class="sujet">{h}</article>', side=toc_html(tokens))
+    add_search("Crédits : usage de l'IA pour concevoir le cours (fournisseur, modèle, tokens)", "credits.html", t, "Infos")
+
 def build_outils():
     t = (CONTENT / "outils.md").read_text(encoding="utf-8")
     h, tokens = md_render(t)
@@ -551,7 +557,7 @@ def main():
         HtmlFormatter(style="default").get_style_defs(".codehilite") + "\n" +
         HtmlFormatter(style="monokai").get_style_defs('[data-theme="dark"] .codehilite'), encoding="utf-8")
     totaux = {td: build_td(td) for td in TDS}
-    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_cours(); build_commun(); build_code(); build_outils(); build_index(totaux)
+    build_notions(); build_recettes(); build_patterns(); build_depannage(); build_ressources(); build_cours(); build_commun(); build_code(); build_outils(); build_credits(); build_index(totaux)
     add_search("Accueil", "index.html", "accueil parcours TD CM progression", "Accueil")
     (OUT / "assets" / "search-index.json").write_text(json.dumps(SEARCH, ensure_ascii=False), encoding="utf-8")
     (OUT / ".nojekyll").write_text("")

@@ -32,3 +32,7 @@ Code fourni pour les TD « IA agentiques avec Spring AI » (M2 MIAGE IPM, Univer
 - Tenez un `JOURNAL.md` dans votre dossier de travail : 5 à 10 lignes par TD ; il sert à l'analyse critique du TD6.
 - **TD6** : lancez d'abord le jeu (`mvn spring-boot:run` dans `jeu-bestiaire`, port 8090), puis la clinique avec le profil `jeu`.
 - Le sujet de chaque TD, les supports de CM et la matrice de compétences sont distribués en cours.
+
+## Crédits et usage de l'IA
+
+Ce cours a été conçu par Nicolas Verstaevel avec l'aide d'une IA générative : fournisseur **Anthropic**, modèle **Claude Sonnet 5.5** (`claude-sonnet-5-5`) pour la phase de finalisation, via l'application Claude (session agentique). Sur la dernière phase de travail, seule mesurée : 115 requêtes, 107 460 tokens de sortie, 440 083 tokens écrits en cache et 29 744 221 relus depuis le cache. Le total du cours est plus élevé. Détails sur la page « Crédits et usage de l'IA » du site (`site/content/credits.md`).
